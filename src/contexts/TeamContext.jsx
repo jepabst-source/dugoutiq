@@ -31,13 +31,13 @@ export function TeamProvider({ children }) {
   const [team, setTeam] = useState(null);
   const [players, setPlayers] = useState([]);
   const [atBats, setAtBats] = useState([]);
-  const [games, setGames] = useState([]);
+  const [savedGames, setSavedGames] = useState([]);
   const [attendance, setAttendance] = useState(new Set());
   const [loadingTeam, setLoadingTeam] = useState(false);
 
   // Subscribe to active team document
   useEffect(() => {
-    if (!activeTeamId) { setTeam(null); setPlayers([]); setAtBats([]); return; }
+    if (!activeTeamId) { setTeam(null); setPlayers([]); setAtBats([]); setSavedGames([]); return; }
     setLoadingTeam(true);
 
     const unsub = onSnapshot(doc(db, 'teams', activeTeamId), (snap) => {
@@ -98,6 +98,23 @@ export function TeamProvider({ children }) {
       setAttendance(new Set(players.map(p => p.id)));
     }
   }, [activeTeamId, players.length]);
+
+  // Subscribe to saved games
+  useEffect(() => {
+    if (!activeTeamId) { setSavedGames([]); return; }
+
+    const unsub = onSnapshot(
+      collection(db, 'teams', activeTeamId, 'games'),
+      (snap) => {
+        const list = snap.docs
+          .map(d => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => (b.gameNumber || 0) - (a.gameNumber || 0));
+        setSavedGames(list);
+      }
+    );
+
+    return unsub;
+  }, [activeTeamId]);
 
   // ── ATTENDANCE ──
 
@@ -233,11 +250,51 @@ export function TeamProvider({ children }) {
     });
   }, [getActivePlayers, getPlayerStats, getRollingAvg]);
 
+  // ── GAME COMMIT / HISTORY ──
+
+  const commitGame = useCallback(async ({ gameNumber, date, innings, opponent, lineups, battingOrder, score }) => {
+    if (!activeTeamId) return;
+    const gameRef = doc(collection(db, 'teams', activeTeamId, 'games'));
+    await setDoc(gameRef, {
+      gameNumber: gameNumber || (savedGames.length + 1),
+      date: date || new Date().toISOString().split('T')[0],
+      innings: innings || 3,
+      opponent: opponent || '',
+      lineups: lineups || {},       // { 1: {pos: playerId}, 2: {...}, ... }
+      battingOrder: battingOrder || [],
+      score: score || { ours: [], theirs: [] },
+      committedAt: serverTimestamp(),
+    });
+    return gameRef.id;
+  }, [activeTeamId, savedGames.length]);
+
+  const deleteGame = useCallback(async (gameId) => {
+    if (!activeTeamId) return;
+    await deleteDoc(doc(db, 'teams', activeTeamId, 'games', gameId));
+  }, [activeTeamId]);
+
+  // Build position history from all saved games
+  const getPositionHistory = useCallback(() => {
+    const hist = {};
+    for (const game of savedGames) {
+      const lineups = game.lineups || {};
+      for (const [inning, assignment] of Object.entries(lineups)) {
+        for (const [pos, playerId] of Object.entries(assignment)) {
+          if (!playerId) continue;
+          if (!hist[playerId]) hist[playerId] = {};
+          hist[playerId][pos] = (hist[playerId][pos] || 0) + 1;
+        }
+      }
+    }
+    return hist;
+  }, [savedGames]);
+
   return (
     <TeamContext.Provider value={{
       team,
       players,
       atBats,
+      savedGames,
       attendance,
       loadingTeam,
       createTeam,
@@ -254,6 +311,9 @@ export function TeamProvider({ children }) {
       getActivePlayers,
       setAllAttendance,
       toggleAttendance,
+      commitGame,
+      deleteGame,
+      getPositionHistory,
     }}>
       {children}
     </TeamContext.Provider>

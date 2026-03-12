@@ -6,6 +6,7 @@ export default function DefenseTab() {
   const {
     players, team, attendance,
     getActivePlayers, setAllAttendance, toggleAttendance,
+    commitGame, getPositionHistory, generateBattingOrder,
   } = useTeam();
 
   const settings = team?.settings || {};
@@ -14,20 +15,24 @@ export default function DefenseTab() {
   const [oor, setOor] = useState(null);
   const [gameNum, setGameNum] = useState('');
   const [gameDate, setGameDate] = useState(new Date().toISOString().split('T')[0]);
+  const [opponent, setOpponent] = useState('');
   const [totalInnings, setTotalInnings] = useState(settings.defaultInnings || 3);
   const [generated, setGenerated] = useState(false);
+  const [committing, setCommitting] = useState(false);
+  const [committed, setCommitted] = useState(false);
 
   const activePlayers = getActivePlayers();
   const activeCount = players.filter(p => attendance.has(p.id)).length;
-  const standardInnings = totalInnings - 1; // Last inning is pocket card
+  const standardInnings = totalInnings - 1;
   const benchCount = Math.max(0, activePlayers.length - 9);
+  const positionHistory = getPositionHistory();
 
   const handleGenerate = useCallback(() => {
     const result = buildFullRotation({
       players: activePlayers,
       standardInnings,
       settings,
-      positionHistory: {}, // TODO: pull from saved games
+      positionHistory,
     });
     setInnings(result.innings);
     setLfg(result.lfg);
@@ -44,19 +49,41 @@ export default function DefenseTab() {
   }, []);
 
   const handleRegenerateLFG = () => {
-    const result = buildFullRotation({ players: activePlayers, standardInnings: 0, settings, positionHistory: {} });
+    const result = buildFullRotation({ players: activePlayers, standardInnings: 0, settings, positionHistory });
     setLfg(result.lfg);
   };
 
   const handleRegenerateOOR = () => {
-    const result = buildFullRotation({ players: activePlayers, standardInnings: 0, settings, positionHistory: {} });
+    const result = buildFullRotation({ players: activePlayers, standardInnings: 0, settings, positionHistory });
     setOor(result.oor);
   };
 
   const handleReshuffleInning = (ing) => {
-    const result = buildFullRotation({ players: activePlayers, standardInnings, settings, positionHistory: {} });
+    const result = buildFullRotation({ players: activePlayers, standardInnings, settings, positionHistory });
     setInnings(prev => ({ ...prev, [ing]: result.innings[ing] || prev[ing] }));
   };
+
+  const handleCommitGame = useCallback(async () => {
+    if (!generated) return;
+    setCommitting(true);
+    try {
+      const order = generateBattingOrder();
+      await commitGame({
+        gameNumber: gameNum ? parseInt(gameNum) : undefined,
+        date: gameDate,
+        innings: totalInnings,
+        opponent,
+        lineups: innings,
+        battingOrder: order.map(p => p.id),
+        score: { ours: [], theirs: [] },
+      });
+      setCommitted(true);
+      setTimeout(() => setCommitted(false), 3000);
+    } catch (err) {
+      console.error('Failed to commit game:', err);
+    }
+    setCommitting(false);
+  }, [generated, gameNum, gameDate, totalInnings, opponent, innings, commitGame, generateBattingOrder]);
 
   return (
     <div>
@@ -74,6 +101,16 @@ export default function DefenseTab() {
                        hover:bg-border-light active:scale-[0.97] transition-all">
             🔀 {generated ? 'Regenerate' : 'Generate'}
           </button>
+          {generated && (
+            <button onClick={handleCommitGame} disabled={committing || committed}
+              className={`px-4 py-2 rounded-lg font-bold text-sm active:scale-[0.97] transition-all
+                ${committed
+                  ? 'bg-lime/20 text-lime border border-lime/30'
+                  : 'bg-lime text-field hover:bg-lime-bright'
+                } disabled:opacity-60`}>
+              {committed ? '✓ Committed!' : committing ? 'Saving...' : '✅ Commit Game'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -134,6 +171,12 @@ export default function DefenseTab() {
           <label className="block text-[10px] font-semibold text-chalk-muted uppercase tracking-wider mb-1">Date</label>
           <input type="date" value={gameDate} onChange={e => setGameDate(e.target.value)}
             className="px-3 py-2 rounded-lg bg-panel border border-border text-chalk text-sm focus:border-lime focus:outline-none" />
+        </div>
+        <div>
+          <label className="block text-[10px] font-semibold text-chalk-muted uppercase tracking-wider mb-1">Opponent</label>
+          <input type="text" value={opponent} onChange={e => setOpponent(e.target.value)}
+            placeholder="vs..."
+            className="w-32 px-3 py-2 rounded-lg bg-panel border border-border text-chalk text-sm focus:border-lime focus:outline-none" />
         </div>
         <div>
           <label className="block text-[10px] font-semibold text-chalk-muted uppercase tracking-wider mb-1">Innings</label>

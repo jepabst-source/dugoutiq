@@ -6,7 +6,7 @@ const OUTCOME_LABELS = { K: 'Strikeout', out: 'Hit into Out', walk: 'Walk', hit:
 const POS_ORDER = [...POSITIONS.infield, ...POSITIONS.outfield, 'Bench 1', 'Bench 2'];
 
 export default function HistoryTab() {
-  const { players, atBats, getPlayerStats, getRollingAvg } = useTeam();
+  const { players, atBats, savedGames, getPlayerStats, getRollingAvg, getPositionHistory, deleteGame } = useTeam();
 
   // Player stats summary
   const playerStats = useMemo(() => {
@@ -28,14 +28,112 @@ export default function HistoryTab() {
       .sort(([, a], [, b]) => (b[0]?.timestamp || 0) - (a[0]?.timestamp || 0));
   }, [atBats]);
 
+  const posHistory = getPositionHistory();
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-xl font-bold text-lime">History & Stats</h2>
-          <p className="text-xs text-chalk-muted mt-0.5">Season batting stats and at-bat log</p>
+          <p className="text-xs text-chalk-muted mt-0.5">Position history, batting stats, and game log</p>
         </div>
       </div>
+
+      {/* Position History Grid */}
+      {Object.keys(posHistory).length > 0 && (
+        <div className="bg-panel border border-border rounded-xl overflow-hidden mb-6">
+          <div className="px-4 py-2.5 bg-field-light border-b border-border">
+            <span className="text-xs font-bold text-lime uppercase tracking-wider">Position History (All Committed Games)</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider sticky left-0 bg-panel">Player</th>
+                  {POS_ORDER.map(pos => (
+                    <th key={pos} className="text-center px-1.5 py-2 text-[9px] font-bold text-chalk-muted uppercase tracking-wider whitespace-nowrap">
+                      {pos.replace('Left Field', 'LF').replace('Center Field', 'CF').replace('Right Field', 'RF')
+                        .replace('1st Base', '1B').replace('2nd Base', '2B').replace('3rd Base', '3B')
+                        .replace('Shortstop', 'SS').replace('Pitcher', 'P').replace('Catcher', 'C')
+                        .replace('Bench 1', 'B1').replace('Bench 2', 'B2')}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {players.map(p => {
+                  const hist = posHistory[p.id] || {};
+                  return (
+                    <tr key={p.id} className="border-b border-border/30 hover:bg-panel-hover">
+                      <td className="px-2 py-1.5 font-semibold text-chalk whitespace-nowrap sticky left-0 bg-panel">{p.name}</td>
+                      {POS_ORDER.map(pos => {
+                        const count = hist[pos] || 0;
+                        const isInfield = POSITIONS.infield.includes(pos);
+                        const isOutfield = POSITIONS.outfield.includes(pos);
+                        const isBench = pos.startsWith('Bench');
+                        const colorClass = count === 0 ? 'text-border'
+                          : isInfield ? 'text-sky'
+                          : isOutfield ? 'text-gold'
+                          : isBench ? 'text-chalk-muted'
+                          : 'text-chalk';
+                        return (
+                          <td key={pos} className={`text-center px-1.5 py-1.5 font-bold ${colorClass}`}>
+                            {count || '·'}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Committed Games History */}
+      {savedGames.length > 0 && (
+        <div className="bg-panel border border-border rounded-xl overflow-hidden mb-6">
+          <div className="px-4 py-2.5 bg-field-light border-b border-border">
+            <span className="text-xs font-bold text-chalk-muted uppercase tracking-wider">Committed Games ({savedGames.length})</span>
+          </div>
+          <div className="divide-y divide-border/50">
+            {savedGames.map(game => (
+              <div key={game.id} className="px-4 py-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <span className="text-sm font-bold text-lime">Game {game.gameNumber}</span>
+                    <span className="text-xs text-chalk-muted ml-2">{game.date}</span>
+                    {game.opponent && <span className="text-xs text-chalk-dim ml-2">vs {game.opponent}</span>}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-chalk-muted">{game.innings} innings</span>
+                    <button onClick={() => { if (confirm(`Delete Game ${game.gameNumber}?`)) deleteGame(game.id); }}
+                      className="px-2 py-0.5 text-[10px] font-bold text-red bg-red/10 border border-red/20 rounded hover:bg-red/20 transition-colors">
+                      ✕
+                    </button>
+                  </div>
+                </div>
+                {/* Show lineup summary */}
+                <div className="flex gap-2 flex-wrap">
+                  {Object.entries(game.lineups || {}).map(([ing, asgn]) => (
+                    <div key={ing} className="text-[9px] text-chalk-muted">
+                      <span className="font-bold text-chalk-dim">I{ing}:</span>{' '}
+                      {Object.entries(asgn).filter(([pos]) => !pos.startsWith('Bench')).map(([pos, pid]) => {
+                        const p = players.find(x => x.id === pid);
+                        const shortPos = pos.replace('Left Field', 'LF').replace('Center Field', 'CF').replace('Right Field', 'RF')
+                          .replace('1st Base', '1B').replace('2nd Base', '2B').replace('3rd Base', '3B')
+                          .replace('Shortstop', 'SS').replace('Pitcher', 'P').replace('Catcher', 'C');
+                        return `${shortPos}:${p?.name?.slice(0, 6) || '?'}`;
+                      }).join(' ')}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Season Batting Stats Table */}
       <div className="bg-panel border border-border rounded-xl overflow-hidden mb-6">
