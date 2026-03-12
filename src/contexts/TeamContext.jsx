@@ -289,6 +289,53 @@ export function TeamProvider({ children }) {
     return hist;
   }, [savedGames]);
 
+  // ── INVITE SYSTEM ──
+
+  const generateInviteCode = useCallback(async () => {
+    if (!activeTeamId || !user) return null;
+    const code = Math.random().toString(36).substring(2, 10);
+    const inviteRef = doc(db, 'invites', code);
+    await setDoc(inviteRef, {
+      teamId: activeTeamId,
+      teamName: team?.name || '',
+      createdBy: user.uid,
+      createdAt: serverTimestamp(),
+      used: false,
+    });
+    return code;
+  }, [activeTeamId, user, team]);
+
+  const joinTeamWithCode = useCallback(async (code) => {
+    if (!user) return { success: false, error: 'Not logged in' };
+    const inviteRef = doc(db, 'invites', code);
+    const snap = await getDoc(inviteRef);
+    if (!snap.exists()) return { success: false, error: 'Invalid invite code' };
+
+    const invite = snap.data();
+    if (invite.used) return { success: false, error: 'This invite has already been used' };
+
+    const teamId = invite.teamId;
+
+    // Add user as assistant on the team
+    const teamRef = doc(db, 'teams', teamId);
+    await updateDoc(teamRef, { assistantIds: arrayUnion(user.uid) });
+
+    // Add team to user's teamIds
+    const userRef = doc(db, 'users', user.uid);
+    await updateDoc(userRef, { teamIds: arrayUnion(teamId) });
+
+    // Mark invite as used
+    await updateDoc(inviteRef, { used: true, usedBy: user.uid, usedAt: serverTimestamp() });
+
+    setActiveTeamId(teamId);
+    return { success: true, teamName: invite.teamName };
+  }, [user, setActiveTeamId]);
+
+  const removeAssistant = useCallback(async (assistantUid) => {
+    if (!activeTeamId) return;
+    await updateDoc(doc(db, 'teams', activeTeamId), { assistantIds: arrayRemove(assistantUid) });
+  }, [activeTeamId]);
+
   return (
     <TeamContext.Provider value={{
       team,
@@ -314,6 +361,9 @@ export function TeamProvider({ children }) {
       commitGame,
       deleteGame,
       getPositionHistory,
+      generateInviteCode,
+      joinTeamWithCode,
+      removeAssistant,
     }}>
       {children}
     </TeamContext.Provider>

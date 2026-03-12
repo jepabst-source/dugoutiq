@@ -1,18 +1,45 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTeam } from '../../contexts/TeamContext';
 import { useAuth } from '../../contexts/AuthContext';
 import StarRating from '../shared/StarRating';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 
 const ALL_POSITIONS = ['Pitcher', 'Catcher', '1st Base', '2nd Base', 'Shortstop', '3rd Base', 'Left Field', 'Center Field', 'Right Field'];
 
 export default function SettingsTab() {
-  const { team, updateTeam, updateSettings } = useTeam();
+  const { team, updateTeam, updateSettings, generateInviteCode, removeAssistant } = useTeam();
   const { user } = useAuth();
   const settings = team?.settings || {};
 
   const [teamName, setTeamName] = useState(team?.name || '');
   const [portalCode, setPortalCode] = useState(team?.portalCode || '');
   const [saved, setSaved] = useState('');
+  const [inviteLink, setInviteLink] = useState('');
+  const [generatingInvite, setGeneratingInvite] = useState(false);
+  const [assistants, setAssistants] = useState([]);
+
+  // Load assistant coach details
+  useEffect(() => {
+    async function loadAssistants() {
+      const ids = team?.assistantIds || [];
+      const details = [];
+      for (const uid of ids) {
+        try {
+          const snap = await getDoc(doc(db, 'users', uid));
+          if (snap.exists()) {
+            details.push({ uid, ...snap.data() });
+          } else {
+            details.push({ uid, displayName: 'Unknown', email: '' });
+          }
+        } catch {
+          details.push({ uid, displayName: 'Unknown', email: '' });
+        }
+      }
+      setAssistants(details);
+    }
+    loadAssistants();
+  }, [team?.assistantIds]);
 
   const showSaved = (msg) => {
     setSaved(msg);
@@ -89,6 +116,83 @@ export default function SettingsTab() {
 
       {/* Parent Portal */}
       <Section title="🔒 Parent Portal Access Code">
+
+      {/* Assistant Coaches */}
+      <Section title="👥 Assistant Coaches">
+        <p className="text-xs text-chalk-muted mb-3">
+          Generate an invite link to share with your assistant coaches. They sign in with Google and get added to your team.
+        </p>
+
+        {/* Generate invite */}
+        <div className="flex items-center gap-3 mb-4">
+          <button
+            onClick={async () => {
+              setGeneratingInvite(true);
+              const code = await generateInviteCode();
+              if (code) {
+                const base = window.location.origin + window.location.pathname.replace(/\/$/, '');
+                setInviteLink(`${base}/join/${code}`);
+              }
+              setGeneratingInvite(false);
+            }}
+            disabled={generatingInvite}
+            className="px-4 py-2 rounded-lg bg-lime text-field font-bold text-sm
+                       hover:bg-lime-bright active:scale-[0.97] transition-all disabled:opacity-50">
+            {generatingInvite ? 'Generating...' : '🔗 Generate Invite Link'}
+          </button>
+        </div>
+
+        {inviteLink && (
+          <div className="bg-field border border-lime/30 rounded-xl p-3 mb-4">
+            <p className="text-[10px] text-chalk-muted uppercase tracking-wider mb-1">Share this link with your assistant coach:</p>
+            <div className="flex items-center gap-2">
+              <input type="text" readOnly value={inviteLink}
+                className="flex-1 px-3 py-2 rounded-lg bg-panel border border-border text-chalk text-xs
+                           focus:outline-none select-all" 
+                onClick={e => e.target.select()} />
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(inviteLink);
+                  showSaved('Link copied!');
+                }}
+                className="px-3 py-2 rounded-lg bg-lime text-field font-bold text-xs
+                           hover:bg-lime-bright transition-all whitespace-nowrap">
+                📋 Copy
+              </button>
+            </div>
+            <p className="text-[10px] text-chalk-muted mt-2">This link is single-use and will expire after it's been used.</p>
+          </div>
+        )}
+
+        {/* Current assistants */}
+        {assistants.length > 0 ? (
+          <div>
+            <p className="text-[10px] font-semibold text-chalk-muted uppercase tracking-wider mb-2">Current Assistant Coaches</p>
+            <div className="space-y-2">
+              {assistants.map(a => (
+                <div key={a.uid} className="flex items-center justify-between px-3 py-2 bg-field border border-border rounded-lg">
+                  <div>
+                    <span className="text-sm text-chalk font-semibold">{a.displayName || 'Unknown'}</span>
+                    {a.email && <span className="text-xs text-chalk-muted ml-2">{a.email}</span>}
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (confirm(`Remove ${a.displayName || 'this coach'} from the team?`)) {
+                        removeAssistant(a.uid);
+                      }
+                    }}
+                    className="px-2 py-1 text-[10px] font-bold text-red bg-red/10 border border-red/20 rounded
+                               hover:bg-red/20 transition-colors">
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <p className="text-xs text-chalk-muted">No assistant coaches yet. Generate an invite link above.</p>
+        )}
+      </Section>
         <p className="text-xs text-chalk-muted mb-3">Share the portal URL + this 4-digit code with parents. They don't need an account.</p>
         <div className="flex items-center gap-3">
           <input type="tel" inputMode="numeric" maxLength={4} value={portalCode}
