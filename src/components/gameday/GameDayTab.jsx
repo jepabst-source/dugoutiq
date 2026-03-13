@@ -1,5 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useTeam, PTS } from '../../contexts/TeamContext';
+import { usePlan } from '../../hooks/usePlan';
+import UpgradeModal from '../shared/UpgradeModal';
 
 const OUTCOME_LABELS = { K: 'Strikeout', out: 'Hit into Out', walk: 'Walk', hit: 'Hit' };
 
@@ -18,6 +20,8 @@ export default function GameDayTab() {
   const [theirScore, setTheirScore] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0]);
   const [scorerLink, setScorerLink] = useState('');
   const [generatingScorer, setGeneratingScorer] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const plan = usePlan();
 
   const activePlayers = getActivePlayers();
   const battingOrder = useMemo(() => generateBattingOrder(), [generateBattingOrder]);
@@ -45,6 +49,7 @@ export default function GameDayTab() {
 
   const handleRecord = useCallback(async (outcome) => {
     if (!selectedPlayerId) return;
+    if (!plan.canLogAtBat) { setShowUpgrade(true); return; }
     await logAtBat({
       playerId: selectedPlayerId,
       game: gameNum,
@@ -75,6 +80,14 @@ export default function GameDayTab() {
 
   return (
     <div className="max-w-lg mx-auto">
+      {showUpgrade && <UpgradeModal onClose={() => setShowUpgrade(false)} lockReason={plan.lockReason} />}
+
+      {/* Free tier usage */}
+      {!plan.isPro && (
+        <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-gold/5 border border-gold/20 rounded-lg text-xs text-gold">
+          <span>{plan.atBatsRemaining} free at-bats remaining</span>
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-lime">⚾ Game Day</h2>

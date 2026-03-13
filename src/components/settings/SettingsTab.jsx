@@ -8,7 +8,7 @@ import { db } from '../../lib/firebase';
 const ALL_POSITIONS = ['Pitcher', 'Catcher', '1st Base', '2nd Base', 'Shortstop', '3rd Base', 'Left Field', 'Center Field', 'Right Field'];
 
 export default function SettingsTab() {
-  const { team, updateTeam, updateSettings, generateInviteCode, removeAssistant } = useTeam();
+  const { team, updateTeam, updateSettings, generateInviteCode, removeAssistant, deleteTeam } = useTeam();
   const { user } = useAuth();
   const settings = team?.settings || {};
 
@@ -361,6 +361,24 @@ export default function SettingsTab() {
             })}
           </div>
         </div>
+      </Section>
+
+      {/* Danger Zone */}
+      <Section title="⚠️ Danger Zone">
+        <p className="text-xs text-chalk-muted mb-3">
+          Permanently delete this team and all its data — players, games, at-bats, everything. This cannot be undone.
+        </p>
+        <button
+          onClick={async () => {
+            if (!confirm(`Delete "${team?.name}"? This will permanently remove all players, games, and at-bat data.`)) return;
+            if (!confirm('This CANNOT be undone. Are you absolutely sure?')) return;
+            await deleteTeam();
+            window.location.reload();
+          }}
+          className="px-4 py-2 rounded-lg bg-red/15 text-red font-bold text-sm border border-red/30
+                     hover:bg-red/25 active:scale-[0.97] transition-all">
+          🗑 Delete Team
+        </button>
       </Section>
     </div>
   );

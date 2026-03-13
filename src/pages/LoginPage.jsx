@@ -8,13 +8,9 @@ export default function LoginPage() {
          style={{ background: 'radial-gradient(ellipse at 30% 20%, rgba(142,212,49,0.06) 0%, transparent 60%), var(--color-field)' }}>
       <div className="w-full max-w-sm text-center">
         {/* Logo */}
-        <div className="mb-2">
-          <span className="text-5xl">⚾</span>
+        <div className="mb-4">
+          <img src="/dugoutiq/og-image.jpg" alt="Dugout IQ" className="w-64 mx-auto rounded-lg" />
         </div>
-        <h1 className="text-4xl font-bold tracking-tight text-lime mb-1"
-            style={{ fontFamily: 'var(--font-display)' }}>
-          Dugout IQ
-        </h1>
         <p className="text-chalk-muted text-sm tracking-widest uppercase mb-12">
           Smart Lineup Manager
         </p>

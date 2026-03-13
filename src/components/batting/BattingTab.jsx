@@ -1,5 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useTeam, PTS } from '../../contexts/TeamContext';
+import { usePlan } from '../../hooks/usePlan';
+import UpgradeModal from '../shared/UpgradeModal';
 import {
   DndContext,
   closestCenter,
@@ -33,7 +35,9 @@ export default function BattingTab() {
   const [selectedInning, setSelectedInning] = useState(1);
   const [showLog, setShowLog] = useState(false);
   const [sortMode, setSortMode] = useState('points');
-  const [manuallyReordered, setManuallyReordered] = useState(false); // 'points' | 'obp'
+  const [manuallyReordered, setManuallyReordered] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const plan = usePlan(); // 'points' | 'obp'
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -101,6 +105,7 @@ export default function BattingTab() {
   const handleLogAtBat = async (outcome) => {
     const playerId = document.getElementById('ab-player-select')?.value;
     if (!playerId) return;
+    if (!plan.canLogAtBat) { setShowUpgrade(true); return; }
     await logAtBat({ playerId, game: gameNum, inning: selectedInning, outcome });
   };
 
@@ -111,6 +116,7 @@ export default function BattingTab() {
 
   return (
     <div>
+      {showUpgrade && <UpgradeModal onClose={() => setShowUpgrade(false)} lockReason={plan.lockReason} />}
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <div>

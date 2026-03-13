@@ -1,6 +1,8 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTeam } from '../../contexts/TeamContext';
 import { buildFullRotation, POSITIONS, INFIELD_POSITIONS, OUTFIELD_POSITIONS } from '../../utils/rotationEngine';
+import { usePlan } from '../../hooks/usePlan';
+import UpgradeModal from '../shared/UpgradeModal';
 
 export default function DefenseTab() {
   const {
@@ -20,7 +22,9 @@ export default function DefenseTab() {
   const [generated, setGenerated] = useState(false);
   const [committing, setCommitting] = useState(false);
   const [committed, setCommitted] = useState(false);
-  const [inningModes, setInningModes] = useState(() => settings.defaultInningModes || {}); // { 1: 'competitive', 2: 'development', ... }
+  const [inningModes, setInningModes] = useState(() => settings.defaultInningModes || {});
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const plan = usePlan(); // { 1: 'competitive', 2: 'development', ... }
 
   const activePlayers = getActivePlayers();
   const activeCount = players.filter(p => attendance.has(p.id)).length;
@@ -140,6 +144,7 @@ export default function DefenseTab() {
 
   const handleCommitGame = useCallback(async () => {
     if (!generated) return;
+    if (!plan.canCommitGame) { setShowUpgrade(true); return; }
     setCommitting(true);
     try {
       const order = generateBattingOrder();
@@ -162,6 +167,14 @@ export default function DefenseTab() {
 
   return (
     <div>
+      {showUpgrade && <UpgradeModal onClose={() => setShowUpgrade(false)} lockReason={plan.lockReason} />}
+
+      {/* Free tier usage */}
+      {!plan.isPro && (
+        <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-gold/5 border border-gold/20 rounded-lg text-xs text-gold">
+          <span>Free tier: {plan.gamesRemaining} game{plan.gamesRemaining !== 1 ? 's' : ''} remaining · {plan.atBatsRemaining} at-bats remaining</span>
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <div>

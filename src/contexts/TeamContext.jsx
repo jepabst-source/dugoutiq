@@ -348,6 +348,24 @@ export function TeamProvider({ children }) {
     await updateDoc(doc(db, 'teams', activeTeamId), { assistantIds: arrayRemove(assistantUid) });
   }, [activeTeamId]);
 
+  const deleteTeam = useCallback(async () => {
+    if (!activeTeamId || !user) return;
+    // Delete subcollections
+    const playerSnap = await getDocs(collection(db, 'teams', activeTeamId, 'players'));
+    await Promise.all(playerSnap.docs.map(d => deleteDoc(d.ref)));
+    const atBatSnap = await getDocs(collection(db, 'teams', activeTeamId, 'atBats'));
+    await Promise.all(atBatSnap.docs.map(d => deleteDoc(d.ref)));
+    const gameSnap = await getDocs(collection(db, 'teams', activeTeamId, 'games'));
+    await Promise.all(gameSnap.docs.map(d => deleteDoc(d.ref)));
+    // Delete the team doc
+    await deleteDoc(doc(db, 'teams', activeTeamId));
+    // Remove from user's teamIds
+    const userRef = doc(db, 'users', user.uid);
+    await updateDoc(userRef, { teamIds: arrayRemove(activeTeamId) });
+    // Switch to another team or null
+    setActiveTeamId(null);
+  }, [activeTeamId, user, setActiveTeamId]);
+
   // ── SCORER LINK ──
 
   const generateScorerLink = useCallback(async (gameId) => {
@@ -394,6 +412,7 @@ export function TeamProvider({ children }) {
       generateInviteCode,
       joinTeamWithCode,
       removeAssistant,
+      deleteTeam,
       generateScorerLink,
     }}>
       {children}
