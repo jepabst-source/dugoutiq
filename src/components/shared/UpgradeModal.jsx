@@ -1,4 +1,25 @@
+import { useState } from 'react';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+
 export default function UpgradeModal({ onClose, lockReason }) {
+  const [loading, setLoading] = useState('');
+
+  const handleUpgrade = async (plan) => {
+    setLoading(plan);
+    try {
+      const functions = getFunctions();
+      const createCheckoutSession = httpsCallable(functions, 'createCheckoutSession');
+      const result = await createCheckoutSession({ plan, origin: window.location.origin });
+      if (result.data?.url) {
+        window.location.href = result.data.url;
+      }
+    } catch (err) {
+      console.error('Checkout error:', err);
+      alert('Something went wrong. Please try again.');
+    }
+    setLoading('');
+  };
+
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70" onClick={onClose}>
       <div className="bg-panel border border-lime rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl text-center"
@@ -12,7 +33,7 @@ export default function UpgradeModal({ onClose, lockReason }) {
         </p>
 
         <p className="text-chalk-muted text-xs mb-6">
-          Dugout IQ Pro unlocks unlimited games, at-bats, and full season tracking.
+          Lineup Man Pro unlocks unlimited games, at-bats, and full season tracking.
           Your roster, stats, and history are all still here — just upgrade to keep going.
         </p>
 
@@ -23,13 +44,11 @@ export default function UpgradeModal({ onClose, lockReason }) {
             <div className="text-2xl font-bold text-chalk">$3.99</div>
             <div className="text-[10px] text-chalk-muted">/month</div>
             <button
-              onClick={() => {
-                // TODO: Stripe checkout monthly
-                alert('Stripe integration coming soon! For now, contact josh@dugoutiq.com for early access.');
-              }}
+              onClick={() => handleUpgrade('monthly')}
+              disabled={!!loading}
               className="w-full mt-3 py-2 rounded-lg bg-border text-chalk font-bold text-xs
-                         hover:bg-border-light active:scale-[0.97] transition-all">
-              Choose Monthly
+                         hover:bg-border-light active:scale-[0.97] transition-all disabled:opacity-50">
+              {loading === 'monthly' ? 'Loading...' : 'Choose Monthly'}
             </button>
           </div>
 
@@ -41,13 +60,11 @@ export default function UpgradeModal({ onClose, lockReason }) {
             <div className="text-2xl font-bold text-lime">$19.99</div>
             <div className="text-[10px] text-chalk-muted">/year</div>
             <button
-              onClick={() => {
-                // TODO: Stripe checkout annual
-                alert('Stripe integration coming soon! For now, contact josh@dugoutiq.com for early access.');
-              }}
+              onClick={() => handleUpgrade('annual')}
+              disabled={!!loading}
               className="w-full mt-3 py-2 rounded-lg bg-lime text-field font-bold text-xs
-                         hover:bg-lime-bright active:scale-[0.97] transition-all">
-              Choose Annual
+                         hover:bg-lime-bright active:scale-[0.97] transition-all disabled:opacity-50">
+              {loading === 'annual' ? 'Loading...' : 'Choose Annual'}
             </button>
           </div>
         </div>

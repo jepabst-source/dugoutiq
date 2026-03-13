@@ -32,6 +32,14 @@ function AppContent() {
   const { user, userDoc, loading, activeTeamId } = useAuth();
   const [inviteCode] = useState(() => getInviteCode());
   const [scorerCode] = useState(() => getScorerCode());
+  const [showUpgradeSuccess] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('upgraded') === 'true') {
+      window.history.replaceState(null, '', window.location.pathname);
+      return true;
+    }
+    return false;
+  });
 
   // Scorer page — no auth required
   if (scorerCode) {
