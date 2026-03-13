@@ -14,7 +14,7 @@ export default function HistoryTab() {
       const stats = getPlayerStats(p.id);
       const rolling = getRollingAvg(p.id);
       return { ...p, ...stats, avg: rolling.avg, avgAbs: rolling.absCount };
-    }).sort((a, b) => b.avg - a.avg);
+    }).sort((a, b) => b.defRating - a.defRating);
   }, [players, getPlayerStats, getRollingAvg]);
 
   // At-bat breakdown by game
@@ -152,7 +152,6 @@ export default function HistoryTab() {
                 <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">Pts</th>
                 <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">OBP</th>
                 <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">Games</th>
-                <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">Def</th>
               </tr>
             </thead>
             <tbody>
@@ -160,7 +159,7 @@ export default function HistoryTab() {
                 <tr key={p.id} className="border-b border-border/30 hover:bg-panel-hover transition-colors">
                   <td className="px-3 py-2 font-semibold text-chalk">
                     {p.name}
-                    {p.role === 'P1' && <span className="ml-1 text-[9px] text-red font-bold">P1</span>}
+                    <span className="ml-1.5 text-gold text-xs">{p.defRating}★</span>
                   </td>
                   <td className="text-center px-2 py-2 font-bold text-lime">
                     {p.avgAbs > 0 ? p.avg.toFixed(2) : '—'}
@@ -171,12 +170,11 @@ export default function HistoryTab() {
                     {p.obp !== null ? p.obp.toFixed(3).replace(/^0/, '') : '—'}
                   </td>
                   <td className="text-center px-2 py-2 text-chalk-dim">{p.gamesPlayed}</td>
-                  <td className="text-center px-2 py-2 text-gold">{p.defRating}★</td>
                 </tr>
               ))}
               {playerStats.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-3 py-8 text-center text-chalk-muted">
+                  <td colSpan={6} className="px-3 py-8 text-center text-chalk-muted">
                     No batting data yet — log at-bats in Game Day or the Batting tab
                   </td>
                 </tr>

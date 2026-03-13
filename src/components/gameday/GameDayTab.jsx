@@ -8,6 +8,7 @@ export default function GameDayTab() {
     players, atBats, attendance,
     getActivePlayers, generateBattingOrder,
     logAtBat, deleteAtBat, getRollingAvg,
+    generateScorerLink,
   } = useTeam();
 
   const [selectedPlayerId, setSelectedPlayerId] = useState(null);
@@ -15,6 +16,8 @@ export default function GameDayTab() {
   const [gameNum, setGameNum] = useState(() => `gd-${new Date().toISOString().split('T')[0]}`);
   const [ourScore, setOurScore] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0]);
   const [theirScore, setTheirScore] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0]);
+  const [scorerLink, setScorerLink] = useState('');
+  const [generatingScorer, setGeneratingScorer] = useState(false);
 
   const activePlayers = getActivePlayers();
   const battingOrder = useMemo(() => generateBattingOrder(), [generateBattingOrder]);
@@ -75,7 +78,40 @@ export default function GameDayTab() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-lime">⚾ Game Day</h2>
+        <button
+          onClick={async () => {
+            setGeneratingScorer(true);
+            const code = await generateScorerLink(gameNum);
+            if (code) {
+              const base = window.location.origin + window.location.pathname.replace(/\/$/, '');
+              setScorerLink(`${base}/score/${code}`);
+            }
+            setGeneratingScorer(false);
+          }}
+          disabled={generatingScorer}
+          className="px-3 py-2 rounded-lg bg-border text-chalk-dim font-bold text-xs
+                     hover:bg-border-light active:scale-[0.97] transition-all disabled:opacity-50">
+          {generatingScorer ? '...' : '📤 Share Scorer'}
+        </button>
       </div>
+
+      {/* Scorer link */}
+      {scorerLink && (
+        <div className="bg-field border border-sky/30 rounded-xl p-3 mb-4">
+          <p className="text-[10px] text-chalk-muted uppercase tracking-wider mb-1">Scorer link (expires in 12 hours):</p>
+          <div className="flex items-center gap-2">
+            <input type="text" readOnly value={scorerLink}
+              className="flex-1 px-3 py-2 rounded-lg bg-panel border border-border text-chalk text-xs focus:outline-none"
+              onClick={e => e.target.select()} />
+            <button
+              onClick={() => { navigator.clipboard.writeText(scorerLink); }}
+              className="px-3 py-2 rounded-lg bg-sky text-field font-bold text-xs hover:bg-sky/80 transition-all whitespace-nowrap">
+              📋 Copy
+            </button>
+          </div>
+          <p className="text-[10px] text-chalk-muted mt-1">Text this to anyone — no login needed. They just tap players and log at-bats.</p>
+        </div>
+      )}
 
       {/* Score Bar */}
       <div className="bg-panel border border-border rounded-xl p-3 mb-4">

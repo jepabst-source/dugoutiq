@@ -4,25 +4,46 @@ import { TeamProvider, useTeam } from './contexts/TeamContext';
 import LoginPage from './pages/LoginPage';
 import CreateTeamPage from './pages/CreateTeamPage';
 import JoinTeamPage from './pages/JoinTeamPage';
+import ScorerPage from './pages/ScorerPage';
 import AppShell from './pages/AppShell';
 
 function getInviteCode() {
-  // Check URL for /join/CODE pattern
   const path = window.location.pathname;
-  const match = path.match(/\/join\/([a-zA-Z0-9]+)/);
+  const route = new URLSearchParams(window.location.search).get('route') || '';
+  const match = (path + route).match(/\/join\/([a-zA-Z0-9]+)/);
+  if (match) {
+    // Clean URL after reading
+    window.history.replaceState(null, '', window.location.pathname.split('/join/')[0] + '/join/' + match[1]);
+  }
+  return match ? match[1] : null;
+}
+
+function getScorerCode() {
+  const path = window.location.pathname;
+  const route = new URLSearchParams(window.location.search).get('route') || '';
+  const match = (path + route).match(/\/score\/([a-zA-Z0-9]+)/);
+  if (match) {
+    window.history.replaceState(null, '', window.location.pathname.split('/score/')[0] + '/score/' + match[1]);
+  }
   return match ? match[1] : null;
 }
 
 function AppContent() {
   const { user, userDoc, loading, activeTeamId } = useAuth();
   const [inviteCode] = useState(() => getInviteCode());
+  const [scorerCode] = useState(() => getScorerCode());
+
+  // Scorer page — no auth required
+  if (scorerCode) {
+    return <ScorerPage scorerCode={scorerCode} />;
+  }
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="text-4xl mb-3 animate-pulse">⚾</div>
-          <p className="text-chalk-muted text-sm">Loading DugoutIQ...</p>
+          <p className="text-chalk-muted text-sm">Loading Dugout IQ...</p>
         </div>
       </div>
     );

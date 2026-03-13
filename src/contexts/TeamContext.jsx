@@ -336,6 +336,23 @@ export function TeamProvider({ children }) {
     await updateDoc(doc(db, 'teams', activeTeamId), { assistantIds: arrayRemove(assistantUid) });
   }, [activeTeamId]);
 
+  // ── SCORER LINK ──
+
+  const generateScorerLink = useCallback(async (gameId) => {
+    if (!activeTeamId) return null;
+    const code = Math.random().toString(36).substring(2, 10);
+    const ref = doc(db, 'scorerLinks', code);
+    await setDoc(ref, {
+      teamId: activeTeamId,
+      teamName: team?.name || '',
+      gameId: gameId || '',
+      playerSnapshot: players.map(p => ({ id: p.id, name: p.name, number: p.number || '' })),
+      createdAt: Date.now(),
+      expiresAt: Date.now() + (12 * 60 * 60 * 1000), // 12 hours
+    });
+    return code;
+  }, [activeTeamId, team, players]);
+
   return (
     <TeamContext.Provider value={{
       team,
@@ -364,6 +381,7 @@ export function TeamProvider({ children }) {
       generateInviteCode,
       joinTeamWithCode,
       removeAssistant,
+      generateScorerLink,
     }}>
       {children}
     </TeamContext.Provider>
