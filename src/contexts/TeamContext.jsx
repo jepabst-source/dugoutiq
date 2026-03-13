@@ -151,6 +151,7 @@ export function TeamProvider({ children }) {
     const teamData = {
       name,
       coachId: user.uid,
+      assistantIds: [],
       sport: sport || 'softball',
       seasonYear: seasonYear || new Date().getFullYear(),
       seasonLabel: seasonLabel || '',
