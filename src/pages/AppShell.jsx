@@ -36,9 +36,11 @@ export default function AppShell() {
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           {/* Logo + Team Switcher */}
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-bold text-lime tracking-tight hidden sm:block">
-              ⚾ Dugout IQ
-            </h1>
+            <div className="hidden sm:block">
+              <h1 className="text-xl font-bold text-lime tracking-tight leading-none">⚾ Dugout IQ</h1>
+              <div className="text-[8px] text-chalk-muted/50 tracking-wider">by Josh Pabst</div>
+            </div>
+            <span className="sm:hidden text-sm font-bold text-lime">⚾ Dugout IQ</span>
             {team && (
               <div className="relative">
                 <button onClick={() => setShowTeamMenu(!showTeamMenu)}
@@ -127,6 +129,11 @@ export default function AppShell() {
         {activeTab === 'history' && <HistoryTab />}
         {activeTab === 'settings' && <SettingsTab />}
       </main>
+
+      {/* Footer */}
+      <footer className="text-center py-4 text-[10px] text-chalk-muted/40 tracking-wider">
+        ⚾ Dugout IQ · by Josh Pabst
+      </footer>
     </div>
   );
 }
