@@ -6,10 +6,11 @@ const FREE_GAME_LIMIT = 2;
 const FREE_ATBAT_LIMIT = 50;
 
 export function usePlan() {
-  const { userDoc } = useAuth();
+  const { userDoc, user } = useAuth();
   const { savedGames, atBats } = useTeam();
 
-  const isPro = userDoc?.plan === 'pro';
+  const FOUNDER_EMAILS = ['jepabst@gmail.com'];
+  const isPro = userDoc?.plan === 'pro' || FOUNDER_EMAILS.includes(user?.email);
   const gameCount = savedGames?.length || 0;
   const atBatCount = atBats?.length || 0;
 
