@@ -23,7 +23,8 @@ export default function JoinTeamPage({ inviteCode, onJoined }) {
           setError('Invalid invite link.');
         }
       } catch (err) {
-        setError('Could not load invite.');
+        console.error('Invite load error:', err);
+        setError('Could not load invite. Make sure Firestore rules allow public reads on invites collection.');
       }
       setLoading(false);
     }

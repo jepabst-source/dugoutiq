@@ -30,7 +30,8 @@ export default function ScorerPage({ scorerCode }) {
         }
         setScorerData(data);
       } catch (err) {
-        setError('Could not load scorer link.');
+        console.error('Scorer load error:', err);
+        setError('Could not load scorer link. Make sure Firestore rules allow public reads on scorerLinks collection.');
       }
       setLoading(false);
     }

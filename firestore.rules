@@ -3,47 +3,26 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ── USERS ──
-    // Users can only read/write their own document
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    // Open read/write for authenticated users (development mode)
+    match /{document=**} {
+      allow read, write: if request.auth != null;
     }
 
-    // ── TEAMS ──
-    // Only the coach who owns the team can read/write
-    match /teams/{teamId} {
-      allow read: if request.auth != null && resource.data.coachId == request.auth.uid;
-      allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && resource.data.coachId == request.auth.uid;
-
-      // Players subcollection — same rules as parent team
-      match /players/{playerId} {
-        allow read, write: if request.auth != null
-          && get(/databases/$(database)/documents/teams/$(teamId)).data.coachId == request.auth.uid;
-      }
-
-      // Games subcollection
-      match /games/{gameId} {
-        allow read, write: if request.auth != null
-          && get(/databases/$(database)/documents/teams/$(teamId)).data.coachId == request.auth.uid;
-
-        // Lineups within games
-        match /lineups/{inningId} {
-          allow read, write: if request.auth != null
-            && get(/databases/$(database)/documents/teams/$(teamId)).data.coachId == request.auth.uid;
-        }
-
-        // At-bats within games
-        match /atBats/{atBatId} {
-          allow read, write: if request.auth != null
-            && get(/databases/$(database)/documents/teams/$(teamId)).data.coachId == request.auth.uid;
-        }
-      }
+    // Invite links — anyone can read (to verify invite before signing in)
+    match /invites/{code} {
+      allow read: if true;
+      allow write: if request.auth != null;
     }
 
-    // ── PORTAL ACCESS ──
-    // Public read for portal (validated by Cloud Function with PIN)
-    // This will be implemented in Phase 4 with a Cloud Function
-    // that issues custom tokens for portal viewers
+    // Scorer links — anyone can read (no login required)
+    match /scorerLinks/{code} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // At-bats — scorer needs to write without auth
+    match /teams/{teamId}/atBats/{atBatId} {
+      allow read, write: if true;
+    }
   }
 }

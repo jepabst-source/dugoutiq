@@ -7,6 +7,7 @@ import DefenseTab from '../components/defense/DefenseTab';
 import GameDayTab from '../components/gameday/GameDayTab';
 import HistoryTab from '../components/history/HistoryTab';
 import SettingsTab from '../components/settings/SettingsTab';
+import PrintTab from '../components/print/PrintTab';
 
 const TABS = [
   { id: 'roster', label: 'Roster', shortLabel: 'Roster', icon: '👥' },
@@ -14,6 +15,7 @@ const TABS = [
   { id: 'defense', label: 'Defense', shortLabel: 'Def', icon: '🛡️' },
   { id: 'gameday', label: 'Game Day', shortLabel: '⚾', icon: '⚾', highlight: true },
   { id: 'history', label: 'History', shortLabel: 'Hist', icon: '📋' },
+  { id: 'print', label: 'Print', shortLabel: '🖨', icon: '🖨', printOnly: true },
   { id: 'settings', label: 'Settings', shortLabel: '⚙️', icon: '⚙️' },
 ];
 
@@ -105,11 +107,14 @@ export default function AppShell() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-1 min-w-0 px-1.5 sm:px-4 py-2.5 sm:py-2 rounded-md text-[11px] sm:text-sm font-semibold
                            transition-all duration-150 whitespace-nowrap
+                  ${tab.printOnly ? 'hidden sm:block' : ''}
                   ${activeTab === tab.id
                     ? 'bg-field-light text-lime shadow-md'
                     : tab.highlight
                       ? 'text-gold hover:text-gold-bright hover:bg-panel-hover'
-                      : 'text-chalk-muted hover:text-chalk hover:bg-panel-hover'
+                      : tab.printOnly
+                        ? 'text-sky hover:text-sky hover:bg-panel-hover'
+                        : 'text-chalk-muted hover:text-chalk hover:bg-panel-hover'
                   }`}
               >
                 <span className="sm:hidden">{tab.shortLabel}</span>
@@ -127,6 +132,7 @@ export default function AppShell() {
         {activeTab === 'defense' && <DefenseTab />}
         {activeTab === 'gameday' && <GameDayTab />}
         {activeTab === 'history' && <HistoryTab />}
+        {activeTab === 'print' && <PrintTab />}
         {activeTab === 'settings' && <SettingsTab />}
       </main>
 

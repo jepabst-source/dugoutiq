@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTeam } from '../../contexts/TeamContext';
 import { buildFullRotation, POSITIONS, INFIELD_POSITIONS, OUTFIELD_POSITIONS } from '../../utils/rotationEngine';
 
@@ -27,6 +27,15 @@ export default function DefenseTab() {
   const standardInnings = totalInnings - 1;
   const benchCount = Math.max(0, activePlayers.length - 9);
   const positionHistory = getPositionHistory();
+
+  // Sync lineup to localStorage so Print tab can read it
+  useEffect(() => {
+    if (generated) {
+      localStorage.setItem('dugoutiq_currentLineup', JSON.stringify({
+        innings, lfg, oor, gameNum, gameDate, opponent, totalInnings,
+      }));
+    }
+  }, [innings, lfg, oor, gameNum, gameDate, opponent, totalInnings, generated]);
 
   const toggleInningMode = (ing) => {
     setInningModes(prev => ({

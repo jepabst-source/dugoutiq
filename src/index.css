@@ -82,3 +82,17 @@ select option {
   background: var(--color-panel);
   color: var(--color-chalk);
 }
+
+/* Print styles */
+@media print {
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    background: white !important;
+    color: black !important;
+    padding: 0 !important;
+    min-height: auto !important;
+  }
+  header, footer, .print\:hidden, nav { display: none !important; }
+  main { padding: 0 !important; max-width: 100% !important; }
+  .break-before-page { page-break-before: always; break-before: page; }
+}
