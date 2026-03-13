@@ -3,7 +3,7 @@ import { useTeam, PTS } from '../../contexts/TeamContext';
 import { POSITIONS } from '../../utils/rotationEngine';
 
 const OUTCOME_LABELS = { K: 'Strikeout', out: 'Hit into Out', walk: 'Walk', hit: 'Hit' };
-const POS_ORDER = [...POSITIONS.infield, ...POSITIONS.outfield, 'Bench 1', 'Bench 2'];
+const POS_ORDER = [...POSITIONS.infield, ...POSITIONS.outfield, 'Bench'];
 
 export default function HistoryTab() {
   const { players, atBats, savedGames, getPlayerStats, getRollingAvg, getPositionHistory, deleteGame } = useTeam();
@@ -55,7 +55,7 @@ export default function HistoryTab() {
                       {pos.replace('Left Field', 'LF').replace('Center Field', 'CF').replace('Right Field', 'RF')
                         .replace('1st Base', '1B').replace('2nd Base', '2B').replace('3rd Base', '3B')
                         .replace('Shortstop', 'SS').replace('Pitcher', 'P').replace('Catcher', 'C')
-                        .replace('Bench 1', 'B1').replace('Bench 2', 'B2')}
+                        .replace('Bench', 'BN')}
                     </th>
                   ))}
                 </tr>
@@ -67,10 +67,12 @@ export default function HistoryTab() {
                     <tr key={p.id} className="border-b border-border/30 hover:bg-panel-hover">
                       <td className="px-2 py-1.5 font-semibold text-chalk whitespace-nowrap sticky left-0 bg-panel">{p.name}</td>
                       {POS_ORDER.map(pos => {
-                        const count = hist[pos] || 0;
+                        const count = pos === 'Bench'
+                          ? (hist['Bench 1'] || 0) + (hist['Bench 2'] || 0) + (hist['Bench 3'] || 0)
+                          : (hist[pos] || 0);
                         const isInfield = POSITIONS.infield.includes(pos);
                         const isOutfield = POSITIONS.outfield.includes(pos);
-                        const isBench = pos.startsWith('Bench');
+                        const isBench = pos === 'Bench';
                         const colorClass = count === 0 ? 'text-border'
                           : isInfield ? 'text-sky'
                           : isOutfield ? 'text-gold'

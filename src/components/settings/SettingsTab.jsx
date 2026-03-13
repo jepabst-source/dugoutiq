@@ -14,6 +14,9 @@ export default function SettingsTab() {
 
   const [teamName, setTeamName] = useState(team?.name || '');
   const [portalCode, setPortalCode] = useState(team?.portalCode || '');
+  const [sport, setSport] = useState(team?.sport || 'softball');
+  const [seasonLabel, setSeasonLabel] = useState(team?.seasonLabel || 'Spring');
+  const [seasonYear, setSeasonYear] = useState(team?.seasonYear || new Date().getFullYear());
   const [saved, setSaved] = useState('');
   const [inviteLink, setInviteLink] = useState('');
   const [generatingInvite, setGeneratingInvite] = useState(false);
@@ -47,7 +50,7 @@ export default function SettingsTab() {
   };
 
   const handleSaveTeamInfo = async () => {
-    await updateTeam({ name: teamName.trim(), portalCode });
+    await updateTeam({ name: teamName.trim(), portalCode, sport, seasonLabel, seasonYear: Number(seasonYear) });
     showSaved('Team info saved');
   };
 
@@ -90,14 +93,35 @@ export default function SettingsTab() {
           </div>
           <div>
             <label className="block text-[10px] font-semibold text-chalk-muted uppercase tracking-wider mb-1">Sport</label>
-            <div className="px-3 py-2 rounded-lg bg-field border border-border text-chalk-dim text-sm capitalize">
-              {team?.sport || 'softball'}
+            <div className="flex gap-2">
+              {['softball', 'baseball'].map(s => (
+                <button key={s} type="button" onClick={() => setSport(s)}
+                  className={`px-3 py-2 rounded-lg text-sm font-semibold capitalize transition-all flex-1
+                    ${sport === s
+                      ? 'border-lime bg-lime/10 text-lime border'
+                      : 'border border-border bg-field text-chalk-muted hover:border-border-light'
+                    }`}>
+                  {s === 'softball' ? '🥎' : '⚾'} {s}
+                </button>
+              ))}
             </div>
           </div>
-          <div>
-            <label className="block text-[10px] font-semibold text-chalk-muted uppercase tracking-wider mb-1">Season</label>
-            <div className="px-3 py-2 rounded-lg bg-field border border-border text-chalk-dim text-sm">
-              {team?.seasonLabel} {team?.seasonYear}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] font-semibold text-chalk-muted uppercase tracking-wider mb-1">Season</label>
+              <select value={seasonLabel} onChange={e => setSeasonLabel(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-field border border-border text-chalk text-sm
+                           focus:border-lime focus:outline-none">
+                {['Spring', 'Summer', 'Fall', 'Winter'].map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-[10px] font-semibold text-chalk-muted uppercase tracking-wider mb-1">Year</label>
+              <input type="number" value={seasonYear} onChange={e => setSeasonYear(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-field border border-border text-chalk text-sm
+                           focus:border-lime focus:outline-none" />
             </div>
           </div>
           <div>
@@ -219,24 +243,13 @@ export default function SettingsTab() {
             onChange={() => toggleRule('noBackToBackBench')}
           />
 
-          <RuleToggle
-            label="Developmental innings"
-            description="Relaxes position rating floors to give weaker players infield time"
-            enabled={settings.devInningsEnabled}
-            onChange={() => toggleRule('devInningsEnabled')}
-          />
-
-          {settings.devInningsEnabled && (
-            <div className="ml-6 flex items-center gap-2">
-              <span className="text-xs text-chalk-muted">Every</span>
-              <select value={settings.devInningCycle || 3}
-                onChange={e => setRuleValue('devInningCycle', Number(e.target.value))}
-                className="px-2 py-1 rounded bg-field border border-border text-chalk text-sm focus:border-lime focus:outline-none">
-                {[2, 3, 4, 5].map(n => <option key={n} value={n}>{n}</option>)}
-              </select>
-              <span className="text-xs text-chalk-muted">innings is a dev inning</span>
+          <div className="px-3 py-2 bg-field/50 border border-border rounded-lg">
+            <div className="text-sm text-chalk font-semibold">Competitive vs. Development innings</div>
+            <div className="text-xs text-chalk-muted mt-1">
+              Toggle each inning between ⚔️ Competitive and 🔄 Development directly on the Defense tab when generating lineups.
+              Development innings relax position rating floors to give developing players infield time.
             </div>
-          )}
+          </div>
 
           <RuleToggle
             label="Infield innings cap"
@@ -257,20 +270,13 @@ export default function SettingsTab() {
             </div>
           )}
 
-          <RuleToggle
-            label="Allow assistant coaches full access"
-            description="When on, assistants can edit roster, change settings, and delete data"
-            enabled={settings.assistantFullAccess}
-            onChange={() => toggleRule('assistantFullAccess')}
-          />
         </div>
       </Section>
 
       {/* Position Minimum Ratings */}
       <Section title="⭐ Position Minimum Ratings">
         <p className="text-xs text-chalk-muted mb-4">
-          Set a minimum defensive rating for any position. Players below the threshold won't be assigned there (except during dev innings).
-          Tap a star to set the floor, or tap the same star again to clear it.
+          Set a preferred minimum rating for each position. The rotation engine uses these as guidelines when auto-generating lineups. You can always manually override any assignment.
         </p>
         <div className="space-y-2">
           {ALL_POSITIONS.filter(p => p !== 'Pitcher').map(pos => {

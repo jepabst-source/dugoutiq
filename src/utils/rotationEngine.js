@@ -27,12 +27,12 @@ const OUTFIELD_POSITIONS = ['Left Field', 'Center Field', 'Right Field'];
  * @param {Object} params.positionHistory - Historical position counts from saved games
  * @returns {{ innings: Object, lfg: Object, oor: Object }}
  */
-export function buildFullRotation({ players, standardInnings, settings, positionHistory = {} }) {
+export function buildFullRotation({ players, standardInnings, settings, positionHistory = {}, inningModes = {} }) {
   if (!players.length) return { innings: {}, lfg: {}, oor: {} };
 
   const sorted = [...players].sort((a, b) => b.defRating - a.defRating);
-  const p1 = players.find(p => p.role === 'P1');
-  const p2 = players.find(p => p.role === 'P2');
+  const pitchers = players.filter(p => p.canPitch).sort((a, b) => b.defRating - a.defRating);
+  const bestPitcher = pitchers[0] || null;
   const catchers = players.filter(p => p.canCatch);
   const benchCount = Math.max(0, players.length - 9);
 
@@ -40,15 +40,25 @@ export function buildFullRotation({ players, standardInnings, settings, position
   let benchedLastInning = new Set();
 
   for (let ing = 1; ing <= standardInnings; ing++) {
-    const isDevInning = settings.devInningsEnabled && ing % settings.devInningCycle === 0;
+    // inningModes: { 1: 'competitive', 2: 'development', 3: 'competitive', ... }
+    // Default to competitive if not specified
+    const mode = inningModes[ing] || 'competitive';
+    const isDevInning = mode === 'development';
 
     const assignment = {};
     const used = new Set();
 
-    // 1. Pitcher
-    if (p1) {
-      assignment['Pitcher'] = p1.id;
-      used.add(p1.id);
+    // 1. Pitcher — highest rated pitcher for competitive, rotate for dev
+    if (pitchers.length) {
+      if (isDevInning) {
+        // Dev: use a non-best pitcher if available, to give them experience
+        const devPitcher = pitchers.find((p, i) => i > 0 && !used.has(p.id)) || bestPitcher;
+        if (devPitcher) { assignment['Pitcher'] = devPitcher.id; used.add(devPitcher.id); }
+      } else {
+        // Competitive: best pitcher
+        assignment['Pitcher'] = bestPitcher.id;
+        used.add(bestPitcher.id);
+      }
     } else {
       const best = sorted.find(p => !used.has(p.id));
       if (best) { assignment['Pitcher'] = best.id; used.add(best.id); }
@@ -218,8 +228,10 @@ function buildLFGLineup(players, positionHistory) {
   const assignment = {};
   const used = new Set();
 
-  const p1 = players.find(p => p.role === 'P1');
-  if (p1) { assignment['Pitcher'] = p1.id; used.add(p1.id); }
+  // Best available pitcher
+  const pitchers = players.filter(p => p.canPitch).sort((a, b) => b.defRating - a.defRating);
+  if (pitchers.length) { assignment['Pitcher'] = pitchers[0].id; used.add(pitchers[0].id); }
+  else { const best = sorted[0]; if (best) { assignment['Pitcher'] = best.id; used.add(best.id); } }
 
   const catchers = players.filter(p => p.canCatch && !used.has(p.id));
   if (catchers.length) {
@@ -258,10 +270,11 @@ function buildOORLineup(players, positionHistory) {
   const assignment = {};
   const used = new Set();
 
-  const p2 = players.find(p => p.role === 'P2');
-  const p1 = players.find(p => p.role === 'P1');
-  if (p2) { assignment['Pitcher'] = p2.id; used.add(p2.id); }
-  else if (p1) { assignment['Pitcher'] = p1.id; used.add(p1.id); }
+  // OOR: use a non-best pitcher if available (give them experience)
+  const pitchers = players.filter(p => p.canPitch).sort((a, b) => b.defRating - a.defRating);
+  if (pitchers.length > 1) { assignment['Pitcher'] = pitchers[1].id; used.add(pitchers[1].id); }
+  else if (pitchers.length) { assignment['Pitcher'] = pitchers[0].id; used.add(pitchers[0].id); }
+  else { const best = sorted[sorted.length - 1]; if (best) { assignment['Pitcher'] = best.id; used.add(best.id); } }
 
   const catchers = players.filter(p => p.canCatch && !used.has(p.id))
     .sort((a, b) => (positionHistory[a.id]?.['Catcher'] || 0) - (positionHistory[b.id]?.['Catcher'] || 0));

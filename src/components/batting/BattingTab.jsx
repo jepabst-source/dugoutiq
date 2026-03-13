@@ -320,19 +320,19 @@ function SortableBattingSlot({ player, index }) {
       <div className="flex-1 min-w-0">
         <div className="font-semibold text-chalk truncate">
           {player.name}
-          {player.role === 'P1' && (
-            <span className="ml-1.5 px-1.5 py-0.5 text-[9px] font-bold uppercase bg-red/20 text-red border border-red/30 rounded">P1</span>
-          )}
         </div>
         <div className="text-xs text-chalk-muted">
           {stats.totalAbs} career ABs · def {player.defRating}★
         </div>
       </div>
 
-      {/* Rolling avg */}
+      {/* Stats */}
       <div className="text-right">
         <div className="text-lg font-bold text-lime">{avgDisplay}</div>
         <div className="text-[10px] text-chalk-muted">{absNote}</div>
+        {stats.obp !== null && (
+          <div className="text-[10px] text-sky">{stats.obp.toFixed(3).replace(/^0/, '')} OBP</div>
+        )}
       </div>
     </div>
   );

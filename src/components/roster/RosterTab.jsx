@@ -65,6 +65,7 @@ export default function RosterTab() {
               }}
               onRatingChange={(rating) => updatePlayer(player.id, { defRating: rating })}
               onCatcherToggle={(val) => updatePlayer(player.id, { canCatch: val })}
+              onPitcherToggle={(val) => updatePlayer(player.id, { canPitch: val })}
             />
           ))}
         </div>
@@ -73,7 +74,7 @@ export default function RosterTab() {
   );
 }
 
-function PlayerCard({ player, onEdit, onRemove, onRatingChange, onCatcherToggle }) {
+function PlayerCard({ player, onEdit, onRemove, onRatingChange, onCatcherToggle, onPitcherToggle }) {
   const p = player;
 
   return (
@@ -85,22 +86,17 @@ function PlayerCard({ player, onEdit, onRemove, onRatingChange, onCatcherToggle 
         </div>
       )}
 
-      {/* Name + Role */}
+      {/* Name + Tags */}
       <div className="mb-1">
         <span className="text-lg font-bold text-chalk">{p.name}</span>
-        {p.role === 'P1' && (
+        {p.canPitch && (
           <span className="ml-2 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-red/20 text-red border border-red/30 rounded">
-            P1
-          </span>
-        )}
-        {p.role === 'P2' && (
-          <span className="ml-2 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-sky/20 text-sky border border-sky/30 rounded">
-            P2
+            Pitcher
           </span>
         )}
         {p.canCatch && (
           <span className="ml-2 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-sky/20 text-sky border border-sky/30 rounded">
-            🎯 Catcher
+            Catcher
           </span>
         )}
       </div>
@@ -131,15 +127,18 @@ function PlayerCard({ player, onEdit, onRemove, onRatingChange, onCatcherToggle 
       )}
 
       {/* Actions */}
-      <div className="mt-3 flex items-center gap-2 flex-wrap">
+      <div className="mt-3 flex items-center gap-3 flex-wrap">
         <label className="flex items-center gap-1.5 text-xs text-chalk-muted cursor-pointer">
-          <input
-            type="checkbox"
-            checked={p.canCatch || false}
+          <input type="checkbox" checked={p.canPitch || false}
+            onChange={e => onPitcherToggle(e.target.checked)}
+            className="w-3.5 h-3.5 accent-red rounded" />
+          Available Pitcher
+        </label>
+        <label className="flex items-center gap-1.5 text-xs text-chalk-muted cursor-pointer">
+          <input type="checkbox" checked={p.canCatch || false}
             onChange={e => onCatcherToggle(e.target.checked)}
-            className="w-3.5 h-3.5 accent-sky rounded"
-          />
-          Can Catch
+            className="w-3.5 h-3.5 accent-sky rounded" />
+          Available Catcher
         </label>
         <div className="flex-1" />
         <button onClick={onEdit}
@@ -159,7 +158,7 @@ function PlayerForm({ onSave, onCancel, initial }) {
   const [name, setName] = useState(initial?.name || '');
   const [number, setNumber] = useState(initial?.number || '');
   const [defRating, setDefRating] = useState(initial?.defRating || 3);
-  const [role, setRole] = useState(initial?.role || '');
+  const [canPitch, setCanPitch] = useState(initial?.canPitch || false);
   const [canCatch, setCanCatch] = useState(initial?.canCatch || false);
   const [prefPositions, setPrefPositions] = useState(initial?.prefPositions || []);
   const [notes, setNotes] = useState(initial?.notes || '');
@@ -179,7 +178,7 @@ function PlayerForm({ onSave, onCancel, initial }) {
       name: name.trim(),
       number: number.trim(),
       defRating,
-      role,
+      canPitch,
       canCatch,
       prefPositions,
       notes: notes.trim(),
@@ -193,7 +192,7 @@ function PlayerForm({ onSave, onCancel, initial }) {
         {initial ? 'Edit Player' : 'New Player'}
       </h3>
       <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
           <div className="col-span-2 sm:col-span-1">
             <label className="block text-[10px] font-semibold text-chalk-muted uppercase tracking-wider mb-1">Name</label>
             <input type="text" value={name} onChange={e => setName(e.target.value)}
@@ -208,27 +207,22 @@ function PlayerForm({ onSave, onCancel, initial }) {
                          placeholder:text-chalk-muted/40 focus:border-lime focus:outline-none" />
           </div>
           <div>
-            <label className="block text-[10px] font-semibold text-chalk-muted uppercase tracking-wider mb-1">Role</label>
-            <select value={role} onChange={e => setRole(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-field border border-border text-chalk text-sm
-                         focus:border-lime focus:outline-none">
-              <option value="">Regular</option>
-              <option value="P1">⭐ #1 Pitcher</option>
-              <option value="P2">Backup Pitcher</option>
-            </select>
-          </div>
-          <div>
             <label className="block text-[10px] font-semibold text-chalk-muted uppercase tracking-wider mb-1">Def. Rating</label>
             <StarRating value={defRating} onChange={setDefRating} size="md" />
           </div>
         </div>
 
-        {/* Catcher */}
-        <div className="mb-4">
+        {/* Pitcher / Catcher */}
+        <div className="flex gap-6 mb-4">
+          <label className="flex items-center gap-2 cursor-pointer text-sm text-chalk-dim">
+            <input type="checkbox" checked={canPitch} onChange={e => setCanPitch(e.target.checked)}
+              className="w-4 h-4 accent-red rounded" />
+            Available Pitcher
+          </label>
           <label className="flex items-center gap-2 cursor-pointer text-sm text-chalk-dim">
             <input type="checkbox" checked={canCatch} onChange={e => setCanCatch(e.target.checked)}
               className="w-4 h-4 accent-sky rounded" />
-            🎯 Can Catch
+            Available Catcher
           </label>
         </div>
 

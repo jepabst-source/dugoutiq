@@ -20,6 +20,7 @@ export default function DefenseTab() {
   const [generated, setGenerated] = useState(false);
   const [committing, setCommitting] = useState(false);
   const [committed, setCommitted] = useState(false);
+  const [inningModes, setInningModes] = useState({}); // { 1: 'competitive', 2: 'development', ... }
 
   const activePlayers = getActivePlayers();
   const activeCount = players.filter(p => attendance.has(p.id)).length;
@@ -27,18 +28,31 @@ export default function DefenseTab() {
   const benchCount = Math.max(0, activePlayers.length - 9);
   const positionHistory = getPositionHistory();
 
+  const toggleInningMode = (ing) => {
+    setInningModes(prev => ({
+      ...prev,
+      [ing]: prev[ing] === 'development' ? 'competitive' : 'development'
+    }));
+  };
+
+  const handleRepeatPrevious = (ing) => {
+    if (ing <= 1) return;
+    setInnings(prev => ({ ...prev, [ing]: { ...prev[ing - 1] } }));
+  };
+
   const handleGenerate = useCallback(() => {
     const result = buildFullRotation({
       players: activePlayers,
       standardInnings,
       settings,
       positionHistory,
+      inningModes,
     });
     setInnings(result.innings);
     setLfg(result.lfg);
     setOor(result.oor);
     setGenerated(true);
-  }, [activePlayers, standardInnings, settings]);
+  }, [activePlayers, standardInnings, settings, inningModes]);
 
   const handleSwap = useCallback((inning, position, newPlayerId) => {
     setInnings(prev => {
@@ -118,7 +132,7 @@ export default function DefenseTab() {
       <div className="text-xs text-chalk-muted bg-lime/5 border-l-2 border-lime/30 px-3 py-2 rounded-r-lg mb-4">
         {settings.noBackToBackBench && '✓ No back-to-back bench'}
         {settings.infieldCapEnabled && ` · ✓ Max ${settings.infieldCapValue} infield innings`}
-        {settings.devInningsEnabled && ` · ✓ Dev every ${settings.devInningCycle}${getOrdinalSuffix(settings.devInningCycle)} inning`}
+        {` · Toggle ⚔️/🔄 per inning`}
         {Object.entries(settings.positionMinRatings || {}).map(([pos, min]) =>
           ` · ${pos} ${min}★+`
         ).join('')}
@@ -205,7 +219,8 @@ export default function DefenseTab() {
         <div className="space-y-5">
           {/* Standard innings */}
           {Array.from({ length: standardInnings }, (_, i) => i + 1).map(ing => {
-            const isDevInning = settings.devInningsEnabled && ing % (settings.devInningCycle || 3) === 0;
+            const mode = inningModes[ing] || 'competitive';
+            const isDevInning = mode === 'development';
             const asgn = innings[ing] || {};
 
             return (
@@ -214,10 +229,13 @@ export default function DefenseTab() {
                 inning={ing}
                 assignment={asgn}
                 isDevInning={isDevInning}
+                mode={mode}
                 players={activePlayers}
                 benchCount={benchCount}
                 onSwap={(pos, pid) => handleSwap(ing, pos, pid)}
                 onReshuffle={() => handleReshuffleInning(ing)}
+                onRepeatPrevious={() => handleRepeatPrevious(ing)}
+                onToggleMode={() => toggleInningMode(ing)}
                 allInnings={innings}
                 noBackToBack={settings.noBackToBackBench}
               />
@@ -258,7 +276,7 @@ export default function DefenseTab() {
 
 // ── Inning Card Component ──
 
-function InningCard({ inning, assignment, isDevInning, players, benchCount, onSwap, onReshuffle, allInnings, noBackToBack }) {
+function InningCard({ inning, assignment, isDevInning, mode, players, benchCount, onSwap, onReshuffle, onRepeatPrevious, onToggleMode, allInnings, noBackToBack }) {
   const benchPositions = POSITIONS.bench.slice(0, benchCount);
 
   // Check for back-to-back bench warnings
@@ -282,16 +300,29 @@ function InningCard({ inning, assignment, isDevInning, players, benchCount, onSw
       <div className="flex items-center justify-between px-4 py-2.5 bg-field-light border-b border-border">
         <div className="flex items-center gap-2">
           <span className="text-sm font-bold text-lime tracking-wider">INNING {inning}</span>
-          {isDevInning && (
-            <span className="px-2 py-0.5 text-[9px] font-bold uppercase bg-gold/15 text-gold border border-gold/25 rounded tracking-wider">
-              DEV
-            </span>
-          )}
+          {/* Mode toggle */}
+          <button onClick={onToggleMode}
+            className={`px-2 py-0.5 text-[9px] font-bold uppercase rounded border tracking-wider transition-all
+              ${isDevInning
+                ? 'bg-gold/15 text-gold border-gold/25 hover:bg-gold/25'
+                : 'bg-lime/10 text-lime border-lime/25 hover:bg-lime/20'
+              }`}>
+            {isDevInning ? '🔄 DEV' : '⚔️ COMP'}
+          </button>
         </div>
-        <button onClick={onReshuffle}
-          className="px-2.5 py-1 text-xs font-semibold bg-border/50 text-chalk-dim rounded-md hover:bg-border transition-colors">
-          🔀 Reshuffle
-        </button>
+        <div className="flex gap-1.5">
+          {inning > 1 && (
+            <button onClick={onRepeatPrevious}
+              className="px-2.5 py-1 text-xs font-semibold bg-border/50 text-chalk-dim rounded-md hover:bg-border transition-colors"
+              title="Copy lineup from previous inning">
+              📋 Repeat
+            </button>
+          )}
+          <button onClick={onReshuffle}
+            className="px-2.5 py-1 text-xs font-semibold bg-border/50 text-chalk-dim rounded-md hover:bg-border transition-colors">
+            🔀 Reshuffle
+          </button>
+        </div>
       </div>
 
       {/* Positions grid */}
