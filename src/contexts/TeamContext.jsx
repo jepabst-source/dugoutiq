@@ -220,6 +220,14 @@ export function TeamProvider({ children }) {
     await deleteDoc(doc(db, 'teams', activeTeamId, 'atBats', atBatId));
   }, [activeTeamId]);
 
+  const clearAllAtBats = useCallback(async () => {
+    if (!activeTeamId) return;
+    const snapshot = await getDocs(collection(db, 'teams', activeTeamId, 'atBats'));
+    const batch = [];
+    snapshot.forEach(d => batch.push(deleteDoc(doc(db, 'teams', activeTeamId, 'atBats', d.id))));
+    await Promise.all(batch);
+  }, [activeTeamId]);
+
   // ── STATS HELPERS ──
 
   const getRollingAvg = useCallback((playerId) => {
@@ -373,6 +381,7 @@ export function TeamProvider({ children }) {
       removePlayer,
       logAtBat,
       deleteAtBat,
+      clearAllAtBats,
       getRollingAvg,
       getPlayerStats,
       generateBattingOrder,

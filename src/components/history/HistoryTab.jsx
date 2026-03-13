@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useTeam, PTS } from '../../contexts/TeamContext';
 import { POSITIONS } from '../../utils/rotationEngine';
 
@@ -6,7 +6,8 @@ const OUTCOME_LABELS = { K: 'Strikeout', out: 'Hit into Out', walk: 'Walk', hit:
 const POS_ORDER = [...POSITIONS.infield, ...POSITIONS.outfield, 'Bench'];
 
 export default function HistoryTab() {
-  const { players, atBats, savedGames, getPlayerStats, getRollingAvg, getPositionHistory, deleteGame } = useTeam();
+  const { players, atBats, savedGames, getPlayerStats, getRollingAvg, getPositionHistory, deleteGame, deleteAtBat, clearAllAtBats } = useTeam();
+  const [clearing, setClearing] = useState(false);
 
   // Player stats summary
   const playerStats = useMemo(() => {
@@ -191,8 +192,23 @@ export default function HistoryTab() {
 
       {/* Game-by-Game At-Bat Log */}
       <div className="bg-panel border border-border rounded-xl overflow-hidden">
-        <div className="px-4 py-2.5 bg-field-light border-b border-border">
+        <div className="px-4 py-2.5 bg-field-light border-b border-border flex items-center justify-between">
           <span className="text-xs font-bold text-chalk-muted uppercase tracking-wider">At-Bat Log by Game</span>
+          {atBats.length > 0 && (
+            <button
+              onClick={async () => {
+                if (!confirm('⚠️ This will permanently delete ALL at-bat data for this team. Batting averages, OBP, points — everything resets to zero.\n\nAre you sure?')) return;
+                if (!confirm('Really sure? This cannot be undone.')) return;
+                setClearing(true);
+                await clearAllAtBats();
+                setClearing(false);
+              }}
+              disabled={clearing}
+              className="px-2.5 py-1 text-[10px] font-bold text-red bg-red/10 border border-red/20 rounded
+                         hover:bg-red/20 transition-colors disabled:opacity-50">
+              {clearing ? 'Clearing...' : '🗑 Reset All At-Bats'}
+            </button>
+          )}
         </div>
 
         {gameGroups.length === 0 ? (
@@ -202,7 +218,7 @@ export default function HistoryTab() {
         ) : (
           <div className="divide-y divide-border/50">
             {gameGroups.map(([game, abs]) => (
-              <GameLogGroup key={game} game={game} atBats={abs} players={players} />
+              <GameLogGroup key={game} game={game} atBats={abs} players={players} onDeleteAtBat={deleteAtBat} />
             ))}
           </div>
         )}
@@ -211,7 +227,7 @@ export default function HistoryTab() {
   );
 }
 
-function GameLogGroup({ game, atBats, players }) {
+function GameLogGroup({ game, atBats, players, onDeleteAtBat }) {
   const hits = atBats.filter(ab => ab.outcome === 'hit').length;
   const walks = atBats.filter(ab => ab.outcome === 'walk').length;
   const ks = atBats.filter(ab => ab.outcome === 'K').length;
@@ -234,13 +250,25 @@ function GameLogGroup({ game, atBats, players }) {
             hit: 'bg-lime/15 text-lime border-lime/25',
           }[ab.outcome] || '';
           return (
-            <div key={ab.id} className="flex items-center justify-between py-1 text-xs">
+            <div key={ab.id} className="flex items-center justify-between py-1 text-xs group">
               <span className="text-chalk-dim">
                 {p?.name || '?'} · I{ab.inning}
               </span>
-              <span className={`px-1.5 py-0.5 text-[9px] font-bold uppercase rounded border ${outcomeClass}`}>
-                {OUTCOME_LABELS[ab.outcome]}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className={`px-1.5 py-0.5 text-[9px] font-bold uppercase rounded border ${outcomeClass}`}>
+                  {OUTCOME_LABELS[ab.outcome]}
+                </span>
+                <button
+                  onClick={() => {
+                    if (confirm(`Delete this at-bat? (${p?.name || '?'} — ${ab.outcome})`)) {
+                      onDeleteAtBat(ab.id);
+                    }
+                  }}
+                  className="opacity-0 group-hover:opacity-100 px-1.5 py-0.5 text-[9px] font-bold text-red bg-red/10 rounded
+                             hover:bg-red/20 transition-all">
+                  ✕
+                </button>
+              </div>
             </div>
           );
         })}
