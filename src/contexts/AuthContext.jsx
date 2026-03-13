@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db, googleProvider, appleProvider } from '../lib/firebase';
+import { auth, db, googleProvider } from '../lib/firebase';
 
 const AuthContext = createContext(null);
 
@@ -91,7 +91,6 @@ export function AuthProvider({ children }) {
   };
 
   const loginWithGoogle = () => signInWithPopup(auth, googleProvider);
-  const loginWithApple = () => signInWithPopup(auth, appleProvider);
   const logout = () => signOut(auth);
 
   return (
@@ -104,7 +103,6 @@ export function AuthProvider({ children }) {
       allTeams,
       refreshTeams,
       loginWithGoogle,
-      loginWithApple,
       logout,
     }}>
       {children}

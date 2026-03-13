@@ -66,10 +66,45 @@ export default function DefenseTab() {
   const handleSwap = useCallback((inning, position, newPlayerId) => {
     setInnings(prev => {
       const updated = { ...prev };
-      updated[inning] = { ...updated[inning], [position]: newPlayerId || undefined };
+      const inningAssignment = { ...updated[inning] };
+      
+      if (newPlayerId) {
+        const oldPosition = Object.keys(inningAssignment).find(
+          pos => inningAssignment[pos] === newPlayerId && pos !== position
+        );
+        const displacedPlayerId = inningAssignment[position];
+        
+        inningAssignment[position] = newPlayerId;
+        
+        if (oldPosition) {
+          inningAssignment[oldPosition] = displacedPlayerId || undefined;
+        }
+      } else {
+        inningAssignment[position] = undefined;
+      }
+      
+      updated[inning] = inningAssignment;
+
+      // Cascade: regenerate all innings after the changed one
+      if (inning < standardInnings) {
+        const result = buildFullRotation({
+          players: activePlayers,
+          standardInnings,
+          settings,
+          positionHistory,
+          inningModes,
+        });
+        // Keep innings 1 through current inning locked, replace the rest
+        for (let i = inning + 1; i <= standardInnings; i++) {
+          if (result.innings[i]) {
+            updated[i] = result.innings[i];
+          }
+        }
+      }
+
       return updated;
     });
-  }, []);
+  }, [activePlayers, standardInnings, settings, positionHistory, inningModes]);
 
   const handleRegenerateLFG = () => {
     const result = buildFullRotation({ players: activePlayers, standardInnings: 0, settings, positionHistory });

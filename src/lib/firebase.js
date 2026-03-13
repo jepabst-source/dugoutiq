@@ -1,10 +1,10 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
-import { getAuth, GoogleAuthProvider, OAuthProvider } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 
 // TODO: Replace with your new Firebase project config
 // Go to console.firebase.google.com → Create project "dugoutiq"
-// Enable Authentication (Google + Apple providers)
+// Enable Authentication (Google provider)
 // Enable Cloud Firestore
 const firebaseConfig = {
   apiKey: "AIzaSyA1kQSYzx7SpqodCYBX54tbpcXEz-Ld_Nk",
@@ -21,6 +21,5 @@ const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
-export const appleProvider = new OAuthProvider('apple.com');
 
 export default app;
