@@ -312,11 +312,11 @@ export default function SettingsTab() {
             {[3, 4, 5, 6, 7, 8, 9].map(n => (
               <button key={n}
                 onClick={async () => {
-                  await setRuleValue('defaultInnings', n);
-                  // Clean up inning modes for removed innings
+                  // Single write with both changes
                   const modes = { ...(settings.defaultInningModes || {}) };
                   Object.keys(modes).forEach(k => { if (parseInt(k) >= n) delete modes[k]; });
-                  await updateSettings({ defaultInningModes: modes });
+                  await updateSettings({ defaultInnings: n, defaultInningModes: modes });
+                  showSaved(`Default: ${n} innings`);
                 }}
                 className={`w-8 h-8 rounded-md text-xs font-bold transition-all
                   ${(settings.defaultInnings || 3) === n
