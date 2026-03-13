@@ -37,7 +37,7 @@ export default function AppShell() {
           {/* Logo + Team Switcher */}
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-bold text-lime tracking-tight hidden sm:block">
-              ⚾ DugoutIQ
+              ⚾ Dugout IQ
             </h1>
             {team && (
               <div className="relative">
@@ -95,13 +95,13 @@ export default function AppShell() {
         </div>
 
         {/* Tab bar */}
-        <div className="max-w-6xl mx-auto px-2 pb-1">
-          <div className="flex gap-0.5 bg-panel rounded-lg p-0.5 border border-border overflow-x-auto">
+        <div className="max-w-6xl mx-auto px-1 sm:px-2 pb-1">
+          <div className="flex gap-0.5 bg-panel rounded-lg p-0.5 border border-border overflow-x-auto scrollbar-none">
             {TABS.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 min-w-0 px-2 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-semibold
+                className={`flex-1 min-w-0 px-1.5 sm:px-4 py-2.5 sm:py-2 rounded-md text-[11px] sm:text-sm font-semibold
                            transition-all duration-150 whitespace-nowrap
                   ${activeTab === tab.id
                     ? 'bg-field-light text-lime shadow-md'
@@ -119,7 +119,7 @@ export default function AppShell() {
       </header>
 
       {/* Content */}
-      <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-6">
+      <main className="flex-1 max-w-6xl mx-auto w-full px-3 sm:px-4 py-4 sm:py-6 pb-8">
         {activeTab === 'roster' && <RosterTab />}
         {activeTab === 'batting' && <BattingTab />}
         {activeTab === 'defense' && <DefenseTab />}

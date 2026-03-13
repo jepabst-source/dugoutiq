@@ -112,27 +112,20 @@ function PlayerCard({ player, onEdit, onRemove, onRatingChange, onCatcherToggle,
       <StarRating value={p.defRating} onChange={onRatingChange} size="md" />
 
       {/* Stat Badges */}
-      <div className="flex gap-1.5 flex-wrap mt-3">
-        <span className="px-2 py-0.5 text-[10px] bg-lime/8 border border-lime/20 rounded text-chalk-muted">
-          <strong className="text-lime">{stats.pts}</strong> pts
-        </span>
-        <span className="px-2 py-0.5 text-[10px] bg-lime/8 border border-lime/20 rounded text-chalk-muted">
-          <strong className="text-lime">{stats.totalAbs}</strong> ABs
-        </span>
-        <span className="px-2 py-0.5 text-[10px] bg-lime/8 border border-lime/20 rounded text-chalk-muted">
-          <strong className="text-lime">{stats.gamesPlayed}</strong> games
-        </span>
-        {stats.obp !== null && (
-          <span className="px-2 py-0.5 text-[10px] bg-sky/8 border border-sky/20 rounded text-chalk-muted">
-            <strong className="text-sky">{stats.obp.toFixed(3).replace(/^0/, '')}</strong> OBP
-          </span>
-        )}
-        {rolling.absCount > 0 && (
-          <span className="px-2 py-0.5 text-[10px] bg-gold/8 border border-gold/20 rounded text-chalk-muted">
-            <strong className="text-gold">{rolling.avg.toFixed(2)}</strong> avg
-          </span>
-        )}
-      </div>
+      {(stats.obp !== null || rolling.absCount > 0) && (
+        <div className="flex gap-1.5 flex-wrap mt-3">
+          {rolling.absCount > 0 && (
+            <span className="px-2 py-0.5 text-[10px] bg-gold/8 border border-gold/20 rounded text-chalk-muted">
+              <strong className="text-gold">{rolling.avg.toFixed(2)}</strong> avg
+            </span>
+          )}
+          {stats.obp !== null && (
+            <span className="px-2 py-0.5 text-[10px] bg-sky/8 border border-sky/20 rounded text-chalk-muted">
+              <strong className="text-sky">{stats.obp.toFixed(3).replace(/^0/, '')}</strong> OBP
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Position Preferences */}
       {p.prefPositions?.length > 0 && (

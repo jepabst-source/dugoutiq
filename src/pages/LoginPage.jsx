@@ -13,7 +13,7 @@ export default function LoginPage() {
         </div>
         <h1 className="text-4xl font-bold tracking-tight text-lime mb-1"
             style={{ fontFamily: 'var(--font-display)' }}>
-          DugoutIQ
+          Dugout IQ
         </h1>
         <p className="text-chalk-muted text-sm tracking-widest uppercase mb-12">
           Smart Lineup Manager
@@ -53,7 +53,7 @@ export default function LoginPage() {
 
         {/* Footer */}
         <p className="mt-12 text-xs text-chalk-muted">
-          By signing in, you agree to the DugoutIQ Terms of Service.
+          By signing in, you agree to the Dugout IQ Terms of Service.
         </p>
         <p className="mt-2 text-xs text-chalk-muted opacity-60">
           Your data stays private. We never share coach or player information.

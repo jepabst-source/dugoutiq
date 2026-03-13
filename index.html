@@ -3,16 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/dugoutiq/favicon.svg" />
+    <link rel="manifest" href="/dugoutiq/manifest.json" />
+    <link rel="apple-touch-icon" href="/dugoutiq/icons/icon-192.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#0a1a0d" />
-    <meta name="description" content="DugoutIQ — Smart lineup manager for softball and baseball coaches" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Dugout IQ" />
+    <meta name="description" content="Dugout IQ — Smart lineup manager for softball and baseball coaches" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap" rel="stylesheet" />
-    <title>DugoutIQ — Smart Lineup Manager</title>
+    <title>Dugout IQ — Smart Lineup Manager</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/dugoutiq/sw.js').catch(() => {});
+        });
+      }
+    </script>
   </body>
 </html>

@@ -149,25 +149,25 @@ export default function GameDayTab() {
           {/* Outcome buttons */}
           <div className="grid grid-cols-2 gap-3 mb-3">
             <button onClick={() => handleRecord('K')}
-              className="py-4 rounded-xl bg-red/10 border-2 border-red/25 text-red font-bold text-lg
+              className="py-5 sm:py-4 rounded-xl bg-red/10 border-2 border-red/25 text-red font-bold text-xl sm:text-lg
                          hover:bg-red/20 active:scale-95 transition-all flex flex-col items-center gap-1">
               K
               <span className="text-[10px] font-normal opacity-70">strikeout · 0 pts</span>
             </button>
             <button onClick={() => handleRecord('hit')}
-              className="py-4 rounded-xl bg-lime/10 border-2 border-lime/25 text-lime font-bold text-lg
+              className="py-5 sm:py-4 rounded-xl bg-lime/10 border-2 border-lime/25 text-lime font-bold text-xl sm:text-lg
                          hover:bg-lime/20 active:scale-95 transition-all flex flex-col items-center gap-1">
               HIT
               <span className="text-[10px] font-normal opacity-70">2 pts</span>
             </button>
             <button onClick={() => handleRecord('walk')}
-              className="py-4 rounded-xl bg-sky/10 border-2 border-sky/25 text-sky font-bold text-lg
+              className="py-5 sm:py-4 rounded-xl bg-sky/10 border-2 border-sky/25 text-sky font-bold text-xl sm:text-lg
                          hover:bg-sky/20 active:scale-95 transition-all flex flex-col items-center gap-1">
               WALK
               <span className="text-[10px] font-normal opacity-70">1 pt</span>
             </button>
             <button onClick={() => handleRecord('out')}
-              className="py-4 rounded-xl bg-dirt/10 border-2 border-dirt/25 text-dirt font-bold text-lg
+              className="py-5 sm:py-4 rounded-xl bg-dirt/10 border-2 border-dirt/25 text-dirt font-bold text-xl sm:text-lg
                          hover:bg-dirt/20 active:scale-95 transition-all flex flex-col items-center gap-1">
               HIT-OUT
               <span className="text-[10px] font-normal opacity-70">fielded · 1 pt</span>
@@ -188,7 +188,7 @@ export default function GameDayTab() {
             const abCount = playerAbCounts[p.id] || 0;
             return (
               <button key={p.id} onClick={() => setSelectedPlayerId(p.id)}
-                className="text-left px-3 py-2.5 rounded-lg border border-border bg-panel
+                className="text-left px-3 py-3 sm:py-2.5 rounded-lg border border-border bg-panel
                            hover:border-lime/40 active:scale-[0.97] transition-all flex items-center gap-2">
                 <span className="text-xs text-chalk-muted font-bold w-5">{idx + 1}</span>
                 <div className="flex-1 min-w-0">

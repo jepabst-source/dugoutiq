@@ -54,7 +54,7 @@ export default function JoinTeamPage({ inviteCode, onJoined }) {
         <div className="mb-2">
           <span className="text-5xl">⚾</span>
         </div>
-        <h1 className="text-3xl font-bold text-lime mb-1">DugoutIQ</h1>
+        <h1 className="text-3xl font-bold text-lime mb-1">Dugout IQ</h1>
         <p className="text-chalk-muted text-sm uppercase tracking-widest mb-8">Team Invite</p>
 
         {loading ? (
