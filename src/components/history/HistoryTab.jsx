@@ -61,11 +61,16 @@ export default function HistoryTab() {
                 </tr>
               </thead>
               <tbody>
-                {players.map(p => {
+                {[...players].sort((a, b) => b.defRating - a.defRating).map(p => {
                   const hist = posHistory[p.id] || {};
+                  const stats = getPlayerStats(p.id);
                   return (
                     <tr key={p.id} className="border-b border-border/30 hover:bg-panel-hover">
-                      <td className="px-2 py-1.5 font-semibold text-chalk whitespace-nowrap sticky left-0 bg-panel">{p.name}</td>
+                      <td className="px-2 py-1.5 font-semibold text-chalk whitespace-nowrap sticky left-0 bg-panel">
+                        {p.name}
+                        <span className="ml-1 text-gold text-[10px]">{p.defRating}★</span>
+                        {stats.obp !== null && <span className="ml-1 text-sky text-[10px]">{stats.obp.toFixed(3).replace(/^0/, '')}</span>}
+                      </td>
                       {POS_ORDER.map(pos => {
                         const count = pos === 'Bench'
                           ? (hist['Bench 1'] || 0) + (hist['Bench 2'] || 0) + (hist['Bench 3'] || 0)

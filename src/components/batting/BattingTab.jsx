@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTeam, PTS } from '../../contexts/TeamContext';
 import {
   DndContext,
@@ -32,7 +32,8 @@ export default function BattingTab() {
   const [gameNum, setGameNum] = useState('1');
   const [selectedInning, setSelectedInning] = useState(1);
   const [showLog, setShowLog] = useState(false);
-  const [sortMode, setSortMode] = useState('points'); // 'points' | 'obp'
+  const [sortMode, setSortMode] = useState('points');
+  const [manuallyReordered, setManuallyReordered] = useState(false); // 'points' | 'obp'
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -42,27 +43,47 @@ export default function BattingTab() {
   const activePlayers = getActivePlayers();
   const activeCount = players.filter(p => attendance.has(p.id)).length;
 
-  const handleGenerate = () => {
-    if (sortMode === 'obp') {
-      // Sort by OBP
-      const active = getActivePlayers();
-      const ranked = [...active].map(p => {
-        const stats = getPlayerStats(p.id);
-        const rolling = getRollingAvg(p.id);
-        return { ...p, ...stats, avg: rolling.avg, avgAbs: rolling.absCount };
-      }).sort((a, b) => {
+  // Auto-generate on first render and when players/attendance change
+  const autoOrder = useMemo(() => {
+    if (!players.length) return [];
+    const active = activePlayers;
+    return [...active].map(p => {
+      const stats = getPlayerStats(p.id);
+      const rolling = getRollingAvg(p.id);
+      return { ...p, ...stats, avg: rolling.avg, avgAbs: rolling.absCount };
+    }).sort((a, b) => {
+      if (sortMode === 'obp') {
         const aObp = a.obp ?? -1;
         const bObp = b.obp ?? -1;
         if (bObp !== aObp) return bObp - aObp;
         return b.defRating - a.defRating;
-      });
-      setOrder(ranked);
-    } else {
-      // Points system (default)
-      const ranked = generateBattingOrder();
-      setOrder(ranked);
+      }
+      if (b.avg !== a.avg) return b.avg - a.avg;
+      if (b.pts !== a.pts) return b.pts - a.pts;
+      return b.defRating - a.defRating;
+    });
+  }, [players, activePlayers, atBats, sortMode]);
+
+  // Set order from auto-generated if not manually reordered
+  useState(() => {
+    if (autoOrder.length && !generated) {
+      setOrder(autoOrder);
+      setGenerated(true);
     }
+  });
+
+  // Update order when autoOrder changes (new at-bats logged, attendance changed)
+  useEffect(() => {
+    if (!manuallyReordered && autoOrder.length) {
+      setOrder(autoOrder);
+      setGenerated(true);
+    }
+  }, [autoOrder]);
+
+  const handleGenerate = () => {
+    setOrder(autoOrder);
     setGenerated(true);
+    setManuallyReordered(false);
   };
 
   const handleDragEnd = (event) => {
@@ -73,6 +94,7 @@ export default function BattingTab() {
         const newIndex = prev.findIndex(p => p.id === over.id);
         return arrayMove(prev, oldIndex, newIndex);
       });
+      setManuallyReordered(true);
     }
   };
 
@@ -102,7 +124,7 @@ export default function BattingTab() {
           className="px-4 py-2 rounded-lg bg-gold text-field font-bold text-sm
                      hover:bg-gold-bright active:scale-[0.97] transition-all"
         >
-          ⚡ Generate Order
+          ⚡ Refresh Order
         </button>
       </div>
 
@@ -175,10 +197,10 @@ export default function BattingTab() {
       </div>
 
       {/* Batting Order List */}
-      {!generated ? (
+      {order.length === 0 ? (
         <div className="text-center py-12">
           <div className="text-4xl mb-3">📊</div>
-          <p className="text-chalk-muted">Check who's playing, then click <strong className="text-gold">Generate Order</strong></p>
+          <p className="text-chalk-muted">Add players to the roster to see the batting order</p>
         </div>
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
