@@ -132,7 +132,7 @@ export default function DefenseTab() {
       <div className="text-xs text-chalk-muted bg-lime/5 border-l-2 border-lime/30 px-3 py-2 rounded-r-lg mb-4">
         {settings.noBackToBackBench && '✓ No back-to-back bench'}
         {settings.infieldCapEnabled && ` · ✓ Max ${settings.infieldCapValue} infield innings`}
-        {` · Toggle ⚔️/🔄 per inning`}
+        {` · Toggle ⚔️ Competitive / 🔄 Development per inning`}
         {Object.entries(settings.positionMinRatings || {}).map(([pos, min]) =>
           ` · ${pos} ${min}★+`
         ).join('')}
@@ -307,7 +307,7 @@ function InningCard({ inning, assignment, isDevInning, mode, players, benchCount
                 ? 'bg-gold/15 text-gold border-gold/25 hover:bg-gold/25'
                 : 'bg-lime/10 text-lime border-lime/25 hover:bg-lime/20'
               }`}>
-            {isDevInning ? '🔄 DEV' : '⚔️ COMP'}
+            {isDevInning ? '🔄 Development' : '⚔️ Competitive'}
           </button>
         </div>
         <div className="flex gap-1.5">

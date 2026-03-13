@@ -32,6 +32,7 @@ export default function BattingTab() {
   const [gameNum, setGameNum] = useState('1');
   const [selectedInning, setSelectedInning] = useState(1);
   const [showLog, setShowLog] = useState(false);
+  const [sortMode, setSortMode] = useState('points'); // 'points' | 'obp'
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -42,8 +43,25 @@ export default function BattingTab() {
   const activeCount = players.filter(p => attendance.has(p.id)).length;
 
   const handleGenerate = () => {
-    const ranked = generateBattingOrder();
-    setOrder(ranked);
+    if (sortMode === 'obp') {
+      // Sort by OBP
+      const active = getActivePlayers();
+      const ranked = [...active].map(p => {
+        const stats = getPlayerStats(p.id);
+        const rolling = getRollingAvg(p.id);
+        return { ...p, ...stats, avg: rolling.avg, avgAbs: rolling.absCount };
+      }).sort((a, b) => {
+        const aObp = a.obp ?? -1;
+        const bObp = b.obp ?? -1;
+        if (bObp !== aObp) return bObp - aObp;
+        return b.defRating - a.defRating;
+      });
+      setOrder(ranked);
+    } else {
+      // Points system (default)
+      const ranked = generateBattingOrder();
+      setOrder(ranked);
+    }
     setGenerated(true);
   };
 
@@ -76,7 +94,7 @@ export default function BattingTab() {
         <div>
           <h2 className="text-xl font-bold text-lime">Batting Order</h2>
           <p className="text-xs text-chalk-muted mt-0.5">
-            Ranked by rolling average (last 5 ABs) · Drag to reorder
+            {sortMode === 'points' ? 'Ranked by rolling average (last 5 ABs)' : 'Ranked by on-base percentage'} · Drag to reorder
           </p>
         </div>
         <button
@@ -88,12 +106,35 @@ export default function BattingTab() {
         </button>
       </div>
 
-      {/* Scoring legend */}
-      <div className="flex gap-2 flex-wrap mb-4 text-xs">
-        <span className="px-2 py-1 rounded bg-red/15 text-red border border-red/25">K = 0 pts</span>
-        <span className="px-2 py-1 rounded bg-chalk-muted/10 text-chalk-muted border border-border">Walk / Hit-Out = 1 pt</span>
-        <span className="px-2 py-1 rounded bg-lime/15 text-lime border border-lime/25">Hit = 2 pts</span>
+      {/* Sort mode toggle */}
+      <div className="flex items-center gap-3 mb-3">
+        <span className="text-xs text-chalk-muted">Sort by:</span>
+        <div className="flex gap-1 bg-panel border border-border rounded-lg p-0.5">
+          <button onClick={() => setSortMode('points')}
+            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all
+              ${sortMode === 'points' ? 'bg-field-light text-lime' : 'text-chalk-muted hover:text-chalk'}`}>
+            Points System
+          </button>
+          <button onClick={() => setSortMode('obp')}
+            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all
+              ${sortMode === 'obp' ? 'bg-field-light text-sky' : 'text-chalk-muted hover:text-chalk'}`}>
+            OBP
+          </button>
+        </div>
       </div>
+
+      {/* Scoring legend */}
+      {sortMode === 'points' ? (
+        <div className="flex gap-2 flex-wrap mb-4 text-xs">
+          <span className="px-2 py-1 rounded bg-red/15 text-red border border-red/25">K = 0 pts</span>
+          <span className="px-2 py-1 rounded bg-chalk-muted/10 text-chalk-muted border border-border">Walk / Hit-Out = 1 pt</span>
+          <span className="px-2 py-1 rounded bg-lime/15 text-lime border border-lime/25">Hit = 2 pts</span>
+        </div>
+      ) : (
+        <div className="flex gap-2 flex-wrap mb-4 text-xs">
+          <span className="px-2 py-1 rounded bg-sky/15 text-sky border border-sky/25">OBP = (Hits + Walks) ÷ At-Bats</span>
+        </div>
+      )}
 
       {/* Attendance */}
       <div className="bg-panel border border-border rounded-xl p-4 mb-4">

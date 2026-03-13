@@ -49,8 +49,10 @@ export default function SettingsTab() {
     setTimeout(() => setSaved(''), 2000);
   };
 
+  const [coachName, setCoachName] = useState(team?.coachName || user?.displayName || '');
+
   const handleSaveTeamInfo = async () => {
-    await updateTeam({ name: teamName.trim(), portalCode, sport, seasonLabel, seasonYear: Number(seasonYear) });
+    await updateTeam({ name: teamName.trim(), portalCode, sport, seasonLabel, seasonYear: Number(seasonYear), coachName: coachName.trim() });
     showSaved('Team info saved');
   };
 
@@ -125,10 +127,11 @@ export default function SettingsTab() {
             </div>
           </div>
           <div>
-            <label className="block text-[10px] font-semibold text-chalk-muted uppercase tracking-wider mb-1">Coach</label>
-            <div className="px-3 py-2 rounded-lg bg-field border border-border text-chalk-dim text-sm">
-              {user?.displayName || user?.email}
-            </div>
+            <label className="block text-[10px] font-semibold text-chalk-muted uppercase tracking-wider mb-1">Head Coach</label>
+            <input type="text" value={coachName} onChange={e => setCoachName(e.target.value)}
+              placeholder="Coach name"
+              className="w-full px-3 py-2 rounded-lg bg-field border border-border text-chalk text-sm
+                         focus:border-lime focus:outline-none" />
           </div>
         </div>
         <button onClick={handleSaveTeamInfo}

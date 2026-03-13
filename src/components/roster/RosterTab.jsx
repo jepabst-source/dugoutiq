@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTeam } from '../../contexts/TeamContext';
 import StarRating from '../shared/StarRating';
 
-const POSITIONS = ['1st Base', '2nd Base', 'Shortstop', '3rd Base'];
+const POSITIONS = ['Pitcher', 'Catcher', '1st Base', '2nd Base', 'Shortstop', '3rd Base', 'Left Field', 'Center Field', 'Right Field'];
 
 export default function RosterTab() {
   const { players, addPlayer, updatePlayer, removePlayer } = useTeam();
@@ -76,6 +76,9 @@ export default function RosterTab() {
 
 function PlayerCard({ player, onEdit, onRemove, onRatingChange, onCatcherToggle, onPitcherToggle }) {
   const p = player;
+  const { getPlayerStats, getRollingAvg } = useTeam();
+  const stats = getPlayerStats(p.id);
+  const rolling = getRollingAvg(p.id);
 
   return (
     <div className="bg-panel border border-border rounded-xl p-4 hover:border-lime/40 transition-colors relative group">
@@ -101,12 +104,35 @@ function PlayerCard({ player, onEdit, onRemove, onRatingChange, onCatcherToggle,
         )}
       </div>
 
-      <div className="text-xs text-chalk-muted mb-3">
+      <div className="text-xs text-chalk-muted mb-2">
         Def Rating: {p.defRating}/5
       </div>
 
       {/* Star Rating */}
       <StarRating value={p.defRating} onChange={onRatingChange} size="md" />
+
+      {/* Stat Badges */}
+      <div className="flex gap-1.5 flex-wrap mt-3">
+        <span className="px-2 py-0.5 text-[10px] bg-lime/8 border border-lime/20 rounded text-chalk-muted">
+          <strong className="text-lime">{stats.pts}</strong> pts
+        </span>
+        <span className="px-2 py-0.5 text-[10px] bg-lime/8 border border-lime/20 rounded text-chalk-muted">
+          <strong className="text-lime">{stats.totalAbs}</strong> ABs
+        </span>
+        <span className="px-2 py-0.5 text-[10px] bg-lime/8 border border-lime/20 rounded text-chalk-muted">
+          <strong className="text-lime">{stats.gamesPlayed}</strong> games
+        </span>
+        {stats.obp !== null && (
+          <span className="px-2 py-0.5 text-[10px] bg-sky/8 border border-sky/20 rounded text-chalk-muted">
+            <strong className="text-sky">{stats.obp.toFixed(3).replace(/^0/, '')}</strong> OBP
+          </span>
+        )}
+        {rolling.absCount > 0 && (
+          <span className="px-2 py-0.5 text-[10px] bg-gold/8 border border-gold/20 rounded text-chalk-muted">
+            <strong className="text-gold">{rolling.avg.toFixed(2)}</strong> avg
+          </span>
+        )}
+      </div>
 
       {/* Position Preferences */}
       {p.prefPositions?.length > 0 && (

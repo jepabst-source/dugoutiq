@@ -10,25 +10,40 @@ export function AuthProvider({ children }) {
   const [userDoc, setUserDoc] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTeamId, setActiveTeamId] = useState(null);
+  const [allTeams, setAllTeams] = useState([]); // [{id, name, sport, seasonLabel, seasonYear}]
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         setUser(firebaseUser);
-        // Fetch or create user document
         const userRef = doc(db, 'users', firebaseUser.uid);
         const snap = await getDoc(userRef);
         if (snap.exists()) {
-          setUserDoc(snap.data());
+          const data = snap.data();
+          setUserDoc(data);
+
+          // Load basic info for all teams
+          const teamIds = data.teamIds || [];
+          const teams = [];
+          for (const tid of teamIds) {
+            try {
+              const tSnap = await getDoc(doc(db, 'teams', tid));
+              if (tSnap.exists()) {
+                const t = tSnap.data();
+                teams.push({ id: tid, name: t.name, sport: t.sport, seasonLabel: t.seasonLabel, seasonYear: t.seasonYear });
+              }
+            } catch {}
+          }
+          setAllTeams(teams);
+
           // Restore last active team
           const saved = localStorage.getItem('dugoutiq_activeTeam');
-          if (saved && snap.data().teamIds?.includes(saved)) {
+          if (saved && teamIds.includes(saved)) {
             setActiveTeamId(saved);
-          } else if (snap.data().teamIds?.length > 0) {
-            setActiveTeamId(snap.data().teamIds[0]);
+          } else if (teamIds.length > 0) {
+            setActiveTeamId(teamIds[0]);
           }
         } else {
-          // First-time user
           const newUser = {
             email: firebaseUser.email,
             displayName: firebaseUser.displayName || '',
@@ -39,11 +54,13 @@ export function AuthProvider({ children }) {
           };
           await setDoc(userRef, newUser);
           setUserDoc(newUser);
+          setAllTeams([]);
         }
       } else {
         setUser(null);
         setUserDoc(null);
         setActiveTeamId(null);
+        setAllTeams([]);
       }
       setLoading(false);
     });
@@ -57,6 +74,22 @@ export function AuthProvider({ children }) {
     }
   }, [activeTeamId]);
 
+  // Refresh allTeams when userDoc.teamIds changes
+  const refreshTeams = async () => {
+    if (!userDoc?.teamIds) return;
+    const teams = [];
+    for (const tid of userDoc.teamIds) {
+      try {
+        const tSnap = await getDoc(doc(db, 'teams', tid));
+        if (tSnap.exists()) {
+          const t = tSnap.data();
+          teams.push({ id: tid, name: t.name, sport: t.sport, seasonLabel: t.seasonLabel, seasonYear: t.seasonYear });
+        }
+      } catch {}
+    }
+    setAllTeams(teams);
+  };
+
   const loginWithGoogle = () => signInWithPopup(auth, googleProvider);
   const loginWithApple = () => signInWithPopup(auth, appleProvider);
   const logout = () => signOut(auth);
@@ -68,6 +101,8 @@ export function AuthProvider({ children }) {
       loading,
       activeTeamId,
       setActiveTeamId,
+      allTeams,
+      refreshTeams,
       loginWithGoogle,
       loginWithApple,
       logout,
