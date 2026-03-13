@@ -27,7 +27,7 @@ const DEFAULT_SETTINGS = {
 const PTS = { K: 0, out: 1, walk: 1, hit: 2 };
 
 export function TeamProvider({ children }) {
-  const { user, activeTeamId, setActiveTeamId, userDoc } = useAuth();
+  const { user, activeTeamId, setActiveTeamId, userDoc, refreshUserDoc } = useAuth();
   const [team, setTeam] = useState(null);
   const [players, setPlayers] = useState([]);
   const [atBats, setAtBats] = useState([]);
@@ -164,8 +164,9 @@ export function TeamProvider({ children }) {
     await updateDoc(userRef, { teamIds: arrayUnion(teamRef.id) });
 
     setActiveTeamId(teamRef.id);
+    await refreshUserDoc();
     return teamRef.id;
-  }, [user, setActiveTeamId]);
+  }, [user, setActiveTeamId, refreshUserDoc]);
 
   const updateTeam = useCallback(async (updates) => {
     if (!activeTeamId) return;

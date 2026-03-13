@@ -94,6 +94,14 @@ export function AuthProvider({ children }) {
     setAllTeams(teams);
   };
 
+  const refreshUserDoc = async () => {
+    if (!user) return;
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (snap.exists()) {
+      setUserDoc(snap.data());
+    }
+  };
+
   const loginWithGoogle = () => signInWithPopup(auth, googleProvider);
 
   const signUpWithEmail = async (email, password, displayName) => {
@@ -126,6 +134,7 @@ export function AuthProvider({ children }) {
       setActiveTeamId,
       allTeams,
       refreshTeams,
+      refreshUserDoc,
       loginWithGoogle,
       signUpWithEmail,
       loginWithEmail,

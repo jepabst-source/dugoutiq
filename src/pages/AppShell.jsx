@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTeam } from '../contexts/TeamContext';
+import { usePlan } from '../hooks/usePlan';
 import RosterTab from '../components/roster/RosterTab';
 import BattingTab from '../components/batting/BattingTab';
 import DefenseTab from '../components/defense/DefenseTab';
@@ -25,19 +26,12 @@ export default function AppShell() {
   const [activeTab, setActiveTab] = useState('roster');
   const [showTeamMenu, setShowTeamMenu] = useState(false);
   const [showCreateTeam, setShowCreateTeam] = useState(false);
+  const plan = usePlan();
 
   const needsVerification = user?.providerData?.[0]?.providerId === 'password' && !user?.emailVerified;
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Email verification banner */}
-      {needsVerification && (
-        <div className="bg-gold/15 border-b border-gold/30 px-4 py-2 flex items-center justify-center gap-3 text-xs text-gold">
-          <span>Please verify your email address.</span>
-          <button onClick={async () => { await resendVerification(); alert('Verification email sent!'); }}
-            className="underline font-semibold hover:text-gold-bright">Resend email</button>
-        </div>
-      )}
       {/* Create Team Modal */}
       {showCreateTeam && (
         <CreateTeamModal onClose={() => setShowCreateTeam(false)} />
@@ -147,8 +141,22 @@ export default function AppShell() {
       </main>
 
       {/* Footer */}
-      <footer className="text-center py-4 text-[10px] text-chalk-muted/40 tracking-wider">
-        ⚾ Dugout IQ · by Josh Pabst
+      <footer className="text-center py-4 space-y-1">
+        {needsVerification && (
+          <div className="text-[10px] text-gold">
+            Please verify your email address.{' '}
+            <button onClick={async () => { await resendVerification(); alert('Verification email sent!'); }}
+              className="underline font-semibold hover:text-gold-bright">Resend</button>
+          </div>
+        )}
+        {!plan.isPro && (
+          <div className="text-[10px] text-chalk-muted/50">
+            Free tier: {plan.gamesRemaining} game{plan.gamesRemaining !== 1 ? 's' : ''} · {plan.atBatsRemaining} at-bats remaining
+          </div>
+        )}
+        <div className="text-[10px] text-chalk-muted/40 tracking-wider">
+          ⚾ Lineup Man · by Josh Pabst
+        </div>
       </footer>
     </div>
   );

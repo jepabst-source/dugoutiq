@@ -81,13 +81,6 @@ export default function GameDayTab() {
   return (
     <div className="max-w-lg mx-auto">
       {showUpgrade && <UpgradeModal onClose={() => setShowUpgrade(false)} lockReason={plan.lockReason} />}
-
-      {/* Free tier usage */}
-      {!plan.isPro && (
-        <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-gold/5 border border-gold/20 rounded-lg text-xs text-gold">
-          <span>{plan.atBatsRemaining} free at-bats remaining</span>
-        </div>
-      )}
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-lime">⚾ Game Day</h2>

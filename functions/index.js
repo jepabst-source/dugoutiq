@@ -1,9 +1,14 @@
-const functions = require('firebase-functions');
+const { onCall } = require('firebase-functions/v2/https');
+const { onRequest } = require('firebase-functions/v2/https');
+const { defineSecret } = require('firebase-functions/params');
 const admin = require('firebase-admin');
 const stripe = require('stripe');
 
 admin.initializeApp();
 const db = admin.firestore();
+
+const stripeSecretKey = defineSecret('STRIPE_SECRET_KEY');
+const stripeWebhookSecret = defineSecret('STRIPE_WEBHOOK_SECRET');
 
 const PRICES = {
   monthly: 'price_1TAbb3HN43f29F77XeMwzMcc',
@@ -11,31 +16,28 @@ const PRICES = {
 };
 
 // Create a Stripe Checkout session
-// Called from the frontend when coach clicks "Upgrade"
-exports.createCheckoutSession = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
-    throw new functions.https.HttpsError('unauthenticated', 'Must be logged in');
+exports.createCheckoutSession = onCall({ secrets: [stripeSecretKey] }, async (request) => {
+  if (!request.auth) {
+    throw new Error('Must be logged in');
   }
 
-  const { plan } = data; // 'monthly' or 'annual'
+  const { plan, origin } = request.data;
   const priceId = PRICES[plan];
   if (!priceId) {
-    throw new functions.https.HttpsError('invalid-argument', 'Invalid plan');
+    throw new Error('Invalid plan');
   }
 
-  const stripeKey = process.env.STRIPE_SECRET_KEY || functions.config().stripe?.secret;
-  const stripeClient = stripe(stripeKey);
-
-  const uid = context.auth.uid;
-  const email = context.auth.token.email || '';
+  const stripeClient = stripe(stripeSecretKey.value());
+  const uid = request.auth.uid;
+  const email = request.auth.token.email || '';
 
   const session = await stripeClient.checkout.sessions.create({
     mode: 'subscription',
     payment_method_types: ['card'],
     customer_email: email,
     line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${data.origin || 'https://lineupman.com'}/?upgraded=true`,
-    cancel_url: `${data.origin || 'https://lineupman.com'}/?upgraded=false`,
+    success_url: `${origin || 'https://lineupman.com'}/?upgraded=true`,
+    cancel_url: `${origin || 'https://lineupman.com'}/?upgraded=false`,
     metadata: { firebaseUID: uid },
     subscription_data: { metadata: { firebaseUID: uid } },
   });
@@ -43,27 +45,25 @@ exports.createCheckoutSession = functions.https.onCall(async (data, context) => 
   return { sessionId: session.id, url: session.url };
 });
 
-// Stripe webhook — receives payment events
-exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
-  const stripeKey = process.env.STRIPE_SECRET_KEY || functions.config().stripe?.secret;
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || functions.config().stripe?.webhook_secret;
-  const stripeClient = stripe(stripeKey);
+// Stripe webhook
+exports.stripeWebhook = onRequest({ secrets: [stripeSecretKey, stripeWebhookSecret] }, async (req, res) => {
+  const stripeClient = stripe(stripeSecretKey.value());
 
   let event;
 
-  if (webhookSecret) {
+  try {
     const sig = req.headers['stripe-signature'];
-    try {
-      event = stripeClient.webhooks.constructEvent(req.rawBody, sig, webhookSecret);
-    } catch (err) {
-      console.error('Webhook signature verification failed:', err.message);
-      return res.status(400).send(`Webhook Error: ${err.message}`);
+    const secret = stripeWebhookSecret.value();
+    if (secret) {
+      event = stripeClient.webhooks.constructEvent(req.rawBody, sig, secret);
+    } else {
+      event = req.body;
     }
-  } else {
-    event = req.body;
+  } catch (err) {
+    console.error('Webhook signature verification failed:', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // Handle checkout.session.completed — upgrade user to pro
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     const uid = session.metadata?.firebaseUID;
@@ -78,7 +78,6 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
     }
   }
 
-  // Handle subscription deleted — downgrade user
   if (event.type === 'customer.subscription.deleted') {
     const subscription = event.data.object;
     const uid = subscription.metadata?.firebaseUID;

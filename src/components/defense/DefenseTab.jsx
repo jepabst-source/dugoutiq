@@ -168,13 +168,6 @@ export default function DefenseTab() {
   return (
     <div>
       {showUpgrade && <UpgradeModal onClose={() => setShowUpgrade(false)} lockReason={plan.lockReason} />}
-
-      {/* Free tier usage */}
-      {!plan.isPro && (
-        <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-gold/5 border border-gold/20 rounded-lg text-xs text-gold">
-          <span>Free tier: {plan.gamesRemaining} game{plan.gamesRemaining !== 1 ? 's' : ''} remaining · {plan.atBatsRemaining} at-bats remaining</span>
-        </div>
-      )}
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <div>
