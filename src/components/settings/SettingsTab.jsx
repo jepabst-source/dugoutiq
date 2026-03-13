@@ -141,9 +141,6 @@ export default function SettingsTab() {
         </button>
       </Section>
 
-      {/* Parent Portal */}
-      <Section title="🔒 Parent Portal Access Code">
-
       {/* Assistant Coaches */}
       <Section title="👥 Assistant Coaches">
         <p className="text-xs text-chalk-muted mb-3">
@@ -220,6 +217,9 @@ export default function SettingsTab() {
           <p className="text-xs text-chalk-muted">No assistant coaches yet. Generate an invite link above.</p>
         )}
       </Section>
+
+      {/* Parent Portal */}
+      <Section title="🔒 Parent Portal Access Code">
         <p className="text-xs text-chalk-muted mb-3">Share the portal URL + this 4-digit code with parents. They don't need an account.</p>
         <div className="flex items-center gap-3">
           <input type="tel" inputMode="numeric" maxLength={4} value={portalCode}

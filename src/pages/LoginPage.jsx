@@ -5,13 +5,13 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4"
-         style={{ background: 'radial-gradient(ellipse at 30% 20%, rgba(142,212,49,0.06) 0%, transparent 60%), var(--color-field)' }}>
-      <div className="w-full max-w-sm text-center">
+         style={{ background: '#ffffff' }}>
+      <div className="w-full max-w-md text-center">
         {/* Logo */}
-        <div className="mb-4">
-          <img src="/dugoutiq/og-image.jpg" alt="Dugout IQ" className="w-64 mx-auto rounded-lg" />
+        <div className="mb-6">
+          <img src="/logo.png" alt="Dugout IQ" className="w-80 mx-auto" />
         </div>
-        <p className="text-chalk-muted text-sm tracking-widest uppercase mb-12">
+        <p className="text-gray-500 text-sm tracking-widest uppercase mb-10">
           Smart Lineup Manager
         </p>
 
@@ -20,9 +20,9 @@ export default function LoginPage() {
           <button
             onClick={loginWithGoogle}
             className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl
-                       bg-white text-gray-800 font-semibold text-sm
+                       bg-white text-gray-800 font-semibold text-sm border border-gray-200
                        hover:bg-gray-50 active:scale-[0.98] transition-all duration-150
-                       shadow-lg shadow-black/20"
+                       shadow-sm"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
@@ -35,10 +35,10 @@ export default function LoginPage() {
         </div>
 
         {/* Footer */}
-        <p className="mt-12 text-xs text-chalk-muted">
+        <p className="mt-10 text-xs text-gray-400">
           By signing in, you agree to the Dugout IQ Terms of Service.
         </p>
-        <p className="mt-2 text-xs text-chalk-muted opacity-60">
+        <p className="mt-2 text-xs text-gray-400">
           Your data stays private. We never share coach or player information.
         </p>
       </div>

@@ -6,12 +6,10 @@
   <script>
     // GitHub Pages SPA redirect for client-side routing
     var path = window.location.pathname;
-    var base = '/dugoutiq';
-    if (path.startsWith(base) && (path.indexOf('/join/') > -1 || path.indexOf('/score/') > -1)) {
-      var route = path.slice(base.length);
-      window.location.replace(base + '/?route=' + encodeURIComponent(route));
+    if (path.indexOf('/join/') > -1 || path.indexOf('/score/') > -1) {
+      window.location.replace('/?route=' + encodeURIComponent(path));
     } else {
-      window.location.replace(base + '/');
+      window.location.replace('/');
     }
   </script>
 </head>

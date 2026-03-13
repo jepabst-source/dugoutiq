@@ -14,7 +14,7 @@ const DEFAULT_SETTINGS = {
   devInningsEnabled: true,
   devInningCycle: 3,
   noBackToBackBench: true,
-  infieldCapEnabled: true,
+  infieldCapEnabled: false,
   infieldCapValue: 2,
   positionMinRatings: {
     '1st Base': 4,

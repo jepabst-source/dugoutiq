@@ -2,21 +2,21 @@
   "name": "Dugout IQ",
   "short_name": "Dugout IQ",
   "description": "Smart lineup manager for softball and baseball coaches",
-  "start_url": "/dugoutiq/",
-  "scope": "/dugoutiq/",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0a1a0d",
   "theme_color": "#0a1a0d",
   "orientation": "any",
   "icons": [
     {
-      "src": "/dugoutiq/icons/icon-192.png",
+      "src": "/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/dugoutiq/icons/icon-512.png",
+      "src": "/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

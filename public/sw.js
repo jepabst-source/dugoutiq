@@ -1,7 +1,7 @@
 const CACHE_NAME = 'dugoutiq-v1';
 const SHELL_URLS = [
-  '/dugoutiq/',
-  '/dugoutiq/index.html',
+  '/',
+  '/index.html',
 ];
 
 // Install: cache the app shell
