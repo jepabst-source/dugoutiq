@@ -47,6 +47,10 @@ export function TeamProvider({ children }) {
         setTeam(null);
       }
       setLoadingTeam(false);
+    }, (err) => {
+      console.error('Team subscription error:', err);
+      setTeam(null);
+      setLoadingTeam(false);
     });
 
     return unsub;

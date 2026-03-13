@@ -247,10 +247,8 @@ export default function SettingsTab() {
           />
 
           <div className="px-3 py-2 bg-field/50 border border-border rounded-lg">
-            <div className="text-sm text-chalk font-semibold">Competitive vs. Development innings</div>
-            <div className="text-xs text-chalk-muted mt-1">
-              Toggle each inning between ⚔️ Competitive and 🔄 Development directly on the Defense tab when generating lineups.
-              Development innings relax position rating floors to give developing players infield time.
+            <div className="text-xs text-chalk-muted">
+              ⚔️ Competitive / 🔄 Development defaults are set below in Default Game Length. You can override per game on the Defense tab.
             </div>
           </div>
 
@@ -308,12 +306,18 @@ export default function SettingsTab() {
 
       {/* Default Innings */}
       <Section title="🏟️ Default Game Length">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mb-3">
           <span className="text-sm text-chalk-muted">Default innings per game:</span>
           <div className="flex gap-1">
             {[3, 4, 5, 6, 7, 8, 9].map(n => (
               <button key={n}
-                onClick={() => setRuleValue('defaultInnings', n)}
+                onClick={async () => {
+                  await setRuleValue('defaultInnings', n);
+                  // Clean up inning modes for removed innings
+                  const modes = { ...(settings.defaultInningModes || {}) };
+                  Object.keys(modes).forEach(k => { if (parseInt(k) >= n) delete modes[k]; });
+                  await updateSettings({ defaultInningModes: modes });
+                }}
                 className={`w-8 h-8 rounded-md text-xs font-bold transition-all
                   ${(settings.defaultInnings || 3) === n
                     ? 'bg-lime/20 border-lime text-lime border'
@@ -322,6 +326,39 @@ export default function SettingsTab() {
                 {n}
               </button>
             ))}
+          </div>
+        </div>
+
+        {/* Per-inning mode defaults */}
+        <div className="bg-field/50 border border-border rounded-lg p-3">
+          <div className="text-xs font-semibold text-chalk-muted uppercase tracking-wider mb-2">Default Inning Modes</div>
+          <p className="text-[10px] text-chalk-muted mb-3">
+            Set each inning's default mode. The last inning is always the LFG/OOR pocket card.
+            You can still override these on the Defense tab per game.
+          </p>
+          <div className="flex gap-2 flex-wrap">
+            {Array.from({ length: (settings.defaultInnings || 3) - 1 }, (_, i) => i + 1).map(ing => {
+              const modes = settings.defaultInningModes || {};
+              const mode = modes[ing] || 'competitive';
+              const isDev = mode === 'development';
+              return (
+                <button key={ing}
+                  onClick={async () => {
+                    const updated = { ...(settings.defaultInningModes || {}) };
+                    updated[ing] = isDev ? 'competitive' : 'development';
+                    await updateSettings({ defaultInningModes: updated });
+                    showSaved(`Inning ${ing} → ${isDev ? 'Competitive' : 'Development'}`);
+                  }}
+                  className={`flex flex-col items-center px-3 py-2 rounded-lg border text-xs font-semibold transition-all
+                    ${isDev
+                      ? 'bg-gold/10 border-gold/25 text-gold'
+                      : 'bg-lime/10 border-lime/25 text-lime'
+                    }`}>
+                  <span className="text-[10px] text-chalk-muted mb-0.5">Inn {ing}</span>
+                  <span>{isDev ? '🔄 Dev' : '⚔️ Comp'}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </Section>

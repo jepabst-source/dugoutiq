@@ -3,26 +3,75 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Open read/write for authenticated users (development mode)
-    match /{document=**} {
-      allow read, write: if request.auth != null;
+    // ── USERS ──
+    // Users can only read/write their own document
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Invite links — anyone can read (to verify invite before signing in)
+    // ── TEAMS ──
+    // Only the head coach or assistant coaches can access team data
+    match /teams/{teamId} {
+      // Helper: is this user a member of this team?
+      function isTeamMember() {
+        return request.auth != null && (
+          resource.data.coachId == request.auth.uid ||
+          (resource.data.assistantIds != null && request.auth.uid in resource.data.assistantIds)
+        );
+      }
+
+      // Anyone authenticated can create a team (they become coachId)
+      allow create: if request.auth != null;
+      // Only team members can read or update
+      allow read: if isTeamMember();
+      allow update: if isTeamMember();
+      // Only head coach can delete
+      allow delete: if request.auth != null && resource.data.coachId == request.auth.uid;
+
+      // ── PLAYERS subcollection ──
+      match /players/{playerId} {
+        allow read, write: if request.auth != null && (
+          get(/databases/$(database)/documents/teams/$(teamId)).data.coachId == request.auth.uid ||
+          (get(/databases/$(database)/documents/teams/$(teamId)).data.assistantIds != null &&
+           request.auth.uid in get(/databases/$(database)/documents/teams/$(teamId)).data.assistantIds)
+        );
+      }
+
+      // ── GAMES subcollection ──
+      match /games/{gameId} {
+        allow read, write: if request.auth != null && (
+          get(/databases/$(database)/documents/teams/$(teamId)).data.coachId == request.auth.uid ||
+          (get(/databases/$(database)/documents/teams/$(teamId)).data.assistantIds != null &&
+           request.auth.uid in get(/databases/$(database)/documents/teams/$(teamId)).data.assistantIds)
+        );
+      }
+
+      // ── AT-BATS subcollection ──
+      // Coaches can read/write, AND scorers can write without auth
+      match /atBats/{atBatId} {
+        allow read: if request.auth != null && (
+          get(/databases/$(database)/documents/teams/$(teamId)).data.coachId == request.auth.uid ||
+          (get(/databases/$(database)/documents/teams/$(teamId)).data.assistantIds != null &&
+           request.auth.uid in get(/databases/$(database)/documents/teams/$(teamId)).data.assistantIds)
+        );
+        // Scorer writes — allow unauthenticated writes (validated by scorer link expiry in app code)
+        allow write: if true;
+      }
+    }
+
+    // ── INVITE LINKS ──
+    // Anyone can read (to verify before signing in), authenticated users can create
     match /invites/{code} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
     }
 
-    // Scorer links — anyone can read (no login required)
+    // ── SCORER LINKS ──
+    // Anyone can read (no login required), authenticated users can create
     match /scorerLinks/{code} {
       allow read: if true;
-      allow write: if request.auth != null;
-    }
-
-    // At-bats — scorer needs to write without auth
-    match /teams/{teamId}/atBats/{atBatId} {
-      allow read, write: if true;
+      allow create: if request.auth != null;
     }
   }
 }

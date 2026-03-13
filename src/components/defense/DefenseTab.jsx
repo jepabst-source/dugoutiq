@@ -20,13 +20,30 @@ export default function DefenseTab() {
   const [generated, setGenerated] = useState(false);
   const [committing, setCommitting] = useState(false);
   const [committed, setCommitted] = useState(false);
-  const [inningModes, setInningModes] = useState({}); // { 1: 'competitive', 2: 'development', ... }
+  const [inningModes, setInningModes] = useState(() => settings.defaultInningModes || {}); // { 1: 'competitive', 2: 'development', ... }
 
   const activePlayers = getActivePlayers();
   const activeCount = players.filter(p => attendance.has(p.id)).length;
   const standardInnings = totalInnings - 1;
   const benchCount = Math.max(0, activePlayers.length - 9);
   const positionHistory = getPositionHistory();
+
+  // Auto-generate on first load when players exist
+  useEffect(() => {
+    if (activePlayers.length >= 9 && !generated) {
+      const result = buildFullRotation({
+        players: activePlayers,
+        standardInnings,
+        settings,
+        positionHistory,
+        inningModes,
+      });
+      setInnings(result.innings);
+      setLfg(result.lfg);
+      setOor(result.oor);
+      setGenerated(true);
+    }
+  }, [activePlayers.length]);
 
   // Sync lineup to localStorage so Print tab can read it
   useEffect(() => {
