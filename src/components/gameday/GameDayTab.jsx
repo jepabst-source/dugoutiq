@@ -91,14 +91,14 @@ export default function GameDayTab() {
           disabled={generatingScorer}
           className="px-3 py-2 rounded-lg bg-border text-chalk-dim font-bold text-xs
                      hover:bg-border-light active:scale-[0.97] transition-all disabled:opacity-50">
-          {generatingScorer ? '...' : '📤 Share Scorer'}
+          {generatingScorer ? '...' : '📤 Invite Log Assistant'}
         </button>
       </div>
 
       {/* Scorer link */}
       {scorerLink && (
         <div className="bg-field border border-sky/30 rounded-xl p-3 mb-4">
-          <p className="text-[10px] text-chalk-muted uppercase tracking-wider mb-1">Scorer link (expires in 12 hours):</p>
+          <p className="text-[10px] text-chalk-muted uppercase tracking-wider mb-1">Log assistant link (expires in 12 hours):</p>
           <div className="flex items-center gap-2">
             <input type="text" readOnly value={scorerLink}
               className="flex-1 px-3 py-2 rounded-lg bg-panel border border-border text-chalk text-xs focus:outline-none"
@@ -109,7 +109,7 @@ export default function GameDayTab() {
               📋 Copy
             </button>
           </div>
-          <p className="text-[10px] text-chalk-muted mt-1">Text this to anyone — no login needed. They just tap players and log at-bats.</p>
+          <p className="text-[10px] text-chalk-muted mt-1">Text this to anyone — no login needed. They tap players and log at-bats from the stands.</p>
         </div>
       )}
 

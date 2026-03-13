@@ -73,7 +73,7 @@ export default function DefenseTab() {
   };
 
   const handleReshuffleInning = (ing) => {
-    const result = buildFullRotation({ players: activePlayers, standardInnings, settings, positionHistory });
+    const result = buildFullRotation({ players: activePlayers, standardInnings, settings, positionHistory, inningModes });
     setInnings(prev => ({ ...prev, [ing]: result.innings[ing] || prev[ing] }));
   };
 

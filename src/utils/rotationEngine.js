@@ -83,8 +83,14 @@ export function buildFullRotation({ players, standardInnings, settings, position
     // 3. Bench selection
     const benched = new Set();
     if (benchCount > 0) {
-      const benchHistory = (p) =>
-        (positionHistory[p.id]?.['Bench 1'] || 0) + (positionHistory[p.id]?.['Bench 2'] || 0);
+      // Count bench from saved games AND current game being generated
+      const benchHistory = (p) => {
+        const savedBench = (positionHistory[p.id]?.['Bench 1'] || 0) 
+          + (positionHistory[p.id]?.['Bench 2'] || 0)
+          + (positionHistory[p.id]?.['Bench 3'] || 0);
+        const currentGameBench = countBenchedInGame(innings, ing - 1, p.id);
+        return savedBench + currentGameBench;
+      };
 
       const lowerPlayers = players.filter(p => p.defRating <= 3);
       const avgLowerBench = lowerPlayers.length
@@ -95,14 +101,14 @@ export function buildFullRotation({ players, standardInnings, settings, position
       const benchSort = isDevInning
         ? () => Math.random() - 0.5
         : (a, b) => {
-            const aHist = benchHistory(a);
-            const bHist = benchHistory(b);
+            // Primary: rating tier (lower rated sit first)
             const nudge = avgLowerBench >= 3;
-            const aEff = (nudge && a.defRating >= 4 && aHist < upperQuota) ? a.defRating - 1.5 : a.defRating;
-            const bEff = (nudge && b.defRating >= 4 && bHist < upperQuota) ? b.defRating - 1.5 : b.defRating;
+            const aEff = (nudge && a.defRating >= 4 && benchHistory(a) < upperQuota) ? a.defRating - 1.5 : a.defRating;
+            const bEff = (nudge && b.defRating >= 4 && benchHistory(b) < upperQuota) ? b.defRating - 1.5 : b.defRating;
             const tier = Math.round(aEff) - Math.round(bEff);
             if (tier !== 0) return tier;
-            return aHist - bHist;
+            // Secondary: STRICT — fewest total bench appearances sits next (hard tiebreaker, no jitter)
+            return benchHistory(a) - benchHistory(b);
           };
 
       // Pass 1: exclude players benched last inning (if no-back-to-back is enabled)
@@ -156,8 +162,8 @@ function scoreFieldPlayer(p, pos, ing, gameInnings, positionHistory, settings, i
   const minRating = minRatings[pos];
   if (minRating && !isDevInning && p.defRating < minRating) return -9999;
 
-  // Infield cap check
-  if (settings.infieldCapEnabled && INFIELD_POSITIONS.includes(pos)) {
+  // Infield cap check — skipped during development innings
+  if (settings.infieldCapEnabled && !isDevInning && INFIELD_POSITIONS.includes(pos)) {
     const infieldCount = Object.entries(gameInnings)
       .filter(([ingKey]) => parseInt(ingKey) < ing)
       .filter(([, asgn]) => {
