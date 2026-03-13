@@ -1,5 +1,9 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
+import {
+  onAuthStateChanged, signInWithPopup, signOut,
+  createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  sendEmailVerification, sendPasswordResetEmail, updateProfile,
+} from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db, googleProvider } from '../lib/firebase';
 
@@ -91,6 +95,26 @@ export function AuthProvider({ children }) {
   };
 
   const loginWithGoogle = () => signInWithPopup(auth, googleProvider);
+
+  const signUpWithEmail = async (email, password, displayName) => {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    if (displayName) {
+      await updateProfile(cred.user, { displayName });
+    }
+    await sendEmailVerification(cred.user);
+    return cred;
+  };
+
+  const loginWithEmail = (email, password) => signInWithEmailAndPassword(auth, email, password);
+
+  const resetPassword = (email) => sendPasswordResetEmail(auth, email);
+
+  const resendVerification = () => {
+    if (auth.currentUser && !auth.currentUser.emailVerified) {
+      return sendEmailVerification(auth.currentUser);
+    }
+  };
+
   const logout = () => signOut(auth);
 
   return (
@@ -103,6 +127,10 @@ export function AuthProvider({ children }) {
       allTeams,
       refreshTeams,
       loginWithGoogle,
+      signUpWithEmail,
+      loginWithEmail,
+      resetPassword,
+      resendVerification,
       logout,
     }}>
       {children}

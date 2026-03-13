@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTeam } from '../contexts/TeamContext';
 
 const FREE_GAME_LIMIT = 2;
-const FREE_ATBAT_LIMIT = 50;
+const FREE_ATBAT_LIMIT = 70;
 
 export function usePlan() {
   const { userDoc, user } = useAuth();

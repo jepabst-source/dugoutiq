@@ -73,5 +73,11 @@ service cloud.firestore {
       allow read: if true;
       allow create: if request.auth != null;
     }
+
+    // ── FEEDBACK ──
+    // Any authenticated user can submit, only you can read
+    match /feedback/{docId} {
+      allow create: if request.auth != null;
+    }
   }
 }

@@ -363,6 +363,44 @@ export default function SettingsTab() {
         </div>
       </Section>
 
+      {/* Suggestion Box */}
+      <Section title="💡 Suggestion Box">
+        <p className="text-xs text-chalk-muted mb-3">
+          Have an idea or feature request? We'd love to hear from you.
+        </p>
+        <textarea
+          id="feedback-text"
+          rows={3}
+          placeholder="What would make this app better for you?"
+          className="w-full px-3 py-2 rounded-lg bg-field border border-border text-chalk text-sm
+                     placeholder:text-chalk-muted/40 focus:border-lime focus:outline-none resize-none mb-3"
+        />
+        <button
+          onClick={async () => {
+            const text = document.getElementById('feedback-text')?.value?.trim();
+            if (!text) return;
+            try {
+              const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
+              const { db } = await import('../../lib/firebase');
+              await addDoc(collection(db, 'feedback'), {
+                message: text,
+                email: user?.email || '',
+                displayName: user?.displayName || '',
+                teamName: team?.name || '',
+                createdAt: serverTimestamp(),
+              });
+              document.getElementById('feedback-text').value = '';
+              showSaved('Thanks! Message sent.');
+            } catch (err) {
+              console.error('Feedback error:', err);
+            }
+          }}
+          className="px-4 py-2 rounded-lg bg-lime text-field font-bold text-sm
+                     hover:bg-lime-bright active:scale-[0.97] transition-all">
+          📨 Send Feedback
+        </button>
+      </Section>
+
       {/* Danger Zone */}
       <Section title="⚠️ Danger Zone">
         <p className="text-xs text-chalk-muted mb-3">

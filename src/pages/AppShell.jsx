@@ -20,14 +20,24 @@ const TABS = [
 ];
 
 export default function AppShell() {
-  const { user, logout, allTeams, setActiveTeamId, activeTeamId } = useAuth();
+  const { user, logout, allTeams, setActiveTeamId, activeTeamId, resendVerification } = useAuth();
   const { team } = useTeam();
   const [activeTab, setActiveTab] = useState('roster');
   const [showTeamMenu, setShowTeamMenu] = useState(false);
   const [showCreateTeam, setShowCreateTeam] = useState(false);
 
+  const needsVerification = user?.providerData?.[0]?.providerId === 'password' && !user?.emailVerified;
+
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Email verification banner */}
+      {needsVerification && (
+        <div className="bg-gold/15 border-b border-gold/30 px-4 py-2 flex items-center justify-center gap-3 text-xs text-gold">
+          <span>Please verify your email address.</span>
+          <button onClick={async () => { await resendVerification(); alert('Verification email sent!'); }}
+            className="underline font-semibold hover:text-gold-bright">Resend email</button>
+        </div>
+      )}
       {/* Create Team Modal */}
       {showCreateTeam && (
         <CreateTeamModal onClose={() => setShowCreateTeam(false)} />

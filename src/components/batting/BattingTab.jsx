@@ -34,7 +34,7 @@ export default function BattingTab() {
   const [gameNum, setGameNum] = useState('1');
   const [selectedInning, setSelectedInning] = useState(1);
   const [showLog, setShowLog] = useState(false);
-  const [sortMode, setSortMode] = useState('points');
+  const [sortMode, setSortMode] = useState('obp');
   const [manuallyReordered, setManuallyReordered] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const plan = usePlan(); // 'points' | 'obp'
