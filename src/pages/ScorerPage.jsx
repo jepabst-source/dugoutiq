@@ -11,6 +11,7 @@ export default function ScorerPage({ scorerCode }) {
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [recentLog, setRecentLog] = useState([]);
   const [recording, setRecording] = useState(false);
+  const [advancedMode, setAdvancedMode] = useState(false);
 
   // Load scorer link data
   useEffect(() => {
@@ -118,34 +119,106 @@ export default function ScorerPage({ scorerCode }) {
             {selectedPlayer.number && (
               <div className="text-5xl font-bold text-[#8ed431]/15 mb-1">#{selectedPlayer.number}</div>
             )}
-            <div className="text-3xl font-bold text-[#eaf0e6] mb-5 tracking-tight">{selectedPlayer.name}</div>
+            <div className="text-3xl font-bold text-[#eaf0e6] mb-4 tracking-tight">{selectedPlayer.name}</div>
 
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <button onClick={() => handleRecord('K')} disabled={recording}
-                className="py-5 rounded-xl bg-[#d64045]/10 border-2 border-[#d64045]/25 text-[#d64045] font-bold text-xl
-                           active:scale-95 transition-all flex flex-col items-center gap-1 disabled:opacity-50">
-                K
-                <span className="text-[10px] font-normal opacity-70">strikeout</span>
-              </button>
-              <button onClick={() => handleRecord('hit')} disabled={recording}
-                className="py-5 rounded-xl bg-[#8ed431]/10 border-2 border-[#8ed431]/25 text-[#8ed431] font-bold text-xl
-                           active:scale-95 transition-all flex flex-col items-center gap-1 disabled:opacity-50">
-                HIT
-                <span className="text-[10px] font-normal opacity-70">base hit</span>
-              </button>
-              <button onClick={() => handleRecord('walk')} disabled={recording}
-                className="py-5 rounded-xl bg-[#4a9eda]/10 border-2 border-[#4a9eda]/25 text-[#4a9eda] font-bold text-xl
-                           active:scale-95 transition-all flex flex-col items-center gap-1 disabled:opacity-50">
-                WALK
-                <span className="text-[10px] font-normal opacity-70">walked</span>
-              </button>
-              <button onClick={() => handleRecord('out')} disabled={recording}
-                className="py-5 rounded-xl bg-[#c4874a]/10 border-2 border-[#c4874a]/25 text-[#c4874a] font-bold text-xl
-                           active:scale-95 transition-all flex flex-col items-center gap-1 disabled:opacity-50">
-                OUT
-                <span className="text-[10px] font-normal opacity-70">hit into out</span>
-              </button>
+            {/* Mode toggle */}
+            <div className="flex justify-center mb-3">
+              <div className="flex gap-0.5 bg-[#0a1a0d] rounded-lg p-0.5 border border-[#2a3d2c]">
+                <button onClick={() => setAdvancedMode(false)}
+                  className={`px-3 py-1 rounded-md text-[10px] font-semibold transition-all
+                    ${!advancedMode ? 'bg-[#151f17] text-[#8ed431]' : 'text-[#6a7d62]'}`}>
+                  Simple
+                </button>
+                <button onClick={() => setAdvancedMode(true)}
+                  className={`px-3 py-1 rounded-md text-[10px] font-semibold transition-all
+                    ${advancedMode ? 'bg-[#151f17] text-[#8ed431]' : 'text-[#6a7d62]'}`}>
+                  Advanced
+                </button>
+              </div>
             </div>
+
+            {!advancedMode ? (
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                <button onClick={() => handleRecord('K')} disabled={recording}
+                  className="py-5 rounded-xl bg-[#d64045]/10 border-2 border-[#d64045]/25 text-[#d64045] font-bold text-xl
+                             active:scale-95 transition-all flex flex-col items-center gap-1 disabled:opacity-50">
+                  K
+                  <span className="text-[10px] font-normal opacity-70">strikeout</span>
+                </button>
+                <button onClick={() => handleRecord('hit')} disabled={recording}
+                  className="py-5 rounded-xl bg-[#8ed431]/10 border-2 border-[#8ed431]/25 text-[#8ed431] font-bold text-xl
+                             active:scale-95 transition-all flex flex-col items-center gap-1 disabled:opacity-50">
+                  HIT
+                  <span className="text-[10px] font-normal opacity-70">base hit</span>
+                </button>
+                <button onClick={() => handleRecord('walk')} disabled={recording}
+                  className="py-5 rounded-xl bg-[#4a9eda]/10 border-2 border-[#4a9eda]/25 text-[#4a9eda] font-bold text-xl
+                             active:scale-95 transition-all flex flex-col items-center gap-1 disabled:opacity-50">
+                  WALK
+                  <span className="text-[10px] font-normal opacity-70">walked</span>
+                </button>
+                <button onClick={() => handleRecord('out')} disabled={recording}
+                  className="py-5 rounded-xl bg-[#c4874a]/10 border-2 border-[#c4874a]/25 text-[#c4874a] font-bold text-xl
+                             active:scale-95 transition-all flex flex-col items-center gap-1 disabled:opacity-50">
+                  OUT
+                  <span className="text-[10px] font-normal opacity-70">fielded out</span>
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2 mb-3">
+                <div className="grid grid-cols-2 gap-2">
+                  <button onClick={() => handleRecord('K')} disabled={recording}
+                    className="py-3 rounded-xl bg-[#d64045]/10 border-2 border-[#d64045]/25 text-[#d64045] font-bold text-base
+                               active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">
+                    K
+                  </button>
+                  <button onClick={() => handleRecord('out')} disabled={recording}
+                    className="py-3 rounded-xl bg-[#c4874a]/10 border-2 border-[#c4874a]/25 text-[#c4874a] font-bold text-base
+                               active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">
+                    OUT
+                  </button>
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  <button onClick={() => handleRecord('single')} disabled={recording}
+                    className="py-3 rounded-xl bg-[#8ed431]/10 border-2 border-[#8ed431]/25 text-[#8ed431] font-bold text-sm
+                               active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">
+                    1B
+                  </button>
+                  <button onClick={() => handleRecord('double')} disabled={recording}
+                    className="py-3 rounded-xl bg-[#8ed431]/15 border-2 border-[#8ed431]/30 text-[#8ed431] font-bold text-sm
+                               active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">
+                    2B
+                  </button>
+                  <button onClick={() => handleRecord('triple')} disabled={recording}
+                    className="py-3 rounded-xl bg-[#8ed431]/20 border-2 border-[#8ed431]/35 text-[#a8e84a] font-bold text-sm
+                               active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">
+                    3B
+                  </button>
+                  <button onClick={() => handleRecord('hr')} disabled={recording}
+                    className="py-3 rounded-xl bg-[#e8a832]/15 border-2 border-[#e8a832]/30 text-[#e8a832] font-bold text-sm
+                               active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">
+                    HR
+                  </button>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <button onClick={() => handleRecord('walk')} disabled={recording}
+                    className="py-3 rounded-xl bg-[#4a9eda]/10 border-2 border-[#4a9eda]/25 text-[#4a9eda] font-bold text-sm
+                               active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">
+                    BB
+                  </button>
+                  <button onClick={() => handleRecord('hbp')} disabled={recording}
+                    className="py-3 rounded-xl bg-[#4a9eda]/10 border-2 border-[#4a9eda]/25 text-[#4a9eda] font-bold text-sm
+                               active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">
+                    HBP
+                  </button>
+                  <button onClick={() => handleRecord('sac')} disabled={recording}
+                    className="py-3 rounded-xl bg-[#c4874a]/10 border-2 border-[#c4874a]/25 text-[#c4874a] font-bold text-sm
+                               active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">
+                    SAC
+                  </button>
+                </div>
+              </div>
+            )}
 
             <button onClick={() => setSelectedPlayer(null)}
               className="w-full py-2.5 text-sm text-[#6a7d62] bg-[#2a3d2c]/50 rounded-lg active:bg-[#2a3d2c] transition-colors">
@@ -187,17 +260,19 @@ export default function ScorerPage({ scorerCode }) {
               {recentLog.map((entry, i) => {
                 const colors = {
                   K: 'text-[#d64045]',
-                  hit: 'text-[#8ed431]',
-                  walk: 'text-[#4a9eda]',
-                  out: 'text-[#c4874a]',
+                  hit: 'text-[#8ed431]', single: 'text-[#8ed431]', double: 'text-[#8ed431]',
+                  triple: 'text-[#a8e84a]', hr: 'text-[#e8a832]',
+                  walk: 'text-[#4a9eda]', hbp: 'text-[#4a9eda]',
+                  out: 'text-[#c4874a]', sac: 'text-[#c4874a]',
                 };
+                const labels = { K:'K', out:'OUT', hit:'HIT', single:'1B', double:'2B', triple:'3B', hr:'HR', walk:'BB', hbp:'HBP', sac:'SAC' };
                 return (
                   <div key={i} className="flex items-center justify-between px-3 py-2 border-b border-[#2a3d2c]/50 last:border-0 text-sm">
                     <span className="text-[#a8b8a0]">
                       {entry.number ? `#${entry.number} ` : ''}{entry.name}
                     </span>
-                    <span className={`font-bold text-xs uppercase ${colors[entry.outcome]}`}>
-                      {entry.outcome === 'K' ? 'K' : entry.outcome === 'hit' ? 'HIT' : entry.outcome === 'walk' ? 'WALK' : 'OUT'}
+                    <span className={`font-bold text-xs uppercase ${colors[entry.outcome] || 'text-[#a8b8a0]'}`}>
+                      {labels[entry.outcome] || entry.outcome}
                     </span>
                   </div>
                 );

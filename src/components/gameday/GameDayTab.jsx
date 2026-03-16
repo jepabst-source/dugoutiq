@@ -22,6 +22,7 @@ export default function GameDayTab() {
   const [generatingScorer, setGeneratingScorer] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const plan = usePlan();
+  const [advancedMode, setAdvancedMode] = useState(false);
 
   const activePlayers = getActivePlayers();
   const battingOrder = useMemo(() => generateBattingOrder(), [generateBattingOrder]);
@@ -188,33 +189,119 @@ export default function GameDayTab() {
             {playerAbCounts[selectedPlayer.id] || 0} AB{(playerAbCounts[selectedPlayer.id] || 0) !== 1 ? 's' : ''} today
           </div>
 
-          {/* Outcome buttons */}
-          <div className="grid grid-cols-2 gap-3 mb-3">
-            <button onClick={() => handleRecord('K')}
-              className="py-5 sm:py-4 rounded-xl bg-red/10 border-2 border-red/25 text-red font-bold text-xl sm:text-lg
-                         hover:bg-red/20 active:scale-95 transition-all flex flex-col items-center gap-1">
-              K
-              <span className="text-[10px] font-normal opacity-70">strikeout · 0 pts</span>
-            </button>
-            <button onClick={() => handleRecord('hit')}
-              className="py-5 sm:py-4 rounded-xl bg-lime/10 border-2 border-lime/25 text-lime font-bold text-xl sm:text-lg
-                         hover:bg-lime/20 active:scale-95 transition-all flex flex-col items-center gap-1">
-              HIT
-              <span className="text-[10px] font-normal opacity-70">2 pts</span>
-            </button>
-            <button onClick={() => handleRecord('walk')}
-              className="py-5 sm:py-4 rounded-xl bg-sky/10 border-2 border-sky/25 text-sky font-bold text-xl sm:text-lg
-                         hover:bg-sky/20 active:scale-95 transition-all flex flex-col items-center gap-1">
-              WALK
-              <span className="text-[10px] font-normal opacity-70">1 pt</span>
-            </button>
-            <button onClick={() => handleRecord('out')}
-              className="py-5 sm:py-4 rounded-xl bg-dirt/10 border-2 border-dirt/25 text-dirt font-bold text-xl sm:text-lg
-                         hover:bg-dirt/20 active:scale-95 transition-all flex flex-col items-center gap-1">
-              HIT-OUT
-              <span className="text-[10px] font-normal opacity-70">fielded · 1 pt</span>
-            </button>
+          {/* Mode toggle */}
+          <div className="flex justify-center mb-3">
+            <div className="flex gap-0.5 bg-field rounded-lg p-0.5 border border-border">
+              <button onClick={() => setAdvancedMode(false)}
+                className={`px-3 py-1 rounded-md text-[10px] font-semibold transition-all
+                  ${!advancedMode ? 'bg-panel text-lime' : 'text-chalk-muted'}`}>
+                Simple
+              </button>
+              <button onClick={() => setAdvancedMode(true)}
+                className={`px-3 py-1 rounded-md text-[10px] font-semibold transition-all
+                  ${advancedMode ? 'bg-panel text-lime' : 'text-chalk-muted'}`}>
+                Advanced
+              </button>
+            </div>
           </div>
+
+          {/* Outcome buttons */}
+          {!advancedMode ? (
+            /* Simple mode */
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <button onClick={() => handleRecord('K')}
+                className="py-5 sm:py-4 rounded-xl bg-red/10 border-2 border-red/25 text-red font-bold text-xl sm:text-lg
+                           hover:bg-red/20 active:scale-95 transition-all flex flex-col items-center gap-1">
+                K
+                <span className="text-[10px] font-normal opacity-70">strikeout · 0 pts</span>
+              </button>
+              <button onClick={() => handleRecord('hit')}
+                className="py-5 sm:py-4 rounded-xl bg-lime/10 border-2 border-lime/25 text-lime font-bold text-xl sm:text-lg
+                           hover:bg-lime/20 active:scale-95 transition-all flex flex-col items-center gap-1">
+                HIT
+                <span className="text-[10px] font-normal opacity-70">2 pts</span>
+              </button>
+              <button onClick={() => handleRecord('walk')}
+                className="py-5 sm:py-4 rounded-xl bg-sky/10 border-2 border-sky/25 text-sky font-bold text-xl sm:text-lg
+                           hover:bg-sky/20 active:scale-95 transition-all flex flex-col items-center gap-1">
+                WALK
+                <span className="text-[10px] font-normal opacity-70">1 pt</span>
+              </button>
+              <button onClick={() => handleRecord('out')}
+                className="py-5 sm:py-4 rounded-xl bg-dirt/10 border-2 border-dirt/25 text-dirt font-bold text-xl sm:text-lg
+                           hover:bg-dirt/20 active:scale-95 transition-all flex flex-col items-center gap-1">
+                HIT-OUT
+                <span className="text-[10px] font-normal opacity-70">fielded · 1 pt</span>
+              </button>
+            </div>
+          ) : (
+            /* Advanced mode */
+            <div className="space-y-2 mb-3">
+              {/* Outs row */}
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={() => handleRecord('K')}
+                  className="py-3 rounded-xl bg-red/10 border-2 border-red/25 text-red font-bold text-base
+                             active:scale-95 transition-all flex flex-col items-center">
+                  K
+                  <span className="text-[9px] font-normal opacity-70">strikeout</span>
+                </button>
+                <button onClick={() => handleRecord('out')}
+                  className="py-3 rounded-xl bg-dirt/10 border-2 border-dirt/25 text-dirt font-bold text-base
+                             active:scale-95 transition-all flex flex-col items-center">
+                  OUT
+                  <span className="text-[9px] font-normal opacity-70">fielded out</span>
+                </button>
+              </div>
+              {/* Hits row */}
+              <div className="grid grid-cols-4 gap-2">
+                <button onClick={() => handleRecord('single')}
+                  className="py-3 rounded-xl bg-lime/10 border-2 border-lime/25 text-lime font-bold text-sm
+                             active:scale-95 transition-all flex flex-col items-center">
+                  1B
+                  <span className="text-[8px] font-normal opacity-70">single</span>
+                </button>
+                <button onClick={() => handleRecord('double')}
+                  className="py-3 rounded-xl bg-lime/15 border-2 border-lime/30 text-lime font-bold text-sm
+                             active:scale-95 transition-all flex flex-col items-center">
+                  2B
+                  <span className="text-[8px] font-normal opacity-70">double</span>
+                </button>
+                <button onClick={() => handleRecord('triple')}
+                  className="py-3 rounded-xl bg-lime/20 border-2 border-lime/35 text-lime-bright font-bold text-sm
+                             active:scale-95 transition-all flex flex-col items-center">
+                  3B
+                  <span className="text-[8px] font-normal opacity-70">triple</span>
+                </button>
+                <button onClick={() => handleRecord('hr')}
+                  className="py-3 rounded-xl bg-gold/15 border-2 border-gold/30 text-gold font-bold text-sm
+                             active:scale-95 transition-all flex flex-col items-center">
+                  HR
+                  <span className="text-[8px] font-normal opacity-70">homer</span>
+                </button>
+              </div>
+              {/* Other row */}
+              <div className="grid grid-cols-3 gap-2">
+                <button onClick={() => handleRecord('walk')}
+                  className="py-3 rounded-xl bg-sky/10 border-2 border-sky/25 text-sky font-bold text-sm
+                             active:scale-95 transition-all flex flex-col items-center">
+                  BB
+                  <span className="text-[9px] font-normal opacity-70">walk</span>
+                </button>
+                <button onClick={() => handleRecord('hbp')}
+                  className="py-3 rounded-xl bg-sky/10 border-2 border-sky/25 text-sky font-bold text-sm
+                             active:scale-95 transition-all flex flex-col items-center">
+                  HBP
+                  <span className="text-[9px] font-normal opacity-70">hit by pitch</span>
+                </button>
+                <button onClick={() => handleRecord('sac')}
+                  className="py-3 rounded-xl bg-dirt/10 border-2 border-dirt/25 text-dirt font-bold text-sm
+                             active:scale-95 transition-all flex flex-col items-center">
+                  SAC
+                  <span className="text-[9px] font-normal opacity-70">sacrifice</span>
+                </button>
+              </div>
+            </div>
+          )}
 
           <button onClick={() => setSelectedPlayerId(null)}
             className="w-full py-2 text-sm text-chalk-muted bg-border/30 rounded-lg hover:bg-border transition-colors">

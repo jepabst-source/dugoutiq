@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useTeam, PTS } from '../../contexts/TeamContext';
 import { POSITIONS } from '../../utils/rotationEngine';
 
-const OUTCOME_LABELS = { K: 'Strikeout', out: 'Hit into Out', walk: 'Walk', hit: 'Hit' };
+const OUTCOME_LABELS = { K: 'K', out: 'Out', walk: 'BB', hit: 'Hit', single: '1B', double: '2B', triple: '3B', hr: 'HR', hbp: 'HBP', sac: 'SAC' };
 const POS_ORDER = [...POSITIONS.infield, ...POSITIONS.outfield, 'Bench'];
 
 export default function HistoryTab() {
@@ -248,6 +248,12 @@ function GameLogGroup({ game, atBats, players, onDeleteAtBat }) {
             out: 'bg-dirt/15 text-dirt border-dirt/25',
             walk: 'bg-sky/15 text-sky border-sky/25',
             hit: 'bg-lime/15 text-lime border-lime/25',
+            single: 'bg-lime/15 text-lime border-lime/25',
+            double: 'bg-lime/15 text-lime border-lime/25',
+            triple: 'bg-lime/20 text-lime-bright border-lime/30',
+            hr: 'bg-gold/15 text-gold border-gold/25',
+            hbp: 'bg-sky/15 text-sky border-sky/25',
+            sac: 'bg-dirt/15 text-dirt border-dirt/25',
           }[ab.outcome] || '';
           return (
             <div key={ab.id} className="flex items-center justify-between py-1 text-xs group">

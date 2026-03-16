@@ -23,8 +23,13 @@ const DEFAULT_SETTINGS = {
   assistantFullAccess: false,
 };
 
-// Scoring system
-const PTS = { K: 0, out: 1, walk: 1, hit: 2 };
+// Scoring system — advanced outcomes map to same points as simple
+const PTS = { K: 0, out: 1, walk: 1, hit: 2, single: 2, double: 2, triple: 2, hr: 2, hbp: 1, sac: 1 };
+
+// Helper: is this outcome a hit?
+const IS_HIT = { hit: true, single: true, double: true, triple: true, hr: true };
+// Helper: is this outcome on-base? (hits + walks + hbp)
+const IS_ON_BASE = { hit: true, single: true, double: true, triple: true, hr: true, walk: true, hbp: true };
 
 export function TeamProvider({ children }) {
   const { user, activeTeamId, setActiveTeamId, userDoc, refreshUserDoc } = useAuth();
@@ -246,9 +251,16 @@ export function TeamProvider({ children }) {
     const playerAbs = atBats.filter(a => a.playerId === playerId);
     const pts = playerAbs.reduce((s, a) => s + (PTS[a.outcome] ?? 0), 0);
     const gamesPlayed = [...new Set(playerAbs.map(a => a.game))].length;
-    const onBase = playerAbs.filter(a => a.outcome === 'hit' || a.outcome === 'walk').length;
-    const obp = playerAbs.length ? onBase / playerAbs.length : null;
-    return { totalAbs: playerAbs.length, pts, gamesPlayed, obp };
+    const onBase = playerAbs.filter(a => IS_ON_BASE[a.outcome]).length;
+    const hits = playerAbs.filter(a => IS_HIT[a.outcome]).length;
+    // Don't count sac flies in OBP denominator
+    const obpAbs = playerAbs.filter(a => a.outcome !== 'sac').length;
+    const obp = obpAbs ? onBase / obpAbs : null;
+    const singles = playerAbs.filter(a => a.outcome === 'single' || a.outcome === 'hit').length;
+    const doubles = playerAbs.filter(a => a.outcome === 'double').length;
+    const triples = playerAbs.filter(a => a.outcome === 'triple').length;
+    const homeRuns = playerAbs.filter(a => a.outcome === 'hr').length;
+    return { totalAbs: playerAbs.length, pts, gamesPlayed, obp, hits, singles, doubles, triples, homeRuns };
   }, [atBats]);
 
   const generateBattingOrder = useCallback(() => {
