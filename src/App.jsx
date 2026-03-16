@@ -10,10 +10,10 @@ import AppShell from './pages/AppShell';
 function getInviteCode() {
   const path = window.location.pathname;
   const route = new URLSearchParams(window.location.search).get('route') || '';
-  const match = (path + route).match(/\/join\/([a-zA-Z0-9]+)/);
+  const combined = path + route;
+  const match = combined.match(/\/join\/([a-zA-Z0-9]+)/);
   if (match) {
-    // Clean URL after reading
-    window.history.replaceState(null, '', window.location.pathname.split('/join/')[0] + '/join/' + match[1]);
+    try { window.history.replaceState(null, '', '/join/' + match[1]); } catch {}
   }
   return match ? match[1] : null;
 }
@@ -21,9 +21,10 @@ function getInviteCode() {
 function getScorerCode() {
   const path = window.location.pathname;
   const route = new URLSearchParams(window.location.search).get('route') || '';
-  const match = (path + route).match(/\/score\/([a-zA-Z0-9]+)/);
+  const combined = path + route;
+  const match = combined.match(/\/score\/([a-zA-Z0-9]+)/);
   if (match) {
-    window.history.replaceState(null, '', window.location.pathname.split('/score/')[0] + '/score/' + match[1]);
+    try { window.history.replaceState(null, '', '/score/' + match[1]); } catch {}
   }
   return match ? match[1] : null;
 }

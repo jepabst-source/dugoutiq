@@ -11,12 +11,15 @@ const stripeSecretKey = defineSecret('STRIPE_SECRET_KEY');
 const stripeWebhookSecret = defineSecret('STRIPE_WEBHOOK_SECRET');
 
 const PRICES = {
-  monthly: 'price_1TAbb3HN43f29F77XeMwzMcc',
-  annual: 'price_1TAbbnHN43f29F77DgrJEGIJ',
+  monthly: 'price_1TBZTMHbpYF4shFMitP14xYU',
+  annual: 'price_1TBZTPHbpYF4shFMLKjmyU8E',
 };
 
 // Create a Stripe Checkout session
-exports.createCheckoutSession = onCall({ secrets: [stripeSecretKey] }, async (request) => {
+exports.createCheckoutSession = onCall({ 
+  secrets: [stripeSecretKey],
+  invoker: 'public',
+}, async (request) => {
   if (!request.auth) {
     throw new Error('Must be logged in');
   }

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { getFunctions, httpsCallable } from 'firebase/functions';
+import app from '../../lib/firebase';
 
 export default function UpgradeModal({ onClose, lockReason }) {
   const [loading, setLoading] = useState('');
@@ -7,7 +8,7 @@ export default function UpgradeModal({ onClose, lockReason }) {
   const handleUpgrade = async (plan) => {
     setLoading(plan);
     try {
-      const functions = getFunctions();
+      const functions = getFunctions(app);
       const createCheckoutSession = httpsCallable(functions, 'createCheckoutSession');
       const result = await createCheckoutSession({ plan, origin: window.location.origin });
       if (result.data?.url) {
