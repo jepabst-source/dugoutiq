@@ -102,21 +102,31 @@ export default function PortalPage({ teamId }) {
     if (abs.length < 3) return [];
     const recent = abs.slice(0, 5);
     const previous = abs.slice(5, 10);
-    if (!previous.length) return [];
     const trends = [];
+
+    // Hot streak — 3+ hits in last 5
+    const recentHits = recent.filter(a => IS_ON_BASE[a.outcome]).length;
+    if (recentHits >= 3) trends.push('🔥 Hot Streak');
+
+    if (!previous.length) return trends;
+
+    // Batting avg trend
     const avgR = recent.reduce((s, a) => s + (PTS[a.outcome] ?? 0), 0) / recent.length;
     const avgP = previous.reduce((s, a) => s + (PTS[a.outcome] ?? 0), 0) / previous.length;
-    if (avgR - avgP > 0.15) trends.push('Batting');
+    if (avgR - avgP > 0.15) trends.push('↑ Batting');
+
+    // OBP trend
     const obpR = recent.filter(a => IS_ON_BASE[a.outcome]).length / recent.length;
     const obpP = previous.filter(a => IS_ON_BASE[a.outcome]).length / previous.length;
-    if (obpR - obpP > 0.15) trends.push('OBP');
+    if (obpR - obpP > 0.15) trends.push('↑ OBP');
+
     return trends;
   };
 
   const getRecentPositions = (playerId) => {
     const sorted = [...games].sort((a, b) => (b.committedAt?.seconds || 0) - (a.committedAt?.seconds || 0));
     const positions = [];
-    for (const game of sorted.slice(0, 3)) {
+    for (const game of sorted.slice(0, 5)) {
       const lineups = game.lineups || {};
       for (const [inning, asgn] of Object.entries(lineups)) {
         const pos = Object.entries(asgn).find(([p, id]) => id === playerId && !p.startsWith('Bench'));
@@ -136,8 +146,8 @@ export default function PortalPage({ teamId }) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#ffffff' }}>
         <div className="w-full max-w-sm text-center">
-          <div className="mb-4">
-            <img src="/logo.png" alt="Dugout IQ" className="w-48 mx-auto" />
+          <div className="mb-6">
+            <img src="/logo-square.jpg" alt="Dugout IQ" className="w-40 mx-auto rounded-xl" />
           </div>
           <h2 className="text-xl font-bold text-gray-800 mb-1">Parent Portal</h2>
           <p className="text-sm text-gray-500 mb-6">Enter the access code your coach shared with you.</p>
@@ -174,7 +184,7 @@ export default function PortalPage({ teamId }) {
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="Dugout IQ" className="w-10 h-auto" />
+            <img src="/logo-square.jpg" alt="Dugout IQ" className="w-12 h-12 rounded-lg" />
             <div>
               <div className="text-lg font-bold text-gray-800">{team?.name || 'Team'}</div>
               <div className="text-[10px] text-gray-400 uppercase tracking-wider">
@@ -223,37 +233,37 @@ export default function PortalPage({ teamId }) {
                       </div>
                       {/* Trends */}
                       {trends.length > 0 && (
-                        <div className="flex gap-1 mt-1">
+                        <div className="flex gap-2 mt-1">
                           {trends.map(t => (
-                            <span key={t} className="text-[10px] text-green-600 font-semibold">↑ {t}</span>
+                            <span key={t} className="text-[10px] text-green-600 font-semibold">{t}</span>
                           ))}
                         </div>
                       )}
                     </div>
                     {/* Stat blocks */}
-                    <div className="flex gap-3 text-center">
+                    <div className="flex items-end gap-3 text-center">
                       <div>
-                        <div className="text-lg font-bold text-amber-600">{stats.pts ?? '—'}</div>
-                        <div className="text-[9px] text-gray-400 uppercase">Season</div>
+                        <div className="text-sm font-semibold text-gray-400">{stats.pts ?? '—'}</div>
+                        <div className="text-[8px] text-gray-300 uppercase">Season</div>
                       </div>
                       <div>
-                        <div className="text-lg font-bold text-gray-800">
+                        <div className="text-sm font-semibold text-gray-400">
                           {rolling.avg !== null ? rolling.avg.toFixed(2) : '—'}
                         </div>
-                        <div className="text-[9px] text-gray-400 uppercase">Form</div>
+                        <div className="text-[8px] text-gray-300 uppercase">Form</div>
                       </div>
                       <div>
-                        <div className="text-lg font-bold text-blue-500">
+                        <div className="text-2xl font-bold text-blue-500">
                           {stats.obp !== null ? stats.obp.toFixed(3).replace(/^0/, '') : '—'}
                         </div>
-                        <div className="text-[9px] text-gray-400 uppercase">OBP</div>
+                        <div className="text-[9px] text-blue-400 uppercase font-semibold">OBP</div>
                       </div>
                     </div>
                   </div>
 
                   {/* Recent positions */}
                   <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
-                    <span className="text-[10px] text-gray-400">Recent:</span>
+                    <span className="text-[10px] text-gray-400">Recent Positions:</span>
                     {positions.length > 0 ? (
                       positions.map((pos, i) => (
                         <span key={i} className="px-2 py-0.5 text-[10px] font-semibold bg-gray-100 text-gray-600 rounded">
