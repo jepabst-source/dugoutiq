@@ -127,30 +127,27 @@ export default function PortalPage({ teamId }) {
 
   const getRecentPositions = (playerId) => {
     if (!games.length) return [];
-    // Sort by any available timestamp — committedAt could be Firestore Timestamp or plain
     const sorted = [...games].sort((a, b) => {
       const aTime = a.committedAt?.seconds || a.committedAt?.toMillis?.() || 0;
       const bTime = b.committedAt?.seconds || b.committedAt?.toMillis?.() || 0;
       return bTime - aTime;
     });
+    // Collect all positions across all innings of recent games, newest first
     const positions = [];
-    for (const game of sorted.slice(0, 5)) {
+    for (const game of sorted) {
       const lineups = game.lineups || {};
-      const inningKeys = Object.keys(lineups).sort((a, b) => Number(a) - Number(b));
-      let found = false;
+      const inningKeys = Object.keys(lineups).sort((a, b) => Number(b) - Number(a)); // newest inning first
       for (const ing of inningKeys) {
         const asgn = lineups[ing] || {};
         for (const [pos, id] of Object.entries(asgn)) {
           if (id === playerId && !pos.startsWith('Bench')) {
             positions.push(pos);
-            found = true;
-            break;
           }
         }
-        if (found) break;
       }
+      if (positions.length >= 5) break;
     }
-    return positions;
+    return positions.slice(0, 5);
   };
 
   const sortedPlayers = useMemo(() =>
