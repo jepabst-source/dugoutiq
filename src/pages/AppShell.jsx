@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTeam } from '../contexts/TeamContext';
 import { usePlan } from '../hooks/usePlan';
@@ -14,11 +14,14 @@ const TABS = [
   { id: 'roster', label: 'Roster', shortLabel: 'Roster', icon: '👥' },
   { id: 'batting', label: 'Batting', shortLabel: 'Bat', icon: '📊' },
   { id: 'defense', label: 'Defense', shortLabel: 'Def', icon: '🛡️' },
-  { id: 'gameday', label: 'Game Day', shortLabel: '⚾', icon: '⚾', highlight: true },
+  { id: 'gameday', label: 'Play Ball', shortLabel: '⚾', icon: '⚾', highlight: true },
   { id: 'history', label: 'History', shortLabel: 'Hist', icon: '📋' },
   { id: 'print', label: 'Print', shortLabel: '🖨', icon: '🖨', printOnly: true },
   { id: 'settings', label: 'Settings', shortLabel: '⚙️', icon: '⚙️' },
 ];
+
+// Detect if already installed as PWA
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
 export default function AppShell() {
   const { user, logout, allTeams, setActiveTeamId, activeTeamId, resendVerification } = useAuth();
@@ -27,6 +30,46 @@ export default function AppShell() {
   const [showTeamMenu, setShowTeamMenu] = useState(false);
   const [showCreateTeam, setShowCreateTeam] = useState(false);
   const plan = usePlan();
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+  const [isIOS] = useState(() => /iPad|iPhone|iPod/.test(navigator.userAgent));
+
+  // Capture the beforeinstallprompt event (Android/Chrome)
+  useEffect(() => {
+    if (isStandalone) return;
+    const handler = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      // Show banner if not dismissed before
+      if (!localStorage.getItem('dugoutiq_install_dismissed')) {
+        setShowInstallBanner(true);
+      }
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    
+    // Show iOS banner if not installed and not dismissed
+    if (isIOS && !isStandalone && !localStorage.getItem('dugoutiq_install_dismissed')) {
+      setShowInstallBanner(true);
+    }
+    
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (installPrompt) {
+      installPrompt.prompt();
+      const result = await installPrompt.userChoice;
+      if (result.outcome === 'accepted') {
+        setShowInstallBanner(false);
+      }
+      setInstallPrompt(null);
+    }
+  };
+
+  const dismissInstall = () => {
+    setShowInstallBanner(false);
+    localStorage.setItem('dugoutiq_install_dismissed', 'true');
+  };
 
   const needsVerification = user?.providerData?.[0]?.providerId === 'password' && !user?.emailVerified;
 
@@ -35,6 +78,26 @@ export default function AppShell() {
       {/* Create Team Modal */}
       {showCreateTeam && (
         <CreateTeamModal onClose={() => setShowCreateTeam(false)} />
+      )}
+
+      {/* Install App Banner */}
+      {showInstallBanner && !isStandalone && (
+        <div className="bg-lime/10 border-b border-lime/25 px-4 py-2.5 flex items-center justify-center gap-3 print:hidden">
+          {isIOS ? (
+            <span className="text-xs text-chalk">
+              📲 Install Dugout IQ: tap <strong className="text-chalk">Share</strong> → <strong className="text-chalk">Add to Home Screen</strong>
+            </span>
+          ) : (
+            <>
+              <span className="text-xs text-chalk">📲 Install Dugout IQ as an app on your phone</span>
+              <button onClick={handleInstall}
+                className="px-3 py-1 rounded-lg bg-lime text-field font-bold text-xs active:scale-95 transition-all">
+                Install
+              </button>
+            </>
+          )}
+          <button onClick={dismissInstall} className="text-chalk-muted hover:text-chalk text-sm ml-1">✕</button>
+        </div>
       )}
 
       {/* Header */}

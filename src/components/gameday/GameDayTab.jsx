@@ -23,6 +23,7 @@ export default function GameDayTab() {
   const [showUpgrade, setShowUpgrade] = useState(false);
   const plan = usePlan();
   const [advancedMode, setAdvancedMode] = useState(false);
+  const [showGameControls, setShowGameControls] = useState(false);
 
   const activePlayers = getActivePlayers();
   const battingOrder = useMemo(() => generateBattingOrder(), [generateBattingOrder]);
@@ -84,7 +85,7 @@ export default function GameDayTab() {
       {showUpgrade && <UpgradeModal onClose={() => setShowUpgrade(false)} lockReason={plan.lockReason} />}
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-lime">⚾ Game Day</h2>
+        <h2 className="text-xl font-bold text-lime">⚾ Play Ball</h2>
         <button
           onClick={async () => {
             setGeneratingScorer(true);
@@ -120,8 +121,17 @@ export default function GameDayTab() {
         </div>
       )}
 
-      {/* Score Bar */}
-      <div className="bg-panel border border-border rounded-xl p-3 mb-4">
+      {/* Score & Innings (collapsible) */}
+      <button onClick={() => setShowGameControls(!showGameControls)}
+        className="w-full flex items-center justify-between px-3 py-2 mb-2 bg-panel border border-border rounded-lg text-xs text-chalk-muted hover:bg-panel-hover transition-colors">
+        <span>Score & Innings</span>
+        <span>{showGameControls ? '▲' : '▼'}</span>
+      </button>
+
+      {showGameControls && (
+        <>
+          {/* Score Bar */}
+          <div className="bg-panel border border-border rounded-xl p-3 mb-4">
         <div className="flex items-center justify-center gap-6">
           <div className="text-center">
             <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest">Us</div>
@@ -175,6 +185,8 @@ export default function GameDayTab() {
           );
         })}
       </div>
+        </>
+      )}
 
       {/* NOW BATTING Card (shown when a player is selected) */}
       {selectedPlayer && (
@@ -182,6 +194,9 @@ export default function GameDayTab() {
              style={{ boxShadow: '0 0 30px rgba(142,212,49,0.1)' }}>
           <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-[0.2em] mb-1">NOW BATTING</div>
           <div className="absolute top-3 right-5 text-5xl font-bold text-lime/10 select-none">{selectedIndex}</div>
+          {selectedPlayer.number && (
+            <div className="text-4xl font-bold text-lime/15 mb-0">#{selectedPlayer.number}</div>
+          )}
           <div className="text-3xl font-bold text-chalk mb-1 tracking-tight">{selectedPlayer.name}</div>
           <div className="text-sm text-chalk-muted mb-5">
             avg {selectedRolling?.absCount > 0 ? selectedRolling.avg.toFixed(2) : '—'}
@@ -312,27 +327,33 @@ export default function GameDayTab() {
 
       {/* Player Roster Grid (tap to select who's up) */}
       {!selectedPlayer && (
-        <div className="grid grid-cols-2 gap-2 mb-4">
-          {battingOrder.map((p, idx) => {
-            const abCount = playerAbCounts[p.id] || 0;
-            return (
-              <button key={p.id} onClick={() => setSelectedPlayerId(p.id)}
-                className="text-left px-3 py-3 sm:py-2.5 rounded-lg border border-border bg-panel
-                           hover:border-lime/40 active:scale-[0.97] transition-all flex items-center gap-2">
-                <span className="text-xs text-chalk-muted font-bold w-5">{idx + 1}</span>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm text-chalk truncate">{p.name}</div>
-                  {abCount > 0 && (
-                    <div className="flex items-center gap-1">
-                      <span className="text-[10px] text-lime tracking-widest">{'●'.repeat(Math.min(abCount, 5))}</span>
-                      <span className="text-[10px] text-chalk-muted">{abCount} AB</span>
-                    </div>
+        <>
+          <p className="text-xs text-chalk-muted mb-2 text-center">Tap the player who's batting:</p>
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            {battingOrder.map((p, idx) => {
+              const abCount = playerAbCounts[p.id] || 0;
+              return (
+                <button key={p.id} onClick={() => setSelectedPlayerId(p.id)}
+                  className="text-left px-3 py-3 sm:py-2.5 rounded-lg border border-border bg-panel
+                             hover:border-lime/40 active:scale-[0.97] transition-all flex items-center gap-2">
+                  <span className="text-xs text-chalk-muted font-bold w-5">{idx + 1}</span>
+                  {p.number && (
+                    <span className="text-sm font-bold text-lime/40 min-w-[28px]">#{p.number}</span>
                   )}
-                </div>
-              </button>
-            );
-          })}
-        </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm text-chalk truncate">{p.name}</div>
+                    {abCount > 0 && (
+                      <div className="flex items-center gap-1">
+                        <span className="text-[10px] text-lime tracking-widest">{'●'.repeat(Math.min(abCount, 5))}</span>
+                        <span className="text-[10px] text-chalk-muted">{abCount} AB</span>
+                      </div>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </>
       )}
 
       {/* This Inning's At-Bats Log */}
