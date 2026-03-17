@@ -85,7 +85,7 @@ export default function AppShell() {
         <div className="bg-lime/10 border-b border-lime/25 px-4 py-2.5 flex items-center justify-center gap-3 print:hidden">
           {isIOS ? (
             <span className="text-xs text-chalk">
-              📲 Install Dugout IQ: tap <strong className="text-chalk">Share</strong> → <strong className="text-chalk">Add to Home Screen</strong>
+              📲 Add to home screen: tap the <span className="inline-block border border-chalk/30 rounded px-1 text-[10px]">⬆</span> button at the bottom of Safari → scroll down → <strong>"Add to Home Screen"</strong>
             </span>
           ) : (
             <>
