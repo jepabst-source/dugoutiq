@@ -171,7 +171,7 @@ export default function DefenseTab() {
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <div>
-          <h2 className="text-xl font-bold text-lime">Defensive Lineup</h2>
+          <h2 className="text-xl font-bold text-lime">Fielding Lineup</h2>
           <p className="text-xs text-chalk-muted mt-0.5">
             Auto-generates a {standardInnings}-inning rotation + final inning pocket card
           </p>

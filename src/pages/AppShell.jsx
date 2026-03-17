@@ -13,7 +13,7 @@ import PrintTab from '../components/print/PrintTab';
 const TABS = [
   { id: 'roster', label: 'Roster', shortLabel: 'Roster', icon: '👥' },
   { id: 'batting', label: 'Batting', shortLabel: 'Bat', icon: '📊' },
-  { id: 'defense', label: 'Defense', shortLabel: 'Def', icon: '🛡️' },
+  { id: 'defense', label: 'Fielding', shortLabel: 'Field', icon: '🛡️' },
   { id: 'gameday', label: 'Play Ball', shortLabel: '⚾', icon: '⚾', highlight: true },
   { id: 'history', label: 'History', shortLabel: 'Hist', icon: '📋' },
   { id: 'print', label: 'Print', shortLabel: '🖨', icon: '🖨', printOnly: true },
