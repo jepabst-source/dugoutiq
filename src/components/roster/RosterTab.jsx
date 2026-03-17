@@ -84,7 +84,7 @@ function PlayerCard({ player, onEdit, onRemove, onRatingChange, onCatcherToggle,
     <div className="bg-panel border border-border rounded-xl p-4 hover:border-lime/40 transition-colors relative group">
       {/* Jersey number watermark */}
       {p.number && (
-        <div className="absolute top-3 right-4 text-3xl font-bold text-lime/10 select-none">
+        <div className="absolute top-3 right-4 text-3xl font-bold text-lime/25 select-none">
           {p.number}
         </div>
       )}

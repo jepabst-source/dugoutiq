@@ -217,7 +217,7 @@ export default function PortalPage({ teamId }) {
       <div className="max-w-2xl mx-auto px-4 pt-4 pb-2">
         <div className="flex gap-3 flex-wrap text-[10px] text-gray-400">
           <span><strong className="text-gray-600">Form</strong> = last 5 at-bats</span>
-          <span><strong className="text-gray-600">Season</strong> = total points</span>
+          <span><strong className="text-gray-600">Pts</strong> = total batting points</span>
           <span><strong className="text-gray-600">OBP</strong> = on-base %</span>
         </div>
       </div>
@@ -258,7 +258,7 @@ export default function PortalPage({ teamId }) {
                     <div className="flex items-end gap-3 text-center">
                       <div>
                         <div className="text-sm font-semibold text-gray-400">{stats.pts ?? '—'}</div>
-                        <div className="text-[8px] text-gray-300 uppercase">Season</div>
+                        <div className="text-[8px] text-gray-300 uppercase">Pts</div>
                       </div>
                       <div>
                         <div className="text-sm font-semibold text-gray-400">
@@ -268,7 +268,7 @@ export default function PortalPage({ teamId }) {
                       </div>
                       <div>
                         <div className="text-2xl font-bold text-blue-500">
-                          {stats.obp !== null ? stats.obp.toFixed(3).replace(/^0/, '') : '—'}
+                          {stats.obp !== null ? (stats.obp >= 1 ? '1.00' : stats.obp.toFixed(3).replace(/^0/, '')) : '—'}
                         </div>
                         <div className="text-[9px] text-blue-400 uppercase font-semibold">OBP</div>
                       </div>
@@ -277,7 +277,7 @@ export default function PortalPage({ teamId }) {
 
                   {/* Recent positions */}
                   <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
-                    <span className="text-[10px] text-gray-400">Recent Positions:</span>
+                    <span className="text-[10px] text-gray-400">Recent:</span>
                     {positions.length > 0 ? (
                       positions.map((pos, i) => (
                         <span key={i} className="px-2 py-0.5 text-[10px] font-semibold bg-gray-100 text-gray-600 rounded">
