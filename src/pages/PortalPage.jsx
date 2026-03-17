@@ -67,7 +67,9 @@ export default function PortalPage({ teamId }) {
 
     // Games
     unsubs.push(onSnapshot(collection(db, 'teams', teamId, 'games'), snap => {
-      setGames(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      const g = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      console.log('Portal games loaded:', g.length, g.length > 0 ? Object.keys(g[0].lineups || {}) : 'no lineups');
+      setGames(g);
     }));
 
     setLoading(false);
@@ -124,11 +126,16 @@ export default function PortalPage({ teamId }) {
   };
 
   const getRecentPositions = (playerId) => {
-    const sorted = [...games].sort((a, b) => (b.committedAt?.seconds || 0) - (a.committedAt?.seconds || 0));
+    if (!games.length) return [];
+    // Sort by any available timestamp — committedAt could be Firestore Timestamp or plain
+    const sorted = [...games].sort((a, b) => {
+      const aTime = a.committedAt?.seconds || a.committedAt?.toMillis?.() || 0;
+      const bTime = b.committedAt?.seconds || b.committedAt?.toMillis?.() || 0;
+      return bTime - aTime;
+    });
     const positions = [];
     for (const game of sorted.slice(0, 5)) {
       const lineups = game.lineups || {};
-      // Sort innings numerically
       const inningKeys = Object.keys(lineups).sort((a, b) => Number(a) - Number(b));
       let found = false;
       for (const ing of inningKeys) {
@@ -141,14 +148,6 @@ export default function PortalPage({ teamId }) {
           }
         }
         if (found) break;
-      }
-      // If only benched in this game, note it
-      if (!found) {
-        const wasBenched = inningKeys.some(ing => {
-          const asgn = lineups[ing] || {};
-          return Object.entries(asgn).some(([pos, id]) => id === playerId && pos.startsWith('Bench'));
-        });
-        // Don't add bench — just skip this game
       }
     }
     return positions;
