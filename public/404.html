@@ -6,7 +6,7 @@
   <script>
     // GitHub Pages SPA redirect for client-side routing
     var path = window.location.pathname;
-    if (path.indexOf('/join/') > -1 || path.indexOf('/score/') > -1) {
+    if (path.indexOf('/join/') > -1 || path.indexOf('/score/') > -1 || path.indexOf('/portal/') > -1) {
       window.location.replace('/?route=' + encodeURIComponent(path));
     } else {
       window.location.replace('/');

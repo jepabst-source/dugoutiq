@@ -107,7 +107,6 @@ export default function AppShell() {
           <div className="flex items-center gap-3">
             <div className="hidden sm:block">
               <h1 className="text-xl font-bold text-lime tracking-tight leading-none">⚾ Dugout IQ</h1>
-              <div className="text-[8px] text-chalk-muted/50 tracking-wider">by Josh Pabst</div>
             </div>
             <span className="sm:hidden text-sm font-bold text-lime">⚾ Dugout IQ</span>
             {team && (

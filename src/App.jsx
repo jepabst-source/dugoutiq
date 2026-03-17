@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import CreateTeamPage from './pages/CreateTeamPage';
 import JoinTeamPage from './pages/JoinTeamPage';
 import ScorerPage from './pages/ScorerPage';
+import PortalPage from './pages/PortalPage';
 import AppShell from './pages/AppShell';
 
 function getInviteCode() {
@@ -29,10 +30,22 @@ function getScorerCode() {
   return match ? match[1] : null;
 }
 
+function getPortalTeamId() {
+  const path = window.location.pathname;
+  const route = new URLSearchParams(window.location.search).get('route') || '';
+  const combined = path + route;
+  const match = combined.match(/\/portal\/([a-zA-Z0-9]+)/);
+  if (match) {
+    try { window.history.replaceState(null, '', '/portal/' + match[1]); } catch {}
+  }
+  return match ? match[1] : null;
+}
+
 function AppContent() {
   const { user, userDoc, loading, activeTeamId } = useAuth();
   const [inviteCode] = useState(() => getInviteCode());
   const [scorerCode] = useState(() => getScorerCode());
+  const [portalTeamId] = useState(() => getPortalTeamId());
   const [showUpgradeSuccess] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('upgraded') === 'true') {
@@ -41,6 +54,11 @@ function AppContent() {
     }
     return false;
   });
+
+  // Portal page — no auth required
+  if (portalTeamId) {
+    return <PortalPage teamId={portalTeamId} />;
+  }
 
   // Scorer page — no auth required
   if (scorerCode) {

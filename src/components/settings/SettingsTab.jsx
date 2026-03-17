@@ -219,16 +219,42 @@ export default function SettingsTab() {
       </Section>
 
       {/* Parent Portal */}
-      <Section title="🔒 Parent Portal Access Code">
-        <p className="text-xs text-chalk-muted mb-3">Share the portal URL + this 4-digit code with parents. They don't need an account.</p>
+      <Section title="🔒 Parent Portal">
+        <p className="text-xs text-chalk-muted mb-3">Share this link and access code with parents. They can view player stats — no account needed.</p>
+        
+        {/* Portal URL */}
+        {team?.id && (
+          <div className="bg-field border border-lime/20 rounded-lg p-3 mb-3">
+            <p className="text-[10px] text-chalk-muted uppercase tracking-wider mb-1">Portal Link</p>
+            <div className="flex items-center gap-2">
+              <input type="text" readOnly
+                value={`${window.location.origin}/portal/${team.id}`}
+                className="flex-1 px-3 py-2 rounded-lg bg-panel border border-border text-chalk text-xs focus:outline-none"
+                onClick={e => e.target.select()} />
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/portal/${team.id}`);
+                  showSaved('Link copied!');
+                }}
+                className="px-3 py-2 rounded-lg bg-lime text-field font-bold text-xs hover:bg-lime-bright transition-all whitespace-nowrap">
+                📋 Copy
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* PIN */}
         <div className="flex items-center gap-3">
-          <input type="tel" inputMode="numeric" maxLength={4} value={portalCode}
-            onChange={e => setPortalCode(e.target.value.replace(/\D/g, '').slice(0, 4))}
-            placeholder="1234"
-            className="w-24 px-3 py-2 rounded-lg bg-field border border-border text-chalk text-lg font-bold text-center tracking-widest
-                       focus:border-lime focus:outline-none" />
+          <div>
+            <p className="text-[10px] text-chalk-muted uppercase tracking-wider mb-1">Access Code</p>
+            <input type="tel" inputMode="numeric" maxLength={4} value={portalCode}
+              onChange={e => setPortalCode(e.target.value.replace(/\D/g, '').slice(0, 4))}
+              placeholder="1234"
+              className="w-24 px-3 py-2 rounded-lg bg-field border border-border text-chalk text-lg font-bold text-center tracking-widest
+                         focus:border-lime focus:outline-none" />
+          </div>
           <button onClick={handleSaveTeamInfo}
-            className="px-3 py-2 rounded-lg bg-lime text-field font-bold text-sm hover:bg-lime-bright transition-all">
+            className="px-3 py-2 rounded-lg bg-lime text-field font-bold text-sm hover:bg-lime-bright transition-all mt-4">
             Save
           </button>
         </div>
