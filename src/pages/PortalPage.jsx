@@ -128,9 +128,27 @@ export default function PortalPage({ teamId }) {
     const positions = [];
     for (const game of sorted.slice(0, 5)) {
       const lineups = game.lineups || {};
-      for (const [inning, asgn] of Object.entries(lineups)) {
-        const pos = Object.entries(asgn).find(([p, id]) => id === playerId && !p.startsWith('Bench'));
-        if (pos) { positions.push(pos[0]); break; }
+      // Sort innings numerically
+      const inningKeys = Object.keys(lineups).sort((a, b) => Number(a) - Number(b));
+      let found = false;
+      for (const ing of inningKeys) {
+        const asgn = lineups[ing] || {};
+        for (const [pos, id] of Object.entries(asgn)) {
+          if (id === playerId && !pos.startsWith('Bench')) {
+            positions.push(pos);
+            found = true;
+            break;
+          }
+        }
+        if (found) break;
+      }
+      // If only benched in this game, note it
+      if (!found) {
+        const wasBenched = inningKeys.some(ing => {
+          const asgn = lineups[ing] || {};
+          return Object.entries(asgn).some(([pos, id]) => id === playerId && pos.startsWith('Bench'));
+        });
+        // Don't add bench — just skip this game
       }
     }
     return positions;
