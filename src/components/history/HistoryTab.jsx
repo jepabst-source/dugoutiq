@@ -42,7 +42,7 @@ export default function HistoryTab() {
 
       {/* Position History Grid */}
       {Object.keys(posHistory).length > 0 && (
-        <div className="bg-panel border border-border rounded-xl overflow-hidden mb-6">
+        <div className="bg-panel border border-border rounded-xl shadow-sm overflow-hidden mb-6">
           <div className="px-4 py-2.5 bg-field-light border-b border-border">
             <span className="text-xs font-bold text-lime uppercase tracking-wider">Position History (All Committed Games)</span>
           </div>
@@ -101,7 +101,7 @@ export default function HistoryTab() {
 
       {/* Committed Games History */}
       {savedGames.length > 0 && (
-        <div className="bg-panel border border-border rounded-xl overflow-hidden mb-6">
+        <div className="bg-panel border border-border rounded-xl shadow-sm overflow-hidden mb-6">
           <div className="px-4 py-2.5 bg-field-light border-b border-border">
             <span className="text-xs font-bold text-chalk-muted uppercase tracking-wider">Committed Games ({savedGames.length})</span>
           </div>
@@ -144,7 +144,7 @@ export default function HistoryTab() {
       )}
 
       {/* Season Batting Stats Table */}
-      <div className="bg-panel border border-border rounded-xl overflow-hidden mb-6">
+      <div className="bg-panel border border-border rounded-xl shadow-sm overflow-hidden mb-6">
         <div className="px-4 py-2.5 bg-field-light border-b border-border">
           <span className="text-xs font-bold text-lime uppercase tracking-wider">Season Batting Stats</span>
         </div>
@@ -191,7 +191,7 @@ export default function HistoryTab() {
       </div>
 
       {/* Game-by-Game At-Bat Log */}
-      <div className="bg-panel border border-border rounded-xl overflow-hidden">
+      <div className="bg-panel border border-border rounded-xl shadow-sm overflow-hidden">
         <div className="px-4 py-2.5 bg-field-light border-b border-border flex items-center justify-between">
           <span className="text-xs font-bold text-chalk-muted uppercase tracking-wider">At-Bat Log by Game</span>
           {atBats.length > 0 && (

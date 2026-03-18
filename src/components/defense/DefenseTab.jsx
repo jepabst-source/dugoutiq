@@ -206,7 +206,7 @@ export default function DefenseTab() {
       </div>
 
       {/* Attendance */}
-      <div className="bg-panel border border-border rounded-xl p-4 mb-4">
+      <div className="bg-panel border border-border rounded-xl shadow-sm p-4 mb-4">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-bold text-lime uppercase tracking-wider">✅ Who's playing today?</span>
           <div className="flex gap-2">
@@ -362,7 +362,7 @@ function InningCard({ inning, assignment, isDevInning, mode, players, benchCount
   }
 
   return (
-    <div className="bg-panel border border-border rounded-xl overflow-hidden">
+    <div className="bg-panel border border-border rounded-xl shadow-sm overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-field-light border-b border-border">
         <div className="flex items-center gap-2">

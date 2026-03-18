@@ -165,7 +165,7 @@ export default function BattingTab() {
       )}
 
       {/* Attendance */}
-      <div className="bg-panel border border-border rounded-xl p-4 mb-4">
+      <div className="bg-panel border border-border rounded-xl shadow-sm p-4 mb-4">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-bold text-lime uppercase tracking-wider">✅ Who's playing today?</span>
           <div className="flex gap-2">

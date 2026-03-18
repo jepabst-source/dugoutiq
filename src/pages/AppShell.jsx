@@ -105,9 +105,7 @@ export default function AppShell() {
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           {/* Logo + Team Switcher */}
           <div className="flex items-center gap-3">
-            <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-lime tracking-tight leading-none">⚾ Dugout IQ</h1>
-            </div>
+            <img src="/logo-square.jpg" alt="Dugout IQ" className="w-9 h-9 rounded-lg" />
             <span className="sm:hidden text-sm font-bold text-lime">⚾ Dugout IQ</span>
             {team && (
               <div className="relative">
@@ -175,12 +173,10 @@ export default function AppShell() {
                            transition-all duration-150 whitespace-nowrap
                   ${tab.printOnly ? 'hidden sm:block' : ''}
                   ${activeTab === tab.id
-                    ? 'bg-gray-100 text-lime font-bold shadow-sm'
+                    ? 'bg-lime text-white font-bold shadow-sm'
                     : tab.highlight
                       ? 'text-gold hover:text-gold-bright hover:bg-panel-hover'
-                      : tab.printOnly
-                        ? 'text-sky hover:text-sky hover:bg-panel-hover'
-                        : 'text-chalk-muted hover:text-chalk hover:bg-panel-hover'
+                      : 'text-chalk-muted hover:text-chalk hover:bg-panel-hover'
                   }`}
               >
                 <span className="sm:hidden">{tab.shortLabel}</span>

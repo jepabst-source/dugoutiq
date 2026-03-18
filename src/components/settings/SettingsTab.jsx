@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTeam } from '../../contexts/TeamContext';
 import { useAuth } from '../../contexts/AuthContext';
 import StarRating from '../shared/StarRating';
@@ -8,7 +8,7 @@ import { db } from '../../lib/firebase';
 const ALL_POSITIONS = ['Pitcher', 'Catcher', '1st Base', '2nd Base', 'Shortstop', '3rd Base', 'Left Field', 'Center Field', 'Right Field'];
 
 export default function SettingsTab() {
-  const { team, updateTeam, updateSettings, generateInviteCode, removeAssistant, deleteTeam } = useTeam();
+  const { team, updateTeam, updateSettings, generateInviteCode, removeAssistant, deleteTeam, getActivePlayers, battingOrder: savedOrder } = useTeam();
   const { user } = useAuth();
   const settings = team?.settings || {};
 
@@ -21,6 +21,135 @@ export default function SettingsTab() {
   const [inviteLink, setInviteLink] = useState('');
   const [generatingInvite, setGeneratingInvite] = useState(false);
   const [assistants, setAssistants] = useState([]);
+  const [exporting, setExporting] = useState(false);
+
+  const exportLineup = useCallback(async () => {
+    setExporting(true);
+    try {
+      const players = getActivePlayers();
+      const order = savedOrder?.length ? savedOrder : players;
+      // Read defensive lineups from localStorage (same as PrintTab)
+      const storedLineups = JSON.parse(localStorage.getItem(`dugoutiq_lineups_${team?.id}`) || '{}');
+
+      const canvas = document.createElement('canvas');
+      const w = 900, padding = 40;
+      const lineH = 28, sectionGap = 20;
+      const innings = Object.keys(storedLineups).sort((a, b) => Number(a) - Number(b));
+
+      // Calculate height
+      let h = padding + 60 + sectionGap; // header
+      h += order.length * lineH + sectionGap + 30; // batting order
+      for (const ing of innings) {
+        h += 30 + 10 * lineH + sectionGap; // each inning
+      }
+      h += padding;
+
+      canvas.width = w;
+      canvas.height = Math.max(h, 400);
+      const ctx = canvas.getContext('2d');
+
+      // Background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, canvas.height);
+
+      let y = padding;
+
+      // Header
+      ctx.fillStyle = '#1e3a5f';
+      ctx.font = 'bold 28px DM Sans, sans-serif';
+      ctx.fillText(team?.name || 'Team', padding, y + 28);
+      ctx.fillStyle = '#9ca3af';
+      ctx.font = '14px DM Sans, sans-serif';
+      ctx.fillText(`${team?.seasonLabel || ''} ${team?.seasonYear || ''} · Dugout IQ`, padding, y + 48);
+      y += 60 + sectionGap;
+
+      // Batting Order
+      ctx.fillStyle = '#1e3a5f';
+      ctx.font = 'bold 16px DM Sans, sans-serif';
+      ctx.fillText('BATTING ORDER', padding, y + 16);
+      y += 28;
+      ctx.strokeStyle = '#e5e7eb';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(w - padding, y); ctx.stroke();
+      y += 8;
+
+      order.forEach((p, i) => {
+        ctx.fillStyle = '#9ca3af';
+        ctx.font = '14px DM Sans, sans-serif';
+        ctx.fillText(`${i + 1}.`, padding, y + 18);
+        ctx.fillStyle = '#1f2937';
+        ctx.font = '15px DM Sans, sans-serif';
+        ctx.fillText(p.name, padding + 30, y + 18);
+        if (p.number) {
+          ctx.fillStyle = '#9ca3af';
+          ctx.font = '13px DM Sans, sans-serif';
+          ctx.fillText(`#${p.number}`, padding + 200, y + 18);
+        }
+        y += lineH;
+      });
+      y += sectionGap;
+
+      // Defensive Lineups
+      for (const ing of innings) {
+        const asgn = storedLineups[ing] || {};
+        ctx.fillStyle = '#1e3a5f';
+        ctx.font = 'bold 16px DM Sans, sans-serif';
+        ctx.fillText(`INNING ${ing}`, padding, y + 16);
+        y += 28;
+        ctx.strokeStyle = '#e5e7eb';
+        ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(w - padding, y); ctx.stroke();
+        y += 8;
+
+        for (const [pos, pid] of Object.entries(asgn)) {
+          const pl = players.find(p => p.id === pid);
+          ctx.fillStyle = '#9ca3af';
+          ctx.font = '13px DM Sans, sans-serif';
+          const posLabel = pos.replace('Center Field', 'CF').replace('Left Field', 'LF').replace('Right Field', 'RF')
+            .replace('1st Base', '1B').replace('2nd Base', '2B').replace('3rd Base', '3B')
+            .replace('Shortstop', 'SS').replace('Pitcher', 'P').replace('Catcher', 'C');
+          ctx.fillText(posLabel, padding, y + 16);
+          ctx.fillStyle = '#1f2937';
+          ctx.font = '15px DM Sans, sans-serif';
+          ctx.fillText(pl?.name || '—', padding + 80, y + 16);
+          y += lineH;
+        }
+        y += sectionGap;
+      }
+
+      // Footer
+      ctx.fillStyle = '#d1d5db';
+      ctx.font = '11px DM Sans, sans-serif';
+      ctx.fillText('lineupman.com · Dugout IQ', padding, canvas.height - 15);
+
+      // Convert to blob and share/download
+      canvas.toBlob(async (blob) => {
+        const file = new File([blob], 'lineup.jpg', { type: 'image/jpeg' });
+
+        // Try Web Share API (works on mobile)
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({ files: [file], title: 'Lineup' });
+            setExporting(false);
+            return;
+          } catch (e) {
+            // User cancelled or failed — fall through to download
+          }
+        }
+
+        // Fallback: download
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `lineup-${team?.name || 'team'}.jpg`;
+        a.click();
+        URL.revokeObjectURL(url);
+        setExporting(false);
+      }, 'image/jpeg', 0.92);
+    } catch (err) {
+      console.error('Export error:', err);
+      setExporting(false);
+    }
+  }, [team, getActivePlayers, savedOrder]);
 
   // Load assistant coach details
   useEffect(() => {
@@ -82,6 +211,21 @@ export default function SettingsTab() {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-lime">Settings</h2>
         {saved && <span className="text-xs text-lime animate-pulse">✓ {saved}</span>}
+      </div>
+
+      {/* Export Lineup */}
+      <div className="bg-panel border border-border rounded-xl shadow-sm p-4 mb-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-sm font-bold text-chalk">📲 Export Lineup</div>
+            <div className="text-[10px] text-chalk-muted">Save batting order + defensive lineup as an image</div>
+          </div>
+          <button onClick={exportLineup} disabled={exporting}
+            className="px-4 py-2 rounded-lg bg-lime text-white font-bold text-sm
+                       hover:bg-lime-bright active:scale-[0.97] transition-all disabled:opacity-50">
+            {exporting ? 'Saving...' : 'Save Image'}
+          </button>
+        </div>
       </div>
 
       {/* Team Info */}
@@ -452,7 +596,7 @@ export default function SettingsTab() {
 
 function Section({ title, children }) {
   return (
-    <div className="bg-panel border border-border rounded-xl p-4 mb-4">
+    <div className="bg-panel border border-border rounded-xl shadow-sm p-4 mb-4">
       <h3 className="text-sm font-bold text-lime uppercase tracking-wider mb-3">{title}</h3>
       {children}
     </div>

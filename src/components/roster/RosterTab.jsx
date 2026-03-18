@@ -81,72 +81,41 @@ function PlayerCard({ player, onEdit, onRemove, onRatingChange, onCatcherToggle,
   const rolling = getRollingAvg(p.id);
 
   return (
-    <div className="bg-panel border border-border rounded-xl p-4 hover:border-lime/40 transition-colors relative group">
-      {/* Jersey number watermark */}
+    <div className="bg-panel border border-border rounded-xl shadow-sm p-4 transition-colors relative group">
+      {/* Jersey number */}
       {p.number && (
-        <div className="absolute top-3 right-4 text-3xl font-bold text-lime/25 select-none">
-          {p.number}
+        <div className="absolute top-3 right-4 text-2xl font-bold text-chalk-muted/25 select-none">
+          #{p.number}
         </div>
       )}
 
-      {/* Name + Tags */}
-      <div className="mb-1">
-        <span className="text-lg font-bold text-chalk">{p.name}</span>
-        {p.canPitch && (
-          <span className="ml-2 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-red/20 text-red border border-red/30 rounded">
-            Pitcher
-          </span>
-        )}
-        {p.canCatch && (
-          <span className="ml-2 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-sky/20 text-sky border border-sky/30 rounded">
-            Catcher
-          </span>
-        )}
+      {/* Name */}
+      <div className="text-lg font-bold text-chalk mb-0.5">{p.name}</div>
+
+      {/* Def Rating + Stars inline */}
+      <div className="flex items-center gap-1 mb-2">
+        <span className="text-xs text-chalk-muted">Def Rating: {p.defRating}/5</span>
+        <StarRating value={p.defRating} onChange={onRatingChange} size="sm" />
       </div>
 
-      <div className="text-xs text-chalk-muted mb-2">
-        Def Rating: {p.defRating}/5
-      </div>
-
-      {/* Star Rating */}
-      <StarRating value={p.defRating} onChange={onRatingChange} size="md" />
-
-      {/* Stat Badges */}
+      {/* Stat Badges — gray borders only */}
       {(stats.obp !== null || rolling.absCount > 0) && (
-        <div className="flex gap-1.5 flex-wrap mt-3">
+        <div className="flex gap-1.5 flex-wrap mb-2">
           {rolling.absCount > 0 && (
-            <span className="px-2 py-0.5 text-[10px] bg-gold/8 border border-gold/20 rounded text-chalk-muted">
-              <strong className="text-gold">{rolling.avg.toFixed(2)}</strong> avg
+            <span className="px-2 py-0.5 text-[11px] border border-border rounded text-chalk-dim">
+              <strong>{rolling.avg.toFixed(2)}</strong> avg
             </span>
           )}
           {stats.obp !== null && (
-            <span className="px-2 py-0.5 text-[10px] bg-sky/8 border border-sky/20 rounded text-chalk-muted">
+            <span className="px-2 py-0.5 text-[11px] border border-border rounded text-chalk-dim">
               <strong className="text-sky">{stats.obp.toFixed(3).replace(/^0/, '')}</strong> OBP
             </span>
           )}
         </div>
       )}
 
-      {/* Position Preferences */}
-      {p.prefPositions?.length > 0 && (
-        <div className="flex gap-1.5 flex-wrap mt-3">
-          {p.prefPositions.map(pos => (
-            <span key={pos} className="px-2 py-0.5 text-[10px] font-semibold bg-lime/10 text-lime border border-lime/25 rounded">
-              {pos}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Notes */}
-      {p.notes && (
-        <div className="mt-3 pt-2 border-t border-border text-xs text-chalk-muted leading-relaxed">
-          📝 {p.notes}
-        </div>
-      )}
-
-      {/* Actions */}
-      <div className="mt-3 flex items-center gap-3 flex-wrap">
+      {/* Actions row */}
+      <div className="flex items-center gap-3 flex-wrap">
         <label className="flex items-center gap-1.5 text-xs text-chalk-muted cursor-pointer">
           <input type="checkbox" checked={p.canPitch || false}
             onChange={e => onPitcherToggle(e.target.checked)}
@@ -161,14 +130,32 @@ function PlayerCard({ player, onEdit, onRemove, onRatingChange, onCatcherToggle,
         </label>
         <div className="flex-1" />
         <button onClick={onEdit}
-          className="px-2.5 py-1 text-xs font-semibold text-chalk-muted bg-border/40 rounded-md hover:bg-border hover:text-chalk transition-colors">
+          className="px-2.5 py-1 text-xs font-semibold text-chalk-muted bg-field rounded-md hover:bg-border transition-colors">
           ✏️ Edit
         </button>
         <button onClick={onRemove}
-          className="px-2.5 py-1 text-xs font-semibold text-red bg-red/10 rounded-md hover:bg-red/20 transition-colors">
-          Remove
+          className="px-2 py-1 text-chalk-muted hover:text-red transition-colors">
+          🗑
         </button>
       </div>
+
+      {/* Position Preferences */}
+      {p.prefPositions?.length > 0 && (
+        <div className="flex gap-1.5 flex-wrap mt-2 pt-2 border-t border-border">
+          {p.prefPositions.map(pos => (
+            <span key={pos} className="px-2 py-0.5 text-[10px] font-semibold text-chalk-muted border border-border rounded">
+              {pos}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Notes */}
+      {p.notes && (
+        <div className="mt-2 pt-2 border-t border-border text-xs text-chalk-muted leading-relaxed">
+          📝 {p.notes}
+        </div>
+      )}
     </div>
   );
 }
@@ -206,7 +193,7 @@ function PlayerForm({ onSave, onCancel, initial }) {
   };
 
   return (
-    <div className="bg-panel border border-border rounded-xl p-5 mb-4">
+    <div className="bg-panel border border-border rounded-xl shadow-sm p-5 mb-4">
       <h3 className="text-sm font-bold text-lime uppercase tracking-wider mb-4">
         {initial ? 'Edit Player' : 'New Player'}
       </h3>
