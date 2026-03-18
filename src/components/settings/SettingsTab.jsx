@@ -62,22 +62,41 @@ export default function SettingsTab() {
 
       canvas.toBlob(async (blob) => {
         if (!blob) { setExporting(false); return; }
+        
+        // Try native share with image
         const file = new File([blob], 'lineup.jpg', { type: 'image/jpeg' });
-
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
-            await navigator.share({ files: [file], title: 'Lineup' });
+            await navigator.share({
+              files: [file],
+              title: `${team?.name || 'Team'} Lineup`,
+              text: 'Dugout card from Dugout IQ',
+            });
             setExporting(false);
             return;
-          } catch (e) { /* cancelled */ }
+          } catch (e) { /* cancelled or failed */ }
         }
 
+        // Fallback: open image in new tab (long-press to save on mobile)
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `lineup-${team?.name || 'team'}.jpg`;
-        a.click();
-        URL.revokeObjectURL(url);
+        const img = new Image();
+        img.src = url;
+        const w = window.open('');
+        if (w) {
+          w.document.write(`
+            <html><head><title>Lineup</title><meta name="viewport" content="width=device-width,initial-scale=1">
+            <style>body{margin:0;display:flex;justify-content:center;background:#f0f0f0;padding:16px}
+            img{max-width:100%;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}</style></head>
+            <body><img src="${url}"><p style="text-align:center;font-family:sans-serif;font-size:12px;color:#999;margin-top:12px">Long-press the image to save to camera roll</p></body></html>
+          `);
+        } else {
+          // If popup blocked, download directly
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `lineup-${team?.name || 'team'}.jpg`;
+          a.click();
+          URL.revokeObjectURL(url);
+        }
         setExporting(false);
       }, 'image/jpeg', 0.92);
     } catch (err) {
