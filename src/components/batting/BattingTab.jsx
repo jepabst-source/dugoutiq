@@ -127,8 +127,8 @@ export default function BattingTab() {
         </div>
         <button
           onClick={handleGenerate}
-          className="px-4 py-2 rounded-lg bg-gold text-field font-bold text-sm
-                     hover:bg-gold-bright active:scale-[0.97] transition-all"
+          className="px-4 py-2 rounded-lg bg-lime text-white font-bold text-sm
+                     hover:bg-lime-bright active:scale-[0.97] transition-all"
         >
           ⚡ Refresh Order
         </button>

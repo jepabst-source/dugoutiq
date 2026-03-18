@@ -321,7 +321,7 @@ export default function DefenseTab() {
                 assignment={lfg}
                 players={activePlayers}
                 benchCount={benchCount}
-                accentClass="text-lime border-lime/30 bg-lime/5"
+                accentClass="text-lime border-lime bg-white"
                 onRegenerate={handleRegenerateLFG}
               />
               <PocketCard
@@ -330,7 +330,7 @@ export default function DefenseTab() {
                 assignment={oor}
                 players={activePlayers}
                 benchCount={benchCount}
-                accentClass="text-chalk-muted border-border bg-panel-hover"
+                accentClass="text-chalk-dim border-lime bg-white"
                 onRegenerate={handleRegenerateOOR}
               />
             </div>
@@ -364,7 +364,7 @@ function InningCard({ inning, assignment, isDevInning, mode, players, benchCount
   return (
     <div className="bg-panel border border-border rounded-xl shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-field-light border-b border-border">
+      <div className="flex items-center justify-between px-4 py-2.5 bg-white border-b border-border">
         <div className="flex items-center gap-2">
           <span className="text-sm font-bold text-lime tracking-wider">INNING {inning}</span>
           {/* Mode toggle */}
@@ -473,7 +473,7 @@ function PocketCard({ label, sublabel, assignment, players, benchCount, accentCl
 
   return (
     <div className={`border rounded-xl overflow-hidden ${accentClass}`}>
-      <div className="flex items-center justify-between px-4 py-2.5 bg-field-light border-b border-border">
+      <div className="flex items-center justify-between px-4 py-2.5 bg-white border-b border-border">
         <div className="flex items-center gap-2">
           <span className="text-sm font-bold tracking-wider">
             {label === 'LFG' ? '⚡' : '🔄'} {label}
