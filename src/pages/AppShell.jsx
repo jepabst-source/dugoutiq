@@ -174,7 +174,7 @@ export default function AppShell() {
                   ${activeTab === tab.id
                     ? 'bg-lime text-white font-bold shadow-sm'
                     : tab.highlight
-                      ? 'text-gold hover:text-gold-bright hover:bg-panel-hover'
+                      ? 'text-red hover:text-red-dim hover:bg-panel-hover'
                       : 'text-chalk-muted hover:text-chalk hover:bg-panel-hover'
                   }`}
               >

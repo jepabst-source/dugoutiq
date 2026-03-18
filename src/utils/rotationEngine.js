@@ -98,16 +98,14 @@ export function buildFullRotation({ players, standardInnings, settings, position
         : 0;
       const upperQuota = avgLowerBench / 3;
 
-      const benchSort = isDevInning
-        ? () => Math.random() - 0.5
-        : (a, b) => {
+      const benchSort = (a, b) => {
             // Primary: rating tier (lower rated sit first)
             const nudge = avgLowerBench >= 3;
             const aEff = (nudge && a.defRating >= 4 && benchHistory(a) < upperQuota) ? a.defRating - 1.5 : a.defRating;
             const bEff = (nudge && b.defRating >= 4 && benchHistory(b) < upperQuota) ? b.defRating - 1.5 : b.defRating;
             const tier = Math.round(aEff) - Math.round(bEff);
             if (tier !== 0) return tier;
-            // Secondary: STRICT — fewest total bench appearances sits next (hard tiebreaker, no jitter)
+            // Secondary: STRICT — fewest total bench appearances sits next (hard tiebreaker)
             return benchHistory(a) - benchHistory(b);
           };
 

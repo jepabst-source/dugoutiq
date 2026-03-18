@@ -269,8 +269,8 @@ export default function SettingsTab() {
         {saved && <span className="text-xs text-lime animate-pulse">✓ {saved}</span>}
       </div>
 
-      {/* Export Lineup */}
-      <div className="bg-panel border border-border rounded-xl shadow-sm p-4 mb-4">
+      {/* Export Lineup — mobile only */}
+      <div className="sm:hidden bg-panel border border-border rounded-xl shadow-sm p-4 mb-4">
         <div className="flex items-center justify-between">
           <div>
             <div className="text-sm font-bold text-chalk">📲 Export Lineup</div>
