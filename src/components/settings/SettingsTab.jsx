@@ -26,175 +26,36 @@ export default function SettingsTab() {
   const exportLineup = useCallback(async () => {
     setExporting(true);
     try {
-      const players = getActivePlayers();
-      const order = savedOrder?.length ? savedOrder : players;
-      const storedData = JSON.parse(localStorage.getItem('dugoutiq_currentLineup') || '{}');
-      const storedInnings = storedData.innings || [];
-
-      const canvas = document.createElement('canvas');
-      const w = 900, padding = 40;
-      const lineH = 28, sectionGap = 20;
-
-      // Calculate height generously
-      let h = padding + 60 + sectionGap; // header
-      h += order.length * lineH + sectionGap + 30; // batting order
-      for (const ing of storedInnings) {
-        const asgn = ing.assignments || ing || {};
-        const posCount = Object.keys(asgn).filter(k => k !== 'mode').length;
-        h += 30 + posCount * lineH + sectionGap;
+      const html2canvas = (await import('html2canvas')).default;
+      
+      // Find the print content — it's rendered in the PrintTab
+      // We need to temporarily render it offscreen
+      const printEl = document.getElementById('print-export-target');
+      if (!printEl) {
+        alert('Generate a lineup on the Fielding tab first, then try again.');
+        setExporting(false);
+        return;
       }
-      if (storedData.lfg) h += 30 + Object.keys(storedData.lfg).length * lineH + sectionGap;
-      if (storedData.oor) h += 30 + Object.keys(storedData.oor).length * lineH + sectionGap;
-      h += padding + 40; // extra buffer
 
-      canvas.width = w;
-      canvas.height = Math.max(h, 400);
-      const ctx = canvas.getContext('2d');
-
-      // Background
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, w, canvas.height);
-
-      let y = padding;
-
-      // Header
-      ctx.fillStyle = '#1e3a5f';
-      ctx.font = 'bold 28px DM Sans, sans-serif';
-      ctx.fillText(team?.name || 'Team', padding, y + 28);
-      ctx.fillStyle = '#9ca3af';
-      ctx.font = '14px DM Sans, sans-serif';
-      ctx.fillText(`${team?.seasonLabel || ''} ${team?.seasonYear || ''} · Dugout IQ`, padding, y + 48);
-      y += 60 + sectionGap;
-
-      // Batting Order
-      ctx.fillStyle = '#1e3a5f';
-      ctx.font = 'bold 16px DM Sans, sans-serif';
-      ctx.fillText('BATTING ORDER', padding, y + 16);
-      y += 28;
-      ctx.strokeStyle = '#e5e7eb';
-      ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(w - padding, y); ctx.stroke();
-      y += 8;
-
-      order.forEach((p, i) => {
-        ctx.fillStyle = '#9ca3af';
-        ctx.font = '14px DM Sans, sans-serif';
-        ctx.fillText(`${i + 1}.`, padding, y + 18);
-        ctx.fillStyle = '#1f2937';
-        ctx.font = '15px DM Sans, sans-serif';
-        ctx.fillText(p.name, padding + 30, y + 18);
-        if (p.number) {
-          ctx.fillStyle = '#9ca3af';
-          ctx.font = '13px DM Sans, sans-serif';
-          ctx.fillText(`#${p.number}`, padding + 200, y + 18);
-        }
-        y += lineH;
+      const canvas = await html2canvas(printEl, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        logging: false,
       });
-      y += sectionGap;
 
-      // Defensive Lineups
-      for (let i = 0; i < storedInnings.length; i++) {
-        const ing = storedInnings[i];
-        const asgn = (ing && typeof ing.assignments === 'object' && ing.assignments) ? ing.assignments : {};
-        const mode = ing?.mode || 'competitive';
-        ctx.fillStyle = '#1e3a5f';
-        ctx.font = 'bold 16px DM Sans, sans-serif';
-        ctx.fillText(`INNING ${i + 1}  (${mode})`, padding, y + 16);
-        y += 28;
-        ctx.strokeStyle = '#e5e7eb';
-        ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(w - padding, y); ctx.stroke();
-        y += 8;
-
-        const positions = Object.entries(asgn).filter(([pos]) => pos !== 'mode');
-        for (const [pos, pid] of positions) {
-          const pl = players.find(p => p.id === pid);
-          ctx.fillStyle = '#9ca3af';
-          ctx.font = '13px DM Sans, sans-serif';
-          const posLabel = pos.replace('Center Field', 'CF').replace('Left Field', 'LF').replace('Right Field', 'RF')
-            .replace('1st Base', '1B').replace('2nd Base', '2B').replace('3rd Base', '3B')
-            .replace('Shortstop', 'SS').replace('Pitcher', 'P').replace('Catcher', 'C');
-          ctx.fillText(posLabel, padding, y + 16);
-          ctx.fillStyle = '#1f2937';
-          ctx.font = '15px DM Sans, sans-serif';
-          ctx.fillText(pl?.name || '—', padding + 80, y + 16);
-          y += lineH;
-        }
-        y += sectionGap;
-      }
-
-      // LFG Pocket Card
-      const lfgData = (storedData.lfg && typeof storedData.lfg === 'object' && !Array.isArray(storedData.lfg)) ? storedData.lfg : null;
-      if (lfgData && Object.keys(lfgData).length) {
-        ctx.fillStyle = '#1e3a5f';
-        ctx.font = 'bold 16px DM Sans, sans-serif';
-        ctx.fillText('LFG (Win Mode)', padding, y + 16);
-        y += 28;
-        ctx.strokeStyle = '#e5e7eb';
-        ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(w - padding, y); ctx.stroke();
-        y += 8;
-        for (const [pos, pid] of Object.entries(lfgData)) {
-          const pl = players.find(p => p.id === pid);
-          ctx.fillStyle = '#9ca3af';
-          ctx.font = '13px DM Sans, sans-serif';
-          const posLabel = pos.replace('Center Field', 'CF').replace('Left Field', 'LF').replace('Right Field', 'RF')
-            .replace('1st Base', '1B').replace('2nd Base', '2B').replace('3rd Base', '3B')
-            .replace('Shortstop', 'SS').replace('Pitcher', 'P').replace('Catcher', 'C');
-          ctx.fillText(posLabel, padding, y + 16);
-          ctx.fillStyle = '#1f2937';
-          ctx.font = '15px DM Sans, sans-serif';
-          ctx.fillText(pl?.name || '—', padding + 80, y + 16);
-          y += lineH;
-        }
-        y += sectionGap;
-      }
-
-      // OOR Pocket Card
-      const oorData = (storedData.oor && typeof storedData.oor === 'object' && !Array.isArray(storedData.oor)) ? storedData.oor : null;
-      if (oorData && Object.keys(oorData).length) {
-        ctx.fillStyle = '#1e3a5f';
-        ctx.font = 'bold 16px DM Sans, sans-serif';
-        ctx.fillText('OOR (Rest Mode)', padding, y + 16);
-        y += 28;
-        ctx.strokeStyle = '#e5e7eb';
-        ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(w - padding, y); ctx.stroke();
-        y += 8;
-        for (const [pos, pid] of Object.entries(oorData)) {
-          const pl = players.find(p => p.id === pid);
-          ctx.fillStyle = '#9ca3af';
-          ctx.font = '13px DM Sans, sans-serif';
-          const posLabel = pos.replace('Center Field', 'CF').replace('Left Field', 'LF').replace('Right Field', 'RF')
-            .replace('1st Base', '1B').replace('2nd Base', '2B').replace('3rd Base', '3B')
-            .replace('Shortstop', 'SS').replace('Pitcher', 'P').replace('Catcher', 'C');
-          ctx.fillText(posLabel, padding, y + 16);
-          ctx.fillStyle = '#1f2937';
-          ctx.font = '15px DM Sans, sans-serif';
-          ctx.fillText(pl?.name || '—', padding + 80, y + 16);
-          y += lineH;
-        }
-        y += sectionGap;
-      }
-
-      // Footer
-      ctx.fillStyle = '#d1d5db';
-      ctx.font = '11px DM Sans, sans-serif';
-      ctx.fillText('lineupman.com · Dugout IQ', padding, canvas.height - 15);
-
-      // Convert to blob and share/download
       canvas.toBlob(async (blob) => {
+        if (!blob) { setExporting(false); return; }
         const file = new File([blob], 'lineup.jpg', { type: 'image/jpeg' });
 
-        // Try Web Share API (works on mobile)
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
             await navigator.share({ files: [file], title: 'Lineup' });
             setExporting(false);
             return;
-          } catch (e) {
-            // User cancelled or failed — fall through to download
-          }
+          } catch (e) { /* cancelled */ }
         }
 
-        // Fallback: download
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -205,10 +66,10 @@ export default function SettingsTab() {
       }, 'image/jpeg', 0.92);
     } catch (err) {
       console.error('Export error:', err);
-      alert('Export failed: ' + err.message);
+      alert('Export failed: ' + (err.message || err));
       setExporting(false);
     }
-  }, [team, getActivePlayers, savedOrder]);
+  }, [team]);
 
   // Load assistant coach details
   useEffect(() => {

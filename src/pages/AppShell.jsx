@@ -197,6 +197,13 @@ export default function AppShell() {
         {activeTab === 'settings' && <SettingsTab />}
       </main>
 
+      {/* Hidden print content for mobile export — always rendered offscreen */}
+      {activeTab !== 'print' && (
+        <div className="fixed -left-[9999px] top-0 w-[900px]" aria-hidden="true">
+          <PrintTab />
+        </div>
+      )}
+
       {/* Footer */}
       <footer className="text-center py-4 space-y-1">
         {needsVerification && (
