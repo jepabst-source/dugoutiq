@@ -95,8 +95,8 @@ export default function SettingsTab() {
       // Defensive Lineups
       for (let i = 0; i < storedInnings.length; i++) {
         const ing = storedInnings[i];
-        const asgn = ing.assignments || {};
-        const mode = ing.mode || 'competitive';
+        const asgn = (ing && typeof ing.assignments === 'object' && ing.assignments) ? ing.assignments : {};
+        const mode = ing?.mode || 'competitive';
         ctx.fillStyle = '#1e3a5f';
         ctx.font = 'bold 16px DM Sans, sans-serif';
         ctx.fillText(`INNING ${i + 1}  (${mode})`, padding, y + 16);
@@ -123,7 +123,8 @@ export default function SettingsTab() {
       }
 
       // LFG Pocket Card
-      if (storedData.lfg && Object.keys(storedData.lfg).length) {
+      const lfgData = (storedData.lfg && typeof storedData.lfg === 'object' && !Array.isArray(storedData.lfg)) ? storedData.lfg : null;
+      if (lfgData && Object.keys(lfgData).length) {
         ctx.fillStyle = '#1e3a5f';
         ctx.font = 'bold 16px DM Sans, sans-serif';
         ctx.fillText('LFG (Win Mode)', padding, y + 16);
@@ -131,7 +132,7 @@ export default function SettingsTab() {
         ctx.strokeStyle = '#e5e7eb';
         ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(w - padding, y); ctx.stroke();
         y += 8;
-        for (const [pos, pid] of Object.entries(storedData.lfg)) {
+        for (const [pos, pid] of Object.entries(lfgData)) {
           const pl = players.find(p => p.id === pid);
           ctx.fillStyle = '#9ca3af';
           ctx.font = '13px DM Sans, sans-serif';
@@ -148,7 +149,8 @@ export default function SettingsTab() {
       }
 
       // OOR Pocket Card
-      if (storedData.oor && Object.keys(storedData.oor).length) {
+      const oorData = (storedData.oor && typeof storedData.oor === 'object' && !Array.isArray(storedData.oor)) ? storedData.oor : null;
+      if (oorData && Object.keys(oorData).length) {
         ctx.fillStyle = '#1e3a5f';
         ctx.font = 'bold 16px DM Sans, sans-serif';
         ctx.fillText('OOR (Rest Mode)', padding, y + 16);
@@ -156,7 +158,7 @@ export default function SettingsTab() {
         ctx.strokeStyle = '#e5e7eb';
         ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(w - padding, y); ctx.stroke();
         y += 8;
-        for (const [pos, pid] of Object.entries(storedData.oor)) {
+        for (const [pos, pid] of Object.entries(oorData)) {
           const pl = players.find(p => p.id === pid);
           ctx.fillStyle = '#9ca3af';
           ctx.font = '13px DM Sans, sans-serif';
