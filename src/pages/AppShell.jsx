@@ -106,7 +106,6 @@ export default function AppShell() {
           {/* Logo + Team Switcher */}
           <div className="flex items-center gap-3">
             <img src="/logo-square.jpg" alt="Dugout IQ" className="w-9 h-9 rounded-lg" />
-            <span className="sm:hidden text-sm font-bold text-lime">⚾ Dugout IQ</span>
             {team && (
               <div className="relative">
                 <button onClick={() => setShowTeamMenu(!showTeamMenu)}

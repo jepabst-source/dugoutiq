@@ -29,19 +29,23 @@ export default function SettingsTab() {
       const players = getActivePlayers();
       const order = savedOrder?.length ? savedOrder : players;
       // Read defensive lineups from localStorage (same as PrintTab)
-      const storedLineups = JSON.parse(localStorage.getItem(`dugoutiq_lineups_${team?.id}`) || '{}');
+      const storedData = JSON.parse(localStorage.getItem('dugoutiq_currentLineup') || '{}');
+      const storedInnings = storedData.innings || [];
 
       const canvas = document.createElement('canvas');
       const w = 900, padding = 40;
       const lineH = 28, sectionGap = 20;
-      const innings = Object.keys(storedLineups).sort((a, b) => Number(a) - Number(b));
 
       // Calculate height
       let h = padding + 60 + sectionGap; // header
       h += order.length * lineH + sectionGap + 30; // batting order
-      for (const ing of innings) {
-        h += 30 + 10 * lineH + sectionGap; // each inning
+      for (const ing of storedInnings) {
+        const posCount = Object.keys(ing.assignments || {}).length;
+        h += 30 + posCount * lineH + sectionGap;
       }
+      // LFG/OOR pocket cards
+      if (storedData.lfg) h += 30 + Object.keys(storedData.lfg).length * lineH + sectionGap;
+      if (storedData.oor) h += 30 + Object.keys(storedData.oor).length * lineH + sectionGap;
       h += padding;
 
       canvas.width = w;
@@ -90,17 +94,69 @@ export default function SettingsTab() {
       y += sectionGap;
 
       // Defensive Lineups
-      for (const ing of innings) {
-        const asgn = storedLineups[ing] || {};
+      for (let i = 0; i < storedInnings.length; i++) {
+        const ing = storedInnings[i];
+        const asgn = ing.assignments || {};
+        const mode = ing.mode || 'competitive';
         ctx.fillStyle = '#1e3a5f';
         ctx.font = 'bold 16px DM Sans, sans-serif';
-        ctx.fillText(`INNING ${ing}`, padding, y + 16);
+        ctx.fillText(`INNING ${i + 1}  (${mode})`, padding, y + 16);
         y += 28;
         ctx.strokeStyle = '#e5e7eb';
         ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(w - padding, y); ctx.stroke();
         y += 8;
 
         for (const [pos, pid] of Object.entries(asgn)) {
+          const pl = players.find(p => p.id === pid);
+          ctx.fillStyle = '#9ca3af';
+          ctx.font = '13px DM Sans, sans-serif';
+          const posLabel = pos.replace('Center Field', 'CF').replace('Left Field', 'LF').replace('Right Field', 'RF')
+            .replace('1st Base', '1B').replace('2nd Base', '2B').replace('3rd Base', '3B')
+            .replace('Shortstop', 'SS').replace('Pitcher', 'P').replace('Catcher', 'C');
+          ctx.fillText(posLabel, padding, y + 16);
+          ctx.fillStyle = '#1f2937';
+          ctx.font = '15px DM Sans, sans-serif';
+          ctx.fillText(pl?.name || '—', padding + 80, y + 16);
+          y += lineH;
+        }
+        y += sectionGap;
+      }
+
+      // LFG Pocket Card
+      if (storedData.lfg && Object.keys(storedData.lfg).length) {
+        ctx.fillStyle = '#1e3a5f';
+        ctx.font = 'bold 16px DM Sans, sans-serif';
+        ctx.fillText('LFG (Win Mode)', padding, y + 16);
+        y += 28;
+        ctx.strokeStyle = '#e5e7eb';
+        ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(w - padding, y); ctx.stroke();
+        y += 8;
+        for (const [pos, pid] of Object.entries(storedData.lfg)) {
+          const pl = players.find(p => p.id === pid);
+          ctx.fillStyle = '#9ca3af';
+          ctx.font = '13px DM Sans, sans-serif';
+          const posLabel = pos.replace('Center Field', 'CF').replace('Left Field', 'LF').replace('Right Field', 'RF')
+            .replace('1st Base', '1B').replace('2nd Base', '2B').replace('3rd Base', '3B')
+            .replace('Shortstop', 'SS').replace('Pitcher', 'P').replace('Catcher', 'C');
+          ctx.fillText(posLabel, padding, y + 16);
+          ctx.fillStyle = '#1f2937';
+          ctx.font = '15px DM Sans, sans-serif';
+          ctx.fillText(pl?.name || '—', padding + 80, y + 16);
+          y += lineH;
+        }
+        y += sectionGap;
+      }
+
+      // OOR Pocket Card
+      if (storedData.oor && Object.keys(storedData.oor).length) {
+        ctx.fillStyle = '#1e3a5f';
+        ctx.font = 'bold 16px DM Sans, sans-serif';
+        ctx.fillText('OOR (Rest Mode)', padding, y + 16);
+        y += 28;
+        ctx.strokeStyle = '#e5e7eb';
+        ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(w - padding, y); ctx.stroke();
+        y += 8;
+        for (const [pos, pid] of Object.entries(storedData.oor)) {
           const pl = players.find(p => p.id === pid);
           ctx.fillStyle = '#9ca3af';
           ctx.font = '13px DM Sans, sans-serif';
