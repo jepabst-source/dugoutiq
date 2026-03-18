@@ -42,6 +42,22 @@ export default function SettingsTab() {
         backgroundColor: '#ffffff',
         useCORS: true,
         logging: false,
+        onclone: (clonedDoc) => {
+          // Override oklch colors that html2canvas can't parse
+          const el = clonedDoc.getElementById('print-export-target');
+          if (el) {
+            // Force all text to use hex colors
+            el.querySelectorAll('*').forEach(node => {
+              const computed = window.getComputedStyle(node);
+              const color = computed.color;
+              const bgColor = computed.backgroundColor;
+              const borderColor = computed.borderColor;
+              if (color && color.includes('oklch')) node.style.color = '#1f2937';
+              if (bgColor && bgColor.includes('oklch')) node.style.backgroundColor = 'transparent';
+              if (borderColor && borderColor.includes('oklch')) node.style.borderColor = '#e5e7eb';
+            });
+          }
+        },
       });
 
       canvas.toBlob(async (blob) => {
