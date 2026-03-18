@@ -82,10 +82,10 @@ export default function AppShell() {
 
       {/* Install App Banner */}
       {showInstallBanner && !isStandalone && (
-        <div className="bg-lime/10 border-b border-lime/25 px-4 py-2.5 flex items-center justify-center gap-3 print:hidden">
+        <div className="bg-lime/5 border-b border-lime/20 px-4 py-2.5 flex items-center justify-center gap-3 print:hidden">
           {isIOS ? (
             <span className="text-xs text-chalk">
-              📲 Add to home screen: tap the <span className="inline-block border border-chalk/30 rounded px-1 text-[10px]">⬆</span> button at the bottom of Safari → scroll down → <strong>"Add to Home Screen"</strong>
+              📲 Add to home screen: tap the <span className="inline-block border border-gray-300 rounded px-1 text-[10px]">⬆</span> button at the bottom of Safari → scroll down → <strong>"Add to Home Screen"</strong>
             </span>
           ) : (
             <>
@@ -101,7 +101,7 @@ export default function AppShell() {
       )}
 
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-field-light border-b-2 border-lime/30 shadow-lg shadow-black/30">
+      <header className="sticky top-0 z-50 bg-white border-b border-border shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           {/* Logo + Team Switcher */}
           <div className="flex items-center gap-3">
@@ -175,7 +175,7 @@ export default function AppShell() {
                            transition-all duration-150 whitespace-nowrap
                   ${tab.printOnly ? 'hidden sm:block' : ''}
                   ${activeTab === tab.id
-                    ? 'bg-field-light text-lime shadow-md'
+                    ? 'bg-lime/10 text-lime shadow-sm'
                     : tab.highlight
                       ? 'text-gold hover:text-gold-bright hover:bg-panel-hover'
                       : tab.printOnly
@@ -248,8 +248,8 @@ function CreateTeamModal({ onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60" onClick={onClose}>
-      <div className="bg-panel border border-lime rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl"
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40" onClick={onClose}>
+      <div className="bg-white border border-gray-200 rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl"
            onClick={e => e.stopPropagation()}>
         <h2 className="text-xl font-bold text-lime mb-4">Create New Team</h2>
         <form onSubmit={handleCreate} className="space-y-4">

@@ -23,7 +23,7 @@ export default function CreateTeamPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4"
-         style={{ background: 'radial-gradient(ellipse at 30% 20%, rgba(142,212,49,0.06) 0%, transparent 60%), var(--color-field)' }}>
+         style={{ background: '#ffffff' }}>
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-lime mb-1">Create Your Team</h1>

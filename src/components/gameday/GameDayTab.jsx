@@ -191,7 +191,7 @@ export default function GameDayTab() {
       {/* NOW BATTING Card (shown when a player is selected) */}
       {selectedPlayer && (
         <div className="bg-panel border-2 border-lime rounded-2xl p-6 text-center mb-4 relative"
-             style={{ boxShadow: '0 0 30px rgba(142,212,49,0.1)' }}>
+             style={{ boxShadow: '0 0 20px rgba(22,128,60,0.08)' }}>
           <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-[0.2em] mb-1">NOW BATTING</div>
           <div className="absolute top-3 right-5 text-5xl font-bold text-lime/10 select-none">{selectedIndex}</div>
           {selectedPlayer.number && (

@@ -1,31 +1,31 @@
 @import "tailwindcss";
 
 @theme {
-  --color-field: #0a1a0d;
-  --color-field-light: #132215;
-  --color-panel: #151f17;
-  --color-panel-hover: #1c2b1e;
-  --color-border: #2a3d2c;
-  --color-border-light: #3d5a40;
+  --color-field: #f8f9fa;
+  --color-field-light: #ffffff;
+  --color-panel: #ffffff;
+  --color-panel-hover: #f3f4f6;
+  --color-border: #e5e7eb;
+  --color-border-light: #d1d5db;
 
-  --color-chalk: #eaf0e6;
-  --color-chalk-dim: #a8b8a0;
-  --color-chalk-muted: #6a7d62;
+  --color-chalk: #1f2937;
+  --color-chalk-dim: #4b5563;
+  --color-chalk-muted: #9ca3af;
 
-  --color-lime: #8ed431;
-  --color-lime-bright: #a8e84a;
-  --color-lime-dim: #5a8a24;
+  --color-lime: #16803c;
+  --color-lime-bright: #15803d;
+  --color-lime-dim: #166534;
 
-  --color-gold: #e8a832;
-  --color-gold-bright: #f5c04a;
+  --color-gold: #d97706;
+  --color-gold-bright: #b45309;
 
-  --color-sky: #4a9eda;
-  --color-sky-dim: #2a6a9a;
+  --color-sky: #2563eb;
+  --color-sky-dim: #1d4ed8;
 
-  --color-red: #d64045;
-  --color-red-dim: #9a2a2e;
+  --color-red: #dc2626;
+  --color-red-dim: #b91c1c;
 
-  --color-dirt: #c4874a;
+  --color-dirt: #b45309;
 
   --font-display: 'DM Sans', sans-serif;
   --font-body: 'DM Sans', sans-serif;
@@ -57,13 +57,11 @@ button, select, [role="button"], label[class*="cursor-pointer"] {
   min-height: 36px;
 }
 
-/* Prevent text selection on buttons during game day */
 button {
   -webkit-user-select: none;
   user-select: none;
 }
 
-/* Smooth scrolling */
 html {
   scroll-behavior: smooth;
 }
@@ -77,7 +75,7 @@ html {
   outline-offset: 2px;
 }
 
-/* Select dropdowns dark mode fix for mobile */
+/* Select dropdowns */
 select option {
   background: var(--color-panel);
   color: var(--color-chalk);
