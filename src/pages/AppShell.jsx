@@ -82,7 +82,7 @@ export default function AppShell() {
 
       {/* Install App Banner */}
       {showInstallBanner && !isStandalone && (
-        <div className="bg-lime/5 border-b border-lime/20 px-4 py-2.5 flex items-center justify-center gap-3 print:hidden">
+        <div className="bg-sky/5 border-b border-sky/20 px-4 py-2.5 flex items-center justify-center gap-3 print:hidden">
           {isIOS ? (
             <span className="text-xs text-chalk">
               📲 Add to home screen: tap the <span className="inline-block border border-gray-300 rounded px-1 text-[10px]">⬆</span> button at the bottom of Safari → scroll down → <strong>"Add to Home Screen"</strong>
@@ -91,7 +91,7 @@ export default function AppShell() {
             <>
               <span className="text-xs text-chalk">📲 Install Dugout IQ as an app on your phone</span>
               <button onClick={handleInstall}
-                className="px-3 py-1 rounded-lg bg-lime text-field font-bold text-xs active:scale-95 transition-all">
+                className="px-3 py-1 rounded-lg bg-sky text-white font-bold text-xs active:scale-95 transition-all">
                 Install
               </button>
             </>
@@ -175,7 +175,7 @@ export default function AppShell() {
                            transition-all duration-150 whitespace-nowrap
                   ${tab.printOnly ? 'hidden sm:block' : ''}
                   ${activeTab === tab.id
-                    ? 'bg-lime/10 text-lime shadow-sm'
+                    ? 'bg-gray-100 text-lime font-bold shadow-sm'
                     : tab.highlight
                       ? 'text-gold hover:text-gold-bright hover:bg-panel-hover'
                       : tab.printOnly

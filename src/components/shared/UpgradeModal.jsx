@@ -53,18 +53,18 @@ export default function UpgradeModal({ onClose, lockReason }) {
             </button>
           </div>
 
-          <div className="bg-lime/5 border-2 border-lime rounded-xl p-4 relative">
-            <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-lime text-white text-[9px] font-bold rounded-full uppercase tracking-wider">
+          <div className="bg-sky/5 border-2 border-sky rounded-xl p-4 relative">
+            <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-sky text-white text-[9px] font-bold rounded-full uppercase tracking-wider">
               Best Value
             </div>
             <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Annual</div>
-            <div className="text-2xl font-bold text-lime">$19.99</div>
+            <div className="text-2xl font-bold text-sky">$19.99</div>
             <div className="text-[10px] text-gray-400">/year</div>
             <button
               onClick={() => handleUpgrade('annual')}
               disabled={!!loading}
-              className="w-full mt-3 py-2 rounded-lg bg-lime text-white font-bold text-xs
-                         hover:bg-lime-bright active:scale-[0.97] transition-all disabled:opacity-50">
+              className="w-full mt-3 py-2 rounded-lg bg-sky text-white font-bold text-xs
+                         hover:bg-sky-dim active:scale-[0.97] transition-all disabled:opacity-50">
               {loading === 'annual' ? 'Loading...' : 'Choose Annual'}
             </button>
           </div>
