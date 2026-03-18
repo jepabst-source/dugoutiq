@@ -59,6 +59,14 @@ export function AuthProvider({ children }) {
           await setDoc(userRef, newUser);
           setUserDoc(newUser);
           setAllTeams([]);
+          // Google Ads conversion tracking
+          if (typeof gtag === 'function') {
+            gtag('event', 'conversion', {
+              'send_to': 'AW-1032290089/4FCZCMPNuQUQqf6d7AM',
+              'value': 1.0,
+              'currency': 'USD'
+            });
+          }
         }
       } else {
         setUser(null);
