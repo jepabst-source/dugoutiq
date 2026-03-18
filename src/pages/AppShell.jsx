@@ -105,7 +105,7 @@ export default function AppShell() {
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           {/* Logo + Team Switcher */}
           <div className="flex items-center gap-3">
-            <img src="/logo-square.jpg" alt="Dugout IQ" className="w-9 h-9 rounded-lg" />
+            <img src="/logo-square.jpg" alt="Dugout IQ" className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg" />
             {team && (
               <div className="relative">
                 <button onClick={() => setShowTeamMenu(!showTeamMenu)}
