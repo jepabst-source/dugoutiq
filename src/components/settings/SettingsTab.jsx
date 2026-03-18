@@ -85,9 +85,9 @@ export default function SettingsTab() {
         if (w) {
           w.document.write(`
             <html><head><title>Lineup</title><meta name="viewport" content="width=device-width,initial-scale=1">
-            <style>body{margin:0;display:flex;justify-content:center;background:#f0f0f0;padding:16px}
-            img{max-width:100%;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}</style></head>
-            <body><img src="${url}"><p style="text-align:center;font-family:sans-serif;font-size:12px;color:#999;margin-top:12px">Long-press the image to save to camera roll</p></body></html>
+            <style>body{margin:0;background:#f0f0f0;padding:16px;overflow-x:auto}
+            img{max-height:100vh;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}</style></head>
+            <body><img src="${url}"></body></html>
           `);
         } else {
           // If popup blocked, download directly
