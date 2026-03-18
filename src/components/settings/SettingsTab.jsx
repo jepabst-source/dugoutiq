@@ -28,7 +28,6 @@ export default function SettingsTab() {
     try {
       const players = getActivePlayers();
       const order = savedOrder?.length ? savedOrder : players;
-      // Read defensive lineups from localStorage (same as PrintTab)
       const storedData = JSON.parse(localStorage.getItem('dugoutiq_currentLineup') || '{}');
       const storedInnings = storedData.innings || [];
 
@@ -36,17 +35,17 @@ export default function SettingsTab() {
       const w = 900, padding = 40;
       const lineH = 28, sectionGap = 20;
 
-      // Calculate height
+      // Calculate height generously
       let h = padding + 60 + sectionGap; // header
       h += order.length * lineH + sectionGap + 30; // batting order
       for (const ing of storedInnings) {
-        const posCount = Object.keys(ing.assignments || {}).length;
+        const asgn = ing.assignments || ing || {};
+        const posCount = Object.keys(asgn).filter(k => k !== 'mode').length;
         h += 30 + posCount * lineH + sectionGap;
       }
-      // LFG/OOR pocket cards
       if (storedData.lfg) h += 30 + Object.keys(storedData.lfg).length * lineH + sectionGap;
       if (storedData.oor) h += 30 + Object.keys(storedData.oor).length * lineH + sectionGap;
-      h += padding;
+      h += padding + 40; // extra buffer
 
       canvas.width = w;
       canvas.height = Math.max(h, 400);
@@ -106,7 +105,8 @@ export default function SettingsTab() {
         ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(w - padding, y); ctx.stroke();
         y += 8;
 
-        for (const [pos, pid] of Object.entries(asgn)) {
+        const positions = Object.entries(asgn).filter(([pos]) => pos !== 'mode');
+        for (const [pos, pid] of positions) {
           const pl = players.find(p => p.id === pid);
           ctx.fillStyle = '#9ca3af';
           ctx.font = '13px DM Sans, sans-serif';
@@ -203,6 +203,7 @@ export default function SettingsTab() {
       }, 'image/jpeg', 0.92);
     } catch (err) {
       console.error('Export error:', err);
+      alert('Export failed: ' + err.message);
       setExporting(false);
     }
   }, [team, getActivePlayers, savedOrder]);

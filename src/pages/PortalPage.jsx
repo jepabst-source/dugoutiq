@@ -161,7 +161,7 @@ export default function PortalPage({ teamId }) {
       <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#ffffff' }}>
         <div className="w-full max-w-sm text-center">
           <div className="mb-6">
-            <img src="/logo-square.jpg" alt="Dugout IQ" className="w-40 mx-auto rounded-xl" />
+            <img src="/logo-square.jpg" alt="Dugout IQ" className="w-60 mx-auto rounded-xl" />
           </div>
           <h2 className="text-xl font-bold text-gray-800 mb-1">Parent Portal</h2>
           <p className="text-sm text-gray-500 mb-6">Enter the access code your coach shared with you.</p>
@@ -198,7 +198,7 @@ export default function PortalPage({ teamId }) {
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/logo-square.jpg" alt="Dugout IQ" className="w-12 h-12 rounded-lg" />
+            <img src="/logo-square.jpg" alt="Dugout IQ" className="w-[72px] h-[72px] rounded-lg" />
             <div>
               <div className="text-lg font-bold text-gray-800">{team?.name || 'Team'}</div>
               <div className="text-[10px] text-gray-400 uppercase tracking-wider">
