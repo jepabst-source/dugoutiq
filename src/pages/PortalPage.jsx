@@ -276,8 +276,8 @@ export default function PortalPage({ teamId }) {
                     </div>
                   </div>
 
-                  {/* Spray chart (if hit location data exists) */}
-                  {(() => {
+                  {/* Spray chart (only if coach has advanced tracking enabled) */}
+                  {team?.settings?.trackingMode === 'advanced' && (() => {
                     const playerHits = atBats.filter(ab =>
                       ab.playerId === p.id && ab.hitX != null && ab.hitY != null
                     );

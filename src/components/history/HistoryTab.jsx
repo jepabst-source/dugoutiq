@@ -7,9 +7,10 @@ const OUTCOME_LABELS = { K: 'K', out: 'Out', walk: 'BB', hit: 'Hit', single: '1B
 const POS_ORDER = [...POSITIONS.infield, ...POSITIONS.outfield, 'Bench'];
 
 export default function HistoryTab() {
-  const { players, atBats, savedGames, getPlayerStats, getRollingAvg, getPositionHistory, deleteGame, deleteAtBat, clearAllAtBats } = useTeam();
+  const { players, atBats, savedGames, team, getPlayerStats, getRollingAvg, getPositionHistory, deleteGame, deleteAtBat, clearAllAtBats } = useTeam();
   const [clearing, setClearing] = useState(false);
   const [expandedPlayer, setExpandedPlayer] = useState(null);
+  const showSpray = team?.settings?.trackingMode === 'advanced';
 
   // Player stats summary
   const playerStats = useMemo(() => {
@@ -165,13 +166,13 @@ export default function HistoryTab() {
             <tbody>
               {playerStats.map(p => {
                 const isExpanded = expandedPlayer === p.id;
-                const playerHits = atBats.filter(ab =>
+                const playerHits = showSpray ? atBats.filter(ab =>
                   ab.playerId === p.id && ab.hitX != null && ab.hitY != null
-                );
+                ) : [];
                 return (
                   <tr key={p.id}
-                    onClick={() => setExpandedPlayer(isExpanded ? null : p.id)}
-                    className="border-b border-border/30 hover:bg-panel-hover transition-colors cursor-pointer">
+                    onClick={() => playerHits.length > 0 ? setExpandedPlayer(isExpanded ? null : p.id) : null}
+                    className={`border-b border-border/30 transition-colors ${playerHits.length > 0 ? 'hover:bg-panel-hover cursor-pointer' : ''}`}>
                     <td className="px-3 py-2 font-semibold text-chalk">
                       {p.name}
                       <span className="ml-1.5 text-gold text-xs">{p.defRating}★</span>
