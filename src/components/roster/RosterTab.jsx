@@ -10,43 +10,59 @@ export default function RosterTab() {
   const [editingId, setEditingId] = useState(null);
 
   const printRoster = () => {
-    const el = document.getElementById('practice-roster-print');
-    if (!el) return;
-    const win = window.open('', '_blank');
-    win.document.write(`
+    const html = `
       <html><head><title>${team?.name || 'Roster'} — Practice Sheet</title>
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'DM Sans', Arial, sans-serif; padding: 24px; }
+        body { font-family: Arial, sans-serif; padding: 24px; }
         h1 { font-size: 20px; border-bottom: 3px solid #1a4332; padding-bottom: 6px; margin-bottom: 16px; color: #1a4332; }
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #888; padding: 6px 8px; border-bottom: 2px solid #1a4332; }
-        td { padding: 8px; border-bottom: 1px solid #e5e7eb; font-size: 13px; vertical-align: top; }
+        td { padding: 10px 8px; border-bottom: 1px solid #ddd; font-size: 14px; vertical-align: top; }
         .num { width: 30px; text-align: center; color: #999; font-weight: 700; }
-        .jersey { width: 40px; text-align: center; color: #1a4332; font-weight: 700; }
-        .name { width: 140px; font-weight: 600; }
-        .notes { border-bottom: 1px dotted #ccc; min-height: 20px; }
-        @media print { body { padding: 12px; } }
+        .jersey { width: 50px; text-align: center; color: #1a4332; font-weight: 700; font-size: 16px; }
+        .name { width: 150px; font-weight: 600; }
+        .notes-cell { width: auto; }
+        .notes-line { border-bottom: 1px dotted #bbb; height: 24px; }
       </style></head><body>
-      <h1>⚾ ${team?.name || 'Team'} — Practice Notes</h1>
+      <h1>\u26be ${team?.name || 'Team'} \u2014 Practice Notes</h1>
       <table>
-        <thead><tr><th class="num">#</th><th class="jersey">Jersey</th><th class="name">Player</th><th>Notes</th></tr></thead>
+        <thead><tr><th class="num"></th><th class="jersey">#</th><th class="name">Player</th><th>Notes</th></tr></thead>
         <tbody>
           ${[...players].sort((a, b) => (a.number || 99) - (b.number || 99)).map((p, i) => `
             <tr>
               <td class="num">${i + 1}</td>
-              <td class="jersey">${p.number || '—'}</td>
+              <td class="jersey">${p.number || '\u2014'}</td>
               <td class="name">${p.name}</td>
-              <td><div class="notes" style="min-width:200px;">&nbsp;</div></td>
+              <td class="notes-cell"><div class="notes-line"></div></td>
             </tr>
           `).join('')}
         </tbody>
       </table>
       </body></html>
-    `);
-    win.document.close();
-    win.focus();
-    setTimeout(() => { win.print(); win.close(); }, 400);
+    `;
+
+    // Create hidden iframe, write content, print it
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.top = '-10000px';
+    iframe.style.left = '-10000px';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+
+    iframe.onload = () => {
+      setTimeout(() => {
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+        setTimeout(() => document.body.removeChild(iframe), 1000);
+      }, 250);
+    };
   };
 
   return (
