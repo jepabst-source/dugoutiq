@@ -76,7 +76,7 @@ export default function RosterTab() {
           </p>
         </div>
         <div className="flex gap-2">
-          {players.length > 0 && (
+          {players.length > 0 && !('ontouchstart' in window) && (
             <button onClick={printRoster}
               className="px-3 py-2 rounded-lg bg-border text-chalk-dim font-bold text-xs
                          hover:bg-border-light active:scale-[0.97] transition-all">
