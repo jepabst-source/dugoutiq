@@ -19,6 +19,8 @@ export default function ScorerPage({ scorerCode }) {
         const data = snap.data();
         if (data.expiresAt && Date.now() > data.expiresAt) { setError('This scorer link has expired.'); setLoading(false); return; }
         setScorerData(data);
+        // Use the coach's preferred tracking mode
+        if (data.trackingMode === 'advanced') setAdvancedMode(true);
       } catch (err) { console.error('Scorer load error:', err); setError('Could not load scorer link.'); }
       setLoading(false);
     }

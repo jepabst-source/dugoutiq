@@ -21,6 +21,7 @@ const DEFAULT_SETTINGS = {
     'Shortstop': 3,
   },
   assistantFullAccess: false,
+  trackingMode: 'simple', // 'simple' or 'advanced' — default for Game Day and Scorer
 };
 
 // Scoring system — advanced outcomes map to same points as simple
@@ -397,6 +398,7 @@ export function TeamProvider({ children }) {
       teamName: team?.name || '',
       gameId: gameId || '',
       playerSnapshot: players.map(p => ({ id: p.id, name: p.name, number: p.number || '' })),
+      trackingMode: team?.settings?.trackingMode || 'simple',
       createdAt: Date.now(),
       expiresAt: Date.now() + (12 * 60 * 60 * 1000), // 12 hours
     });

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { doc, getDoc, collection, getDocs, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import SprayChart from '../components/shared/SprayChart';
 
 const PTS = { K: 0, out: 1, walk: 1, hit: 2, single: 2, double: 2, triple: 2, hr: 2, hbp: 1, sac: 1 };
 const IS_ON_BASE = { hit: true, single: true, double: true, triple: true, hr: true, walk: true, hbp: true };
@@ -274,6 +275,22 @@ export default function PortalPage({ teamId }) {
                       </div>
                     </div>
                   </div>
+
+                  {/* Spray chart (if hit location data exists) */}
+                  {(() => {
+                    const playerHits = atBats.filter(ab =>
+                      ab.playerId === p.id && ab.hitX != null && ab.hitY != null
+                    );
+                    if (playerHits.length === 0) return null;
+                    return (
+                      <div className="pt-2 pb-1 border-t border-gray-100 mt-2">
+                        <div className="text-[9px] text-gray-400 uppercase font-semibold mb-1 text-center">
+                          Spray Chart ({playerHits.length} hit{playerHits.length !== 1 ? 's' : ''})
+                        </div>
+                        <SprayChart hits={playerHits} className="max-w-[200px] mx-auto" />
+                      </div>
+                    );
+                  })()}
 
                   {/* Recent positions */}
                   <div className="flex items-center gap-2 pt-2 border-t border-gray-100">

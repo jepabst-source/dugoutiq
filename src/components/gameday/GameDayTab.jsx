@@ -11,7 +11,7 @@ const HIT_OUTCOMES = ['single', 'double', 'triple', 'hr', 'out'];
 
 export default function GameDayTab() {
   const {
-    players, atBats, attendance,
+    players, atBats, attendance, team,
     getActivePlayers, generateBattingOrder,
     logAtBat, deleteAtBat, getRollingAvg,
     generateScorerLink,
@@ -26,7 +26,7 @@ export default function GameDayTab() {
   const [generatingScorer, setGeneratingScorer] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const plan = usePlan();
-  const [advancedMode, setAdvancedMode] = useState(false);
+  const [advancedMode, setAdvancedMode] = useState(() => team?.settings?.trackingMode === 'advanced');
   const [showGameControls, setShowGameControls] = useState(false);
   const [pendingHit, setPendingHit] = useState(null); // { outcome } — waiting for spray chart tap
 
