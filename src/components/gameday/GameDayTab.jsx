@@ -2,6 +2,8 @@ import { useState, useMemo, useCallback } from 'react';
 import { useTeam, PTS } from '../../contexts/TeamContext';
 import { usePlan } from '../../hooks/usePlan';
 import UpgradeModal from '../shared/UpgradeModal';
+import { hapticSuccess, hapticLight, hapticError } from '../../services/haptics';
+import { shareLink } from '../../services/sharing';
 
 const OUTCOME_LABELS = { K: 'Strikeout', out: 'Hit into Out', walk: 'Walk', hit: 'Hit' };
 
@@ -51,13 +53,16 @@ export default function GameDayTab() {
 
   const handleRecord = useCallback(async (outcome) => {
     if (!selectedPlayerId) return;
-    if (!plan.canLogAtBat) { setShowUpgrade(true); return; }
+    if (!plan.canLogAtBat) { hapticError(); setShowUpgrade(true); return; }
     await logAtBat({
       playerId: selectedPlayerId,
       game: gameNum,
       inning: currentInning,
       outcome,
     });
+    // Haptic feedback: success vibration for on-base, light tap for outs
+    const onBase = ['hit', '1B', '2B', '3B', 'HR', 'walk', 'BB', 'HBP'].includes(outcome);
+    onBase ? hapticSuccess() : hapticLight();
     setSelectedPlayerId(null);
   }, [selectedPlayerId, gameNum, currentInning, logAtBat]);
 
@@ -112,9 +117,20 @@ export default function GameDayTab() {
               className="flex-1 px-3 py-2 rounded-lg bg-panel border border-border text-chalk text-xs focus:outline-none"
               onClick={e => e.target.select()} />
             <button
-              onClick={() => { navigator.clipboard.writeText(scorerLink); }}
+              onClick={async () => {
+                const { method } = await shareLink({
+                  title: 'Dugout IQ Scorer',
+                  text: 'Tap to log at-bats — no login needed',
+                  url: scorerLink,
+                });
+                if (method === 'clipboard') {
+                  // Brief visual feedback that it was copied
+                  const btn = document.activeElement;
+                  if (btn) { btn.textContent = '✓ Copied'; setTimeout(() => { btn.textContent = '📋 Share'; }, 1500); }
+                }
+              }}
               className="px-3 py-2 rounded-lg bg-sky text-field font-bold text-xs hover:bg-sky/80 transition-all whitespace-nowrap">
-              📋 Copy
+              📋 Share
             </button>
           </div>
           <p className="text-[10px] text-chalk-muted mt-1">Text this to anyone — no login needed. They tap players and log at-bats from the stands.</p>

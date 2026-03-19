@@ -4,8 +4,9 @@ import {
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
   sendEmailVerification, sendPasswordResetEmail, updateProfile,
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db, googleProvider } from '../lib/firebase';
+import { initPushNotifications, cleanupPushNotifications } from '../services/notifications';
 
 const AuthContext = createContext(null);
 
@@ -78,6 +79,20 @@ export function AuthProvider({ children }) {
     });
     return unsub;
   }, []);
+
+  // Register push notifications after login
+  useEffect(() => {
+    if (!user) return;
+    initPushNotifications({
+      onToken: async (token) => {
+        // Save the FCM token to the user's Firestore doc for server-side sends
+        try {
+          await updateDoc(doc(db, 'users', user.uid), { fcmToken: token });
+        } catch {}
+      },
+    });
+    return () => { cleanupPushNotifications(); };
+  }, [user]);
 
   // Persist active team selection
   useEffect(() => {
