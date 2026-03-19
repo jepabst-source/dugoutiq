@@ -41,15 +41,15 @@ export default function UpgradeModal({ onClose, lockReason }) {
         {/* Pricing cards */}
         <div className="grid grid-cols-2 gap-3 mb-6">
           <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-            <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Monthly</div>
-            <div className="text-2xl font-bold text-gray-800">$3.99</div>
-            <div className="text-[10px] text-gray-400">/month</div>
+            <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">1 Season</div>
+            <div className="text-2xl font-bold text-gray-800">$11.99</div>
+            <div className="text-[10px] text-gray-400">3 months</div>
             <button
               onClick={() => handleUpgrade('monthly')}
               disabled={!!loading}
               className="w-full mt-3 py-2 rounded-lg bg-gray-200 text-gray-700 font-bold text-xs
                          hover:bg-gray-300 active:scale-[0.97] transition-all disabled:opacity-50">
-              {loading === 'monthly' ? 'Loading...' : 'Choose Monthly'}
+              {loading === 'monthly' ? 'Loading...' : 'Choose Season'}
             </button>
           </div>
 
@@ -57,15 +57,15 @@ export default function UpgradeModal({ onClose, lockReason }) {
             <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-sky text-white text-[9px] font-bold rounded-full uppercase tracking-wider">
               Best Value
             </div>
-            <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Annual</div>
+            <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Full Year</div>
             <div className="text-2xl font-bold text-sky">$19.99</div>
-            <div className="text-[10px] text-gray-400">/year</div>
+            <div className="text-[10px] text-gray-400">12 months</div>
             <button
               onClick={() => handleUpgrade('annual')}
               disabled={!!loading}
               className="w-full mt-3 py-2 rounded-lg bg-sky text-white font-bold text-xs
                          hover:bg-sky-dim active:scale-[0.97] transition-all disabled:opacity-50">
-              {loading === 'annual' ? 'Loading...' : 'Choose Annual'}
+              {loading === 'annual' ? 'Loading...' : 'Choose Year'}
             </button>
           </div>
         </div>
