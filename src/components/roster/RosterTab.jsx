@@ -5,9 +5,49 @@ import StarRating from '../shared/StarRating';
 const POSITIONS = ['Pitcher', 'Catcher', '1st Base', '2nd Base', 'Shortstop', '3rd Base', 'Left Field', 'Center Field', 'Right Field'];
 
 export default function RosterTab() {
-  const { players, addPlayer, updatePlayer, removePlayer } = useTeam();
+  const { players, team, addPlayer, updatePlayer, removePlayer } = useTeam();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+
+  const printRoster = () => {
+    const el = document.getElementById('practice-roster-print');
+    if (!el) return;
+    const win = window.open('', '_blank');
+    win.document.write(`
+      <html><head><title>${team?.name || 'Roster'} — Practice Sheet</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'DM Sans', Arial, sans-serif; padding: 24px; }
+        h1 { font-size: 20px; border-bottom: 3px solid #1a4332; padding-bottom: 6px; margin-bottom: 16px; color: #1a4332; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #888; padding: 6px 8px; border-bottom: 2px solid #1a4332; }
+        td { padding: 8px; border-bottom: 1px solid #e5e7eb; font-size: 13px; vertical-align: top; }
+        .num { width: 30px; text-align: center; color: #999; font-weight: 700; }
+        .jersey { width: 40px; text-align: center; color: #1a4332; font-weight: 700; }
+        .name { width: 140px; font-weight: 600; }
+        .notes { border-bottom: 1px dotted #ccc; min-height: 20px; }
+        @media print { body { padding: 12px; } }
+      </style></head><body>
+      <h1>⚾ ${team?.name || 'Team'} — Practice Notes</h1>
+      <table>
+        <thead><tr><th class="num">#</th><th class="jersey">Jersey</th><th class="name">Player</th><th>Notes</th></tr></thead>
+        <tbody>
+          ${[...players].sort((a, b) => (a.number || 99) - (b.number || 99)).map((p, i) => `
+            <tr>
+              <td class="num">${i + 1}</td>
+              <td class="jersey">${p.number || '—'}</td>
+              <td class="name">${p.name}</td>
+              <td><div class="notes" style="min-width:200px;">&nbsp;</div></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+      </body></html>
+    `);
+    win.document.close();
+    win.focus();
+    setTimeout(() => { win.print(); win.close(); }, 400);
+  };
 
   return (
     <div>
@@ -19,13 +59,22 @@ export default function RosterTab() {
             {players.length} player{players.length !== 1 ? 's' : ''} · Set ratings, roles, and preferences
           </p>
         </div>
-        <button
-          onClick={() => { setShowForm(!showForm); setEditingId(null); }}
-          className="px-4 py-2 rounded-lg bg-lime text-field font-bold text-sm
-                     hover:bg-lime-bright active:scale-[0.97] transition-all"
-        >
-          {showForm ? 'Cancel' : '+ Add Player'}
-        </button>
+        <div className="flex gap-2">
+          {players.length > 0 && (
+            <button onClick={printRoster}
+              className="px-3 py-2 rounded-lg bg-border text-chalk-dim font-bold text-xs
+                         hover:bg-border-light active:scale-[0.97] transition-all">
+              🖨 Practice Sheet
+            </button>
+          )}
+          <button
+            onClick={() => { setShowForm(!showForm); setEditingId(null); }}
+            className="px-4 py-2 rounded-lg bg-lime text-field font-bold text-sm
+                       hover:bg-lime-bright active:scale-[0.97] transition-all"
+          >
+            {showForm ? 'Cancel' : '+ Add Player'}
+          </button>
+        </div>
       </div>
 
       {/* Add/Edit Form */}
