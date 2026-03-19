@@ -1,0 +1,134 @@
+================================================================
+DUGOUT IQ — APP STORE LISTING COPY
+Prepared March 2026
+================================================================
+
+
+────────────────────────────────────────
+APPLE APP STORE
+────────────────────────────────────────
+
+APP NAME:
+Dugout IQ — Lineup Manager
+
+SUBTITLE (30 chars max):
+Baseball & Softball Coaching
+
+CATEGORY:
+Primary: Sports
+Secondary: Utilities
+
+PROMOTIONAL TEXT (170 chars, can be updated without a new build):
+Fair rotations, live at-bat tracking, and printable dugout cards. The coaching app built by a coach. Free to start — upgrade anytime.
+
+DESCRIPTION:
+Dugout IQ takes the guesswork out of game day. Built by a real youth coach, it handles the stuff you used to scribble on napkins — batting orders, defensive rotations, and position tracking — so you can focus on your players.
+
+WHAT IT DOES:
+
+Roster Management — Add players with jersey numbers, star ratings, and position preferences. Mark available pitchers and catchers. The app knows who plays where.
+
+Smart Defensive Rotations — Set competitive or development mode per inning. The rotation engine places the right players at the right positions based on ratings, preferences, and fairness. No one rides the bench all game.
+
+Batting Order — Auto-generated based on on-base percentage or points. Drag to reorder. Tracks at-bats with simple tap scoring or advanced mode (1B, 2B, 3B, HR, BB, HBP, SAC).
+
+Live Game Day Scoring — Tap a player, tap the outcome. Real-time at-bat logging with inning tracking and a live scoreboard. Send a scorer link to an assistant in the stands — no login needed.
+
+Parent Portal — Share a read-only link with parents. They see their kid's stats, batting average, on-base percentage, and hot streaks. No login, no app download needed.
+
+Printable Dugout Cards — Generate a pocket card with your batting order, defensive lineup, and bench rotation. Print it or screenshot it. Stick it in your back pocket.
+
+Game History — Every committed game is saved. View position history across all games, season batting stats, and per-player trends.
+
+Multi-Team Support — Coach multiple teams? Switch between them in one tap. Each team has its own roster, stats, and settings.
+
+WHO IT'S FOR:
+Rec league coaches, travel ball coaches, and anyone managing a youth baseball or softball team who wants fair play and organized game days.
+
+Free to use with 2 games and 70 at-bats. Upgrade to Pro for unlimited access.
+
+KEYWORDS (100 chars max):
+lineup,softball,baseball,coach,rotation,batting order,dugout,roster,youth,fair play
+
+PRIVACY POLICY URL:
+https://lineupman.com/privacy.html
+
+SUPPORT URL:
+https://lineupman.com/about.html
+
+MARKETING URL:
+https://lineupman.com/about.html
+
+
+────────────────────────────────────────
+GOOGLE PLAY STORE
+────────────────────────────────────────
+
+APP NAME:
+Dugout IQ — Lineup Manager
+
+SHORT DESCRIPTION (80 chars max):
+Smart lineup manager for youth baseball & softball coaches. Free to start.
+
+FULL DESCRIPTION:
+(Same as Apple App Store description above)
+
+CATEGORY:
+Sports
+
+CONTENT RATING:
+Everyone
+
+TAGS:
+baseball, softball, coaching, lineup, sports, roster management
+
+
+────────────────────────────────────────
+APP REVIEW NOTES (for Apple reviewers)
+────────────────────────────────────────
+
+Dugout IQ is a coaching management tool for youth baseball and softball. It
+provides lineup generation, defensive rotation planning, live at-bat tracking,
+and game history — features that go well beyond a basic website.
+
+Native features include:
+- Push notifications for live game activity
+- Haptic feedback during at-bat logging
+- Native share sheet for scorer and parent portal links
+
+To test the app:
+- Sign in with Google or create an email account
+- Create a team (any name, any sport)
+- Add 2-3 players to the roster
+- Go to the Defense tab to see the rotation engine
+- Go to the Game Day tab to log at-bats (tap a player, then tap an outcome)
+
+The free tier allows 2 committed games and 70 at-bats. Pro subscription
+unlocks unlimited usage.
+
+Demo account (if needed):
+Email: [you can create a test account or provide one to Apple]
+Password: [fill in before submission]
+
+
+────────────────────────────────────────
+SCREENSHOT GUIDANCE
+────────────────────────────────────────
+
+Apple requires screenshots in these sizes:
+- 6.7" display (iPhone 15 Pro Max): 1290 x 2796 px
+- 5.5" display (iPhone 8 Plus): 1242 x 2208 px
+
+Google Play requires:
+- Phone: min 320px, max 3840px, 16:9 or 9:16 aspect ratio
+
+Recommended screenshots (6 screens):
+1. Roster tab — showing a team with several players, ratings, jersey numbers
+2. Defense tab — showing the rotation grid with position assignments
+3. Game Day tab — showing at-bat logging with a player selected
+4. Parent Portal — the read-only stats view parents see
+5. Print/Dugout Card — the pocket card ready to print
+6. History tab — position history grid across multiple games
+
+Tip: Use your actual team data for authentic screenshots. Blur or use
+first names only (which the app already does) for player privacy.

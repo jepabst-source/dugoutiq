@@ -210,16 +210,22 @@ export function TeamProvider({ children }) {
 
   // ── AT-BAT CRUD ──
 
-  const logAtBat = useCallback(async ({ playerId, game, inning, outcome }) => {
+  const logAtBat = useCallback(async ({ playerId, game, inning, outcome, hitLocation }) => {
     if (!activeTeamId) return;
     const ref = doc(collection(db, 'teams', activeTeamId, 'atBats'));
-    await setDoc(ref, {
+    const data = {
       playerId,
       game: game || '1',
       inning: inning || 1,
       outcome,
       timestamp: Date.now(),
-    });
+    };
+    // Store hit location if provided (from spray chart tap)
+    if (hitLocation) {
+      data.hitX = hitLocation.x;
+      data.hitY = hitLocation.y;
+    }
+    await setDoc(ref, data);
   }, [activeTeamId]);
 
   const deleteAtBat = useCallback(async (atBatId) => {

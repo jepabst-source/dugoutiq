@@ -7,6 +7,9 @@ import {
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db, googleProvider } from '../lib/firebase';
 import { initPushNotifications, cleanupPushNotifications } from '../services/notifications';
+import { initRevenueCat, logoutRevenueCat } from '../services/payments';
+import { enableBiometricLogin, disableBiometricLogin } from '../services/biometric';
+import { isNative } from '../services/platform';
 
 const AuthContext = createContext(null);
 
@@ -80,7 +83,7 @@ export function AuthProvider({ children }) {
     return unsub;
   }, []);
 
-  // Register push notifications after login
+  // Register push notifications and RevenueCat after login
   useEffect(() => {
     if (!user) return;
     initPushNotifications({
@@ -91,6 +94,10 @@ export function AuthProvider({ children }) {
         } catch {}
       },
     });
+    // Init RevenueCat with Firebase UID on native
+    initRevenueCat(user.uid);
+    // Enable biometric login for next app launch on native
+    if (isNative()) enableBiometricLogin();
     return () => { cleanupPushNotifications(); };
   }, [user]);
 
@@ -146,7 +153,11 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const logout = () => signOut(auth);
+  const logout = async () => {
+    disableBiometricLogin();
+    await logoutRevenueCat();
+    return signOut(auth);
+  };
 
   return (
     <AuthContext.Provider value={{

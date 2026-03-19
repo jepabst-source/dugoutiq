@@ -2,10 +2,12 @@ import { useState, useMemo, useCallback } from 'react';
 import { useTeam, PTS } from '../../contexts/TeamContext';
 import { usePlan } from '../../hooks/usePlan';
 import UpgradeModal from '../shared/UpgradeModal';
+import SprayChart from '../shared/SprayChart';
 import { hapticSuccess, hapticLight, hapticError } from '../../services/haptics';
 import { shareLink } from '../../services/sharing';
 
 const OUTCOME_LABELS = { K: 'Strikeout', out: 'Hit into Out', walk: 'Walk', hit: 'Hit' };
+const HIT_OUTCOMES = ['single', 'double', 'triple', 'hr', 'out'];
 
 export default function GameDayTab() {
   const {
@@ -26,6 +28,7 @@ export default function GameDayTab() {
   const plan = usePlan();
   const [advancedMode, setAdvancedMode] = useState(false);
   const [showGameControls, setShowGameControls] = useState(false);
+  const [pendingHit, setPendingHit] = useState(null); // { outcome } — waiting for spray chart tap
 
   const activePlayers = getActivePlayers();
   const battingOrder = useMemo(() => generateBattingOrder(), [generateBattingOrder]);
@@ -51,7 +54,7 @@ export default function GameDayTab() {
   const ourTotal = ourScore.reduce((a, b) => a + b, 0);
   const theirTotal = theirScore.reduce((a, b) => a + b, 0);
 
-  const handleRecord = useCallback(async (outcome) => {
+  const handleRecord = useCallback(async (outcome, hitLocation) => {
     if (!selectedPlayerId) return;
     if (!plan.canLogAtBat) { hapticError(); setShowUpgrade(true); return; }
     await logAtBat({
@@ -59,9 +62,10 @@ export default function GameDayTab() {
       game: gameNum,
       inning: currentInning,
       outcome,
+      hitLocation: hitLocation || null,
     });
     // Haptic feedback: success vibration for on-base, light tap for outs
-    const onBase = ['hit', '1B', '2B', '3B', 'HR', 'walk', 'BB', 'HBP'].includes(outcome);
+    const onBase = ['hit', '1B', '2B', '3B', 'HR', 'walk', 'BB', 'HBP', 'single', 'double', 'triple', 'hr', 'hbp'].includes(outcome);
     onBase ? hapticSuccess() : hapticLight();
     setSelectedPlayerId(null);
   }, [selectedPlayerId, gameNum, currentInning, logAtBat]);
@@ -276,41 +280,41 @@ export default function GameDayTab() {
                   K
                   <span className="text-[9px] font-normal opacity-70">strikeout</span>
                 </button>
-                <button onClick={() => handleRecord('out')}
+                <button onClick={() => setPendingHit({ outcome: 'out' })}
                   className="py-3 rounded-xl bg-dirt/10 border-2 border-dirt/25 text-dirt font-bold text-base
                              active:scale-95 transition-all flex flex-col items-center">
                   OUT
-                  <span className="text-[9px] font-normal opacity-70">fielded out</span>
+                  <span className="text-[9px] font-normal opacity-70">fielded out → tap field</span>
                 </button>
               </div>
-              {/* Hits row */}
+              {/* Hits row — these open the spray chart */}
               <div className="grid grid-cols-4 gap-2">
-                <button onClick={() => handleRecord('single')}
+                <button onClick={() => setPendingHit({ outcome: 'single' })}
                   className="py-3 rounded-xl bg-lime/10 border-2 border-lime/25 text-lime font-bold text-sm
                              active:scale-95 transition-all flex flex-col items-center">
                   1B
                   <span className="text-[8px] font-normal opacity-70">single</span>
                 </button>
-                <button onClick={() => handleRecord('double')}
+                <button onClick={() => setPendingHit({ outcome: 'double' })}
                   className="py-3 rounded-xl bg-lime/15 border-2 border-lime/30 text-lime font-bold text-sm
                              active:scale-95 transition-all flex flex-col items-center">
                   2B
                   <span className="text-[8px] font-normal opacity-70">double</span>
                 </button>
-                <button onClick={() => handleRecord('triple')}
+                <button onClick={() => setPendingHit({ outcome: 'triple' })}
                   className="py-3 rounded-xl bg-lime/20 border-2 border-lime/35 text-lime-bright font-bold text-sm
                              active:scale-95 transition-all flex flex-col items-center">
                   3B
                   <span className="text-[8px] font-normal opacity-70">triple</span>
                 </button>
-                <button onClick={() => handleRecord('hr')}
+                <button onClick={() => setPendingHit({ outcome: 'hr' })}
                   className="py-3 rounded-xl bg-gold/15 border-2 border-gold/30 text-gold font-bold text-sm
                              active:scale-95 transition-all flex flex-col items-center">
                   HR
                   <span className="text-[8px] font-normal opacity-70">homer</span>
                 </button>
               </div>
-              {/* Other row */}
+              {/* Other row — these record directly (no location) */}
               <div className="grid grid-cols-3 gap-2">
                 <button onClick={() => handleRecord('walk')}
                   className="py-3 rounded-xl bg-sky/10 border-2 border-sky/25 text-sky font-bold text-sm
@@ -331,6 +335,42 @@ export default function GameDayTab() {
                   <span className="text-[9px] font-normal opacity-70">sacrifice</span>
                 </button>
               </div>
+
+              {/* Spray Chart overlay — appears after tapping a hit type */}
+              {pendingHit && (
+                <div className="bg-field border-2 border-lime/30 rounded-xl p-3 mt-2">
+                  <div className="text-center mb-1">
+                    <span className="text-xs font-bold text-lime">
+                      {pendingHit.outcome === 'out' ? 'OUT' :
+                       pendingHit.outcome === 'single' ? '1B' :
+                       pendingHit.outcome === 'double' ? '2B' :
+                       pendingHit.outcome === 'triple' ? '3B' : 'HR'}
+                    </span>
+                    <span className="text-[10px] text-chalk-muted ml-2">Tap the field where it went</span>
+                  </div>
+                  <SprayChart
+                    pendingOutcome={pendingHit.outcome}
+                    onTap={({ x, y }) => {
+                      handleRecord(pendingHit.outcome, { x, y });
+                      setPendingHit(null);
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      // Skip location — record without spray data
+                      handleRecord(pendingHit.outcome);
+                      setPendingHit(null);
+                    }}
+                    className="w-full mt-2 py-1.5 text-[10px] text-chalk-muted bg-border/30 rounded-lg hover:bg-border transition-colors">
+                    Skip — record without location
+                  </button>
+                  <button
+                    onClick={() => setPendingHit(null)}
+                    className="w-full mt-1 py-1.5 text-[10px] text-chalk-muted hover:text-red transition-colors">
+                    Cancel
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
