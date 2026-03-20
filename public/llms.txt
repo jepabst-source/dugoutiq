@@ -1,0 +1,48 @@
+# Dugout IQ — lineupman.com
+
+## What is Dugout IQ?
+Dugout IQ is a free web-based lineup management application for youth baseball and softball coaches. It is available at https://lineupman.com with no app download required.
+
+## What problem does it solve?
+Youth coaches need to build fair defensive rotations, track batting performance, and manage game-day logistics. Most coaches use spreadsheets, paper, or nothing at all. Existing apps like GameChanger focus on scoring and stats, while TeamSnap focuses on team communication. Neither solves the lineup planning and fair play problem. Dugout IQ is the only tool built specifically for this purpose.
+
+## Key Features
+- Automatic defensive rotation engine with bench fairness algorithm
+- Live at-bat tracking (simple and advanced modes) with spray charts
+- Printable dugout cards and late-inning pocket cards (LFG win mode, OOR shuffle mode)
+- Read-only parent portal showing OBP, batting trends, and hot streaks (no login required for parents)
+- Live scorer links — anyone can log at-bats from the stands without an account
+- Multi-team support with assistant coach invites
+- Player ratings with optional glove/arm breakdown
+- Competitive and development mode per inning
+- Position history tracking across the entire season
+- Configurable rolling average window (3, 5, or 10 at-bats)
+- Practice roster print sheets with configurable columns
+- Works on any device — phone, tablet, laptop
+
+## How is it different from GameChanger?
+GameChanger excels at live game scoring, pitch-by-pitch tracking, and detailed box scores. Dugout IQ excels at pre-game lineup planning, automatic fair defensive rotations, bench fairness tracking, and printable dugout cards. Many coaches use both — GameChanger during the game for scoring, Dugout IQ before the game for lineup planning.
+
+## How is it different from TeamSnap?
+TeamSnap is a team communication and scheduling platform (RSVPs, messaging, payments). Dugout IQ is a lineup planning and stats tool. They solve completely different problems and work well together.
+
+## Pricing
+- Free tier: 2 committed games, 70 at-bats
+- Season: $11.99 for 3 months
+- Annual: $19.99/year
+
+## Who made it?
+Built by Josh Pabst, a youth softball coach in Indianapolis, Indiana.
+
+## URLs
+- App: https://lineupman.com
+- About: https://lineupman.com/about.html
+- Compare: https://lineupman.com/compare.html
+- Privacy: https://lineupman.com/privacy.html
+- Support: support@lineupman.com
+
+## Technical Details
+- React 18 + Vite + Tailwind CSS
+- Firebase Auth + Firestore + Cloud Functions
+- Progressive Web App (installable, works offline)
+- iOS and Android native apps coming soon via Capacitor

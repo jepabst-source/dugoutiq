@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Build a Fair Defensive Rotation for Youth Baseball & Softball — Dugout IQ</title>
+  <meta name="description" content="Learn how Dugout IQ's rotation algorithm builds fair defensive lineups for youth baseball and softball. Bench fairness, position ratings, competitive vs development mode, and more.">
+  <meta property="og:title" content="How to Build a Fair Defensive Rotation for Youth Baseball & Softball">
+  <meta property="og:description" content="The math behind fair play: how Dugout IQ's rotation algorithm ensures every kid gets meaningful field time without sacrificing competitiveness.">
+  <meta property="og:image" content="https://lineupman.com/og-about.jpg">
+  <meta property="og:url" content="https://lineupman.com/rotation-algorithm.html">
+  <meta name="keywords" content="fair defensive rotation, youth baseball rotation, softball lineup algorithm, bench fairness, equal playing time baseball, how to make fair lineups, youth softball rotation tool">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=AW-1032290089"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'AW-1032290089');
+    gtag('config', 'G-Z2VVXQ6N4R');
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "How to Build a Fair Defensive Rotation for Youth Baseball & Softball",
+    "description": "A detailed explanation of how Dugout IQ's rotation algorithm builds fair defensive lineups while maintaining competitiveness.",
+    "author": { "@type": "Person", "name": "Josh Pabst" },
+    "publisher": { "@type": "Organization", "name": "Dugout IQ", "url": "https://lineupman.com" },
+    "datePublished": "2026-03-20",
+    "url": "https://lineupman.com/rotation-algorithm.html"
+  }
+  </script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; background: #ffffff; color: #1f2937; }
+    a { color: #2563eb; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .nav { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 16px 24px; position: sticky; top: 0; z-index: 10; }
+    .nav-inner { max-width: 960px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+    .nav img { width: 80px; height: 80px; border-radius: 10px; }
+    .nav-cta { background: #1e3a5f; color: #fff; font-weight: 700; font-size: 14px; padding: 10px 24px; border-radius: 10px; text-decoration: none; }
+    .nav-cta:hover { background: #152a45; text-decoration: none; }
+    .nav-links { display: flex; gap: 24px; align-items: center; }
+    .nav-links a { color: #4b5563; font-size: 14px; font-weight: 500; text-decoration: none; }
+    .nav-links a:hover { color: #1e3a5f; }
+    .content { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
+    .content h1 { font-size: 32px; margin-bottom: 8px; line-height: 1.2; }
+    .content .byline { color: #6b7280; font-size: 14px; margin-bottom: 40px; }
+    .content h2 { font-size: 22px; margin-top: 40px; margin-bottom: 12px; color: #1e3a5f; }
+    .content h3 { font-size: 18px; margin-top: 28px; margin-bottom: 8px; color: #374151; }
+    .content p { font-size: 15px; line-height: 1.8; margin-bottom: 16px; color: #374151; }
+    .content ul, .content ol { margin: 0 0 16px 24px; }
+    .content li { font-size: 15px; line-height: 1.8; color: #374151; margin-bottom: 6px; }
+    .callout { background: #f0f7ff; border-left: 4px solid #2563eb; padding: 16px 20px; margin: 24px 0; border-radius: 0 8px 8px 0; }
+    .callout p { margin: 0; font-size: 14px; color: #1e3a5f; }
+    .example { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; margin: 24px 0; }
+    .example h4 { font-size: 14px; font-weight: 700; color: #374151; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .example p { font-size: 14px; margin-bottom: 8px; }
+    .cta-box { text-align: center; padding: 48px 24px; background: #1e3a5f; border-radius: 16px; margin-top: 48px; }
+    .cta-box h2 { color: #fff; font-size: 24px; margin-bottom: 8px; }
+    .cta-box p { color: #94a3b8; font-size: 15px; margin-bottom: 24px; }
+    .cta-box a { display: inline-block; background: #fff; color: #1e3a5f; font-weight: 700; font-size: 16px; padding: 14px 36px; border-radius: 12px; text-decoration: none; }
+    .cta-box a:hover { background: #f0f0f0; text-decoration: none; }
+    .footer { text-align: center; padding: 32px 24px; border-top: 1px solid #e5e7eb; font-size: 13px; color: #9ca3af; }
+    .footer a { color: #6b7280; }
+  </style>
+</head>
+<body>
+
+  <div class="nav">
+    <div class="nav-inner">
+      <div class="nav-links">
+        <a href="/"><img src="/favicon.png" alt="Dugout IQ"></a>
+        <a href="/about.html">About</a>
+        <a href="/compare.html">Compare</a>
+        <a href="/privacy.html">Privacy</a>
+      </div>
+      <a href="/" class="nav-cta">Try Free</a>
+    </div>
+  </div>
+
+  <div class="content">
+    <h1>How to Build a Fair Defensive Rotation for Youth Baseball & Softball</h1>
+    <p class="byline">By Josh Pabst · March 2026 · Youth softball coach, Indianapolis</p>
+
+    <p>If you've ever coached a youth baseball or softball team with more than 9 players, you know the problem. Somebody has to sit on the bench. And the moment a parent sees their kid sitting for the second inning in a row while the coach's kid plays shortstop every game, you've got a dugout mutiny on your hands.</p>
+
+    <p>I built Dugout IQ because I was tired of solving this problem on napkins. Over two seasons of coaching my daughter's softball team, I developed a rotation algorithm that balances fairness with competitiveness. Here's how it works.</p>
+
+    <h2>The Core Problem</h2>
+
+    <p>You have 12 players and 9 field positions. That means 3 kids sit on the bench every inning. Over a 3-inning game, that's 9 bench slots to fill. If you have 12 players, each kid should bench roughly once — but some positions (pitcher, catcher, shortstop) need your strongest players, and you can't just randomly shuffle everyone.</p>
+
+    <p>The naive approach is to just rotate alphabetically or let kids pick positions. Both are terrible. Alphabetical means the same kids always sit first. Letting kids pick means your weakest fielder is at shortstop while your best athlete is in right field because she was last in line.</p>
+
+    <h2>Step 1: Rate Your Players</h2>
+
+    <p>Every player on the roster gets a defensive rating from 1 to 5 stars. This isn't about making kids feel ranked — it's a private coaching tool that helps the algorithm make smart decisions. A 5-star player is your most reliable fielder. A 1-star player is brand new to the sport.</p>
+
+    <p>Optionally, you can break the rating into two components: <strong>Glove</strong> (catching ability) and <strong>Arm</strong> (throwing accuracy). A kid who catches everything but can't throw to first is a 4-Glove, 2-Arm — which averages to a 3-star defender. This granularity helps the algorithm place players more intelligently.</p>
+
+    <h2>Step 2: The Bench Fairness Algorithm</h2>
+
+    <p>This is the heart of the system. When deciding who sits each inning, the algorithm uses a two-key sort:</p>
+
+    <ol>
+      <li><strong>Primary key: Rating tier.</strong> Lower-rated players sit before higher-rated players. A 2-star player will bench before a 4-star player. This is intentional — in competitive innings, you want your strongest defenders on the field.</li>
+      <li><strong>Secondary key: Season bench history.</strong> Within the same rating tier, the player who has benched the fewest times this season sits next. This prevents one 2-star kid from sitting every game while another 2-star kid never sits.</li>
+    </ol>
+
+    <div class="callout">
+      <p><strong>The key insight:</strong> Fairness doesn't mean everyone plays the same amount. It means bench time is distributed equitably within skill tiers. A 5-star player will sit occasionally (everyone does), but a 2-star player will sit more often — and that's okay, because among the 2-star players, bench time is perfectly balanced.</p>
+    </div>
+
+    <h3>The Cross-Tier Nudge</h3>
+
+    <p>There's one additional mechanism. Once the lower-tier players have averaged enough bench appearances (roughly 3 per player across the season), a "quota nudge" kicks in for the higher-tier players. This ensures that even your best players take their turn on the bench occasionally — just not as often as the developing players.</p>
+
+    <p>This prevents the scenario where a 5-star player literally never sits all season. Parents of every kid see their child get field time and bench time. The data backs it up.</p>
+
+    <h2>Step 3: No Back-to-Back Bench</h2>
+
+    <p>One of the most common parent complaints: "My kid sat two innings in a row!" The algorithm enforces a no-back-to-back bench rule by default. If a player sat in inning 2, they're excluded from the bench pool in inning 3 — even if the rating-based sort would normally put them there.</p>
+
+    <p>If it's mathematically impossible to avoid (e.g., only 10 players and 3 bench spots), the algorithm relaxes the constraint rather than crashing. But with 11-12 players, back-to-back benching virtually never happens.</p>
+
+    <h2>Step 4: Position Assignment</h2>
+
+    <p>Once the bench is filled, the remaining 9 players need field positions. The algorithm scores each player for each position based on:</p>
+
+    <ul>
+      <li><strong>Defensive rating</strong> — higher-rated players get first pick at key positions</li>
+      <li><strong>Position preferences</strong> — if a player prefers shortstop, they get a bonus for that position</li>
+      <li><strong>Position history</strong> — players who've played a position many times get a penalty (to encourage variety)</li>
+      <li><strong>Previous inning position</strong> — players avoid playing the same position back-to-back (keeps it interesting)</li>
+      <li><strong>Coming off the bench</strong> — a player who just sat gets a small bonus to ensure they're placed somewhere meaningful, not stuck in right field after benching</li>
+    </ul>
+
+    <h3>Position Minimum Ratings</h3>
+
+    <p>Coaches can configure minimum ratings for specific positions. For example: "1st Base requires at least a 4-star player" or "Shortstop requires at least 3 stars." The algorithm respects these constraints in competitive innings but relaxes them during development innings, giving lower-rated players a chance to try challenging positions.</p>
+
+    <h2>Step 5: Competitive vs. Development Mode</h2>
+
+    <p>Each inning can be set to Competitive or Development mode:</p>
+
+    <ul>
+      <li><strong>Competitive:</strong> Best pitcher on the mound. Position minimums enforced. Strongest defenders at key infield positions. This is your "we need to win this inning" lineup.</li>
+      <li><strong>Development:</strong> Backup pitcher gets a turn. Position minimums relaxed. Lower-rated players get infield experience. This is your "let's grow these kids" lineup.</li>
+    </ul>
+
+    <p>A typical 3-inning game might be: Competitive, Development, Competitive. A 6-inning game might alternate more aggressively. The coach controls this per inning with a single tap.</p>
+
+    <h2>Step 6: The Pocket Card (Last Inning)</h2>
+
+    <p>The final inning isn't generated with the regular rotation — it gets its own pocket card system with two options:</p>
+
+    <ul>
+      <li><strong>LFG (Win Mode):</strong> Your absolute best lineup. Top-rated players at every key position. Used when the game is close and you need to lock it down.</li>
+      <li><strong>OOR (Shuffle Mode):</strong> Rest your starters. Give bench time to your best players (who've been on the field all game) and put developing players on the field. Used when you're ahead by a lot or the game is already decided.</li>
+    </ul>
+
+    <p>Both pocket cards are now bench-aware — they know who already sat during the regular innings and avoid re-benching those kids. The coach can also manually swap any player on the pocket card before the inning starts.</p>
+
+    <div class="example">
+      <h4>Example: 12-Player Softball Team, 4-Inning Game</h4>
+      <p><strong>Innings 1-3:</strong> Regular rotation. Each of the 3 bench spots is filled by a different player each inning. No one benches twice. Lower-rated players sit first, but bench history ensures it balances over the season.</p>
+      <p><strong>Inning 4 (close game):</strong> Coach pulls the LFG card. Best defenders at every position. The 3 players who haven't benched yet this game are the ones who sit — ensuring every player benched exactly once across all 4 innings.</p>
+      <p><strong>Inning 4 (blowout):</strong> Coach pulls the OOR card. Starters rest, developing players get premium positions. Everyone gets a chance to play somewhere meaningful.</p>
+    </div>
+
+    <h2>The Result</h2>
+
+    <p>After a full season using this algorithm, you can pull up any player's position history and show exactly how many innings they played at each position, how many times they benched, and how it compares to their teammates. No more "my kid never plays infield" arguments — the data is right there.</p>
+
+    <p>Parents see the results in the parent portal: their child's batting stats, positions played, and trends. Coaches see the full picture in the history tab. And nobody has to argue about fairness, because the algorithm handles it transparently.</p>
+
+    <div class="cta-box">
+      <h2>Let the algorithm do the work</h2>
+      <p>Dugout IQ handles all of this automatically. Enter your roster, rate your players, and the rotation engine does the rest.</p>
+      <a href="/">Try Dugout IQ Free &rarr;</a>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>Dugout IQ &middot; <a href="/">lineupman.com</a> &middot; <a href="/about.html">About</a> &middot; <a href="/compare.html">Compare</a> &middot; <a href="/privacy.html">Privacy Policy</a></p>
+    <p style="margin-top:8px">Questions? <a href="mailto:support@lineupman.com">support@lineupman.com</a></p>
+  </div>
+
+</body>
+</html>

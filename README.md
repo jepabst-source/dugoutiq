@@ -1,16 +1,92 @@
-# React + Vite
+# ⚾ Dugout IQ — Smart Lineup Manager for Youth Baseball & Softball
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**[lineupman.com](https://lineupman.com)** — Free to use. No download required.
 
-Currently, two official plugins are available:
+Dugout IQ is a lineup management app built specifically for youth baseball and softball coaches. It handles the stuff you used to scribble on napkins — batting orders, defensive rotations, and position tracking — so you can focus on your players.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Why Dugout IQ?
 
-## React Compiler
+Most coaching apps focus on scoring (GameChanger) or team communication (TeamSnap). Neither helps you answer the question every rec league coach faces before every game: **"Who plays where, and is it fair?"**
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Dugout IQ is the only tool built specifically for lineup planning and fair play.
 
-## Expanding the ESLint configuration
+## Features
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 🛡️ Automatic Defensive Rotations
+The rotation engine generates position assignments based on player ratings, position preferences, and bench history. Set competitive or development mode per inning. The bench fairness algorithm ensures no kid rides the bench all game — lower-rated players sit first, but bench time is distributed fairly across the season.
+
+### ⚾ Live At-Bat Tracking
+Tap a player, tap an outcome. Simple mode (K, Hit, Walk, Out) or Advanced mode (1B, 2B, 3B, HR, BB, HBP, SAC) with spray charts showing where each hit landed on the field. OBP and batting averages update in real time.
+
+### 🖨️ Printable Dugout Cards
+One-tap print: batting order on one side, defensive lineup on the other. Includes late-inning pocket cards — LFG (win mode) puts your best players at key positions, OOR (shuffle mode) rests your starters. Tape it to the dugout wall.
+
+### 👨‍👩‍👧 Parent Portal
+Share a link and a 4-digit PIN. Parents see their child's OBP, batting trends, recent positions played, and hot streaks. Only positive trends — no kid gets called out for struggling. No login required.
+
+### 📤 Live Scorer Links
+Generate a link you can text to anyone in the stands. They tap players and log at-bats from their phone — no account needed. Stats sync to your account automatically. Expires in 12 hours.
+
+### 📊 Season History
+Every committed game is saved. View position history across all games, season batting stats, per-player trends, and spray charts. Data-backed decisions about who plays where.
+
+### 👥 Multi-Team Support
+Coach multiple teams? Switch between them in one tap. Each team has its own roster, stats, and settings.
+
+### ⭐ Player Ratings with Glove/Arm Breakdown
+Rate players 1-5 stars for defense. Optionally break it down into Glove and Arm ratings — the average becomes the overall score. The rotation engine uses these to place the right players at the right positions.
+
+### ⚙️ Configurable Rules
+- No back-to-back bench sits
+- Infield innings cap
+- Position minimum ratings (e.g., 4★ minimum for 1st Base)
+- Competitive vs. development mode per inning
+- Configurable rolling average window (last 3, 5, or 10 at-bats)
+- Simple or advanced at-bat tracking mode
+
+## How It's Different
+
+| Feature | Dugout IQ | GameChanger | TeamSnap |
+|---------|-----------|-------------|----------|
+| Auto defensive rotations | ✅ | ❌ | ❌ |
+| Bench fairness algorithm | ✅ | ❌ | ❌ |
+| Printable dugout cards | ✅ | ❌ | ❌ |
+| Live at-bat tracking | ✅ | ✅ | ❌ |
+| Parent portal | ✅ | ✅ | Partial |
+| Spray charts | ✅ | ✅ | ❌ |
+| Position history tracking | ✅ | ❌ | ❌ |
+| No app download needed | ✅ | ❌ | ❌ |
+| Team communication | ❌ | ❌ | ✅ |
+| Advanced scoring (pitch-by-pitch) | ❌ | ✅ | ❌ |
+
+**Use them together:** TeamSnap for scheduling and communication. GameChanger for live scoring. Dugout IQ for lineup planning and fair play.
+
+## Tech Stack
+
+- **Frontend:** React 18 + Vite + Tailwind CSS v4
+- **Backend:** Firebase (Auth + Firestore + Cloud Functions)
+- **Payments:** Stripe (web) + RevenueCat (native, coming soon)
+- **Hosting:** GitHub Pages with custom domain ([lineupman.com](https://lineupman.com))
+- **PWA:** Installable on any device, works offline
+
+## Pricing
+
+- **Free:** 2 committed games, 70 at-bats — enough to try every feature
+- **Season:** $11.99 for 3 months
+- **Annual:** $19.99/year (best value)
+
+## Links
+
+- 🌐 **App:** [lineupman.com](https://lineupman.com)
+- 📖 **About:** [lineupman.com/about.html](https://lineupman.com/about.html)
+- ⚖️ **Compare:** [lineupman.com/compare.html](https://lineupman.com/compare.html)
+- 🔒 **Privacy:** [lineupman.com/privacy.html](https://lineupman.com/privacy.html)
+- 📧 **Support:** [support@lineupman.com](mailto:support@lineupman.com)
+
+## Who It's For
+
+Rec league coaches, travel ball coaches, and anyone managing a youth baseball or softball team who wants fair play and organized game days. Built by a youth softball coach in Indianapolis.
+
+---
+
+*Built by a coach, for coaches.*
