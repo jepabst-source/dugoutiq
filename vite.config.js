@@ -3,6 +3,14 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 const nativeExternals = [
+  '@capacitor/core',
+  '@capacitor/haptics',
+  '@capacitor/share',
+  '@capacitor/app',
+  '@capacitor/status-bar',
+  '@capacitor/splash-screen',
+  '@capacitor/push-notifications',
+  '@capacitor/local-notifications',
   '@revenuecat/purchases-capacitor',
   'capacitor-native-biometric',
 ];
