@@ -264,15 +264,16 @@ export function TeamProvider({ children }) {
 
   // ── STATS HELPERS ──
 
-  const getRollingAvg = useCallback((playerId) => {
+  const getRollingAvg = useCallback((playerId, windowOverride) => {
+    const window = windowOverride || team?.settings?.rollingWindow || 5;
     const playerAbs = atBats
       .filter(a => a.playerId === playerId)
       .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
-      .slice(0, 5);
+      .slice(0, window);
     if (!playerAbs.length) return { avg: 0, absCount: 0, pts: 0 };
     const pts = playerAbs.reduce((s, a) => s + (PTS[a.outcome] ?? 0), 0);
     return { avg: pts / playerAbs.length, absCount: playerAbs.length, pts };
-  }, [atBats]);
+  }, [atBats, team]);
 
   const getPlayerStats = useCallback((playerId) => {
     const playerAbs = atBats.filter(a => a.playerId === playerId);

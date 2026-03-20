@@ -42,7 +42,7 @@ function getPortalTeamId() {
 }
 
 function AppContent() {
-  const { user, userDoc, loading, activeTeamId } = useAuth();
+  const { user, userDoc, loading, creatingDemo, activeTeamId } = useAuth();
   const [inviteCode] = useState(() => getInviteCode());
   const [scorerCode] = useState(() => getScorerCode());
   const [portalTeamId] = useState(() => getPortalTeamId());
@@ -87,6 +87,18 @@ function AppContent() {
 
   // Not logged in
   if (!user) return <LoginPage />;
+
+  // Demo team being created — show loading, not CreateTeamPage
+  if (creatingDemo) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-3 animate-pulse">⚾</div>
+          <p className="text-chalk-muted text-sm">Setting up your demo team...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Logged in but no teams yet
   if (!userDoc?.teamIds?.length || !activeTeamId) {

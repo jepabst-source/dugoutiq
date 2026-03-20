@@ -23,11 +23,14 @@ const OUTCOME_LABELS = { K: 'Strikeout', out: 'Hit into Out', walk: 'Walk', hit:
 
 export default function BattingTab() {
   const {
-    players, atBats, attendance,
+    players, atBats, attendance, team,
     generateBattingOrder, getActivePlayers,
     setAllAttendance, toggleAttendance,
     logAtBat, deleteAtBat, getRollingAvg, getPlayerStats,
+    updateSettings,
   } = useTeam();
+
+  const rollingWindow = team?.settings?.rollingWindow || 5;
 
   const [order, setOrder] = useState([]);
   const [generated, setGenerated] = useState(false);
@@ -122,7 +125,7 @@ export default function BattingTab() {
         <div>
           <h2 className="text-xl font-bold text-lime">Batting Order</h2>
           <p className="text-xs text-chalk-muted mt-0.5">
-            {sortMode === 'points' ? 'Ranked by rolling average (last 5 ABs)' : 'Ranked by on-base percentage'} · Drag to reorder
+            {sortMode === 'points' ? `Ranked by rolling average (last ${rollingWindow} ABs)` : 'Ranked by on-base percentage'} · Drag to reorder
           </p>
         </div>
         <button
@@ -134,8 +137,8 @@ export default function BattingTab() {
         </button>
       </div>
 
-      {/* Sort mode toggle */}
-      <div className="flex items-center gap-3 mb-3">
+      {/* Sort mode toggle + rolling window */}
+      <div className="flex items-center gap-3 mb-3 flex-wrap">
         <span className="text-xs text-chalk-muted">Sort by:</span>
         <div className="flex gap-1 bg-panel border border-border rounded-lg p-0.5">
           <button onClick={() => setSortMode('points')}
@@ -148,6 +151,17 @@ export default function BattingTab() {
               ${sortMode === 'obp' ? 'bg-field-light text-sky' : 'text-chalk-muted hover:text-chalk'}`}>
             OBP
           </button>
+        </div>
+        <span className="text-xs text-chalk-muted ml-auto sm:ml-0">Rolling:</span>
+        <div className="flex gap-0.5 bg-panel border border-border rounded-lg p-0.5">
+          {[3, 5, 10].map(n => (
+            <button key={n}
+              onClick={() => updateSettings({ rollingWindow: n })}
+              className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all
+                ${rollingWindow === n ? 'bg-field-light text-lime' : 'text-chalk-muted hover:text-chalk'}`}>
+              {n}
+            </button>
+          ))}
         </div>
       </div>
 

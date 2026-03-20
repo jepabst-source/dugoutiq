@@ -18,6 +18,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [userDoc, setUserDoc] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [creatingDemo, setCreatingDemo] = useState(false);
   const [activeTeamId, setActiveTeamId] = useState(null);
   const [allTeams, setAllTeams] = useState([]); // [{id, name, sport, seasonLabel, seasonYear}]
 
@@ -66,6 +67,7 @@ export function AuthProvider({ children }) {
           setAllTeams([]);
           // Create Demo Dolphins team for the new user
           try {
+            setCreatingDemo(true);
             const demoId = await createDemoTeam(firebaseUser.uid);
             setActiveTeamId(demoId);
             const updatedSnap = await getDoc(userRef);
@@ -74,6 +76,7 @@ export function AuthProvider({ children }) {
           } catch (err) {
             console.error('Demo team creation error:', err);
           }
+          setCreatingDemo(false);
           // Google Ads conversion tracking
           if (typeof gtag === 'function') {
             gtag('event', 'conversion', {
@@ -175,6 +178,7 @@ export function AuthProvider({ children }) {
       user,
       userDoc,
       loading,
+      creatingDemo,
       activeTeamId,
       setActiveTeamId,
       allTeams,

@@ -338,7 +338,7 @@ export default function DefenseTab() {
           {/* Final Inning Pocket Cards */}
           <div className="border-t border-border pt-5 mt-6">
             <div className="text-xs font-bold text-chalk-muted uppercase tracking-widest mb-4">
-              INNING {totalInnings} — POCKET CARD
+              INNING {totalInnings} — POCKET CARD (Last Inning)
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <PocketCard
