@@ -188,6 +188,21 @@ export default function AppShell() {
 
       {/* Content */}
       <main className="flex-1 max-w-6xl mx-auto w-full px-3 sm:px-4 py-4 sm:py-6 pb-8">
+        {/* Demo team banner */}
+        {team?.isDemo && (
+          <div className="bg-sky/10 border border-sky/30 rounded-xl px-4 py-3 mb-4 flex items-center justify-between gap-3">
+            <div>
+              <div className="text-sm font-bold text-sky">You're viewing the Demo Dolphins</div>
+              <div className="text-[11px] text-chalk-muted">Explore every tab to see how Dugout IQ works. When you're ready, create your real team.</div>
+            </div>
+            <button
+              onClick={() => setShowCreateTeam(true)}
+              className="px-4 py-2 rounded-lg bg-lime text-field font-bold text-xs whitespace-nowrap
+                         hover:bg-lime-bright active:scale-[0.97] transition-all">
+              Create My Team
+            </button>
+          </div>
+        )}
         {activeTab === 'roster' && <RosterTab />}
         {activeTab === 'batting' && <BattingTab />}
         {activeTab === 'defense' && <DefenseTab />}

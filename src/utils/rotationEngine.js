@@ -146,8 +146,8 @@ export function buildFullRotation({ players, standardInnings, settings, position
   }
 
   // Build LFG and OOR pocket cards
-  const lfg = buildLFGLineup(players, positionHistory);
-  const oor = buildOORLineup(players, positionHistory);
+  const lfg = buildLFGLineup(players, positionHistory, innings, standardInnings);
+  const oor = buildOORLineup(players, positionHistory, innings, standardInnings);
 
   return { innings, lfg, oor };
 }
@@ -226,13 +226,15 @@ function assignFieldPositions(fieldPlayers, fieldPositions, ing, gameInnings, po
 
 // ── LFG (Win Mode) ──
 
-function buildLFGLineup(players, positionHistory) {
+function buildLFGLineup(players, positionHistory, gameInnings = {}, standardInnings = 0) {
   if (!players.length) return null;
   const sorted = [...players].sort((a, b) => b.defRating - a.defRating);
   const assignment = {};
   const used = new Set();
 
-  // Best available pitcher
+  const benchCounts = {};
+  players.forEach(p => { benchCounts[p.id] = countBenchedInGame(gameInnings, standardInnings, p.id); });
+
   const pitchers = players.filter(p => p.canPitch).sort((a, b) => b.defRating - a.defRating);
   if (pitchers.length) { assignment['Pitcher'] = pitchers[0].id; used.add(pitchers[0].id); }
   else { const best = sorted[0]; if (best) { assignment['Pitcher'] = best.id; used.add(best.id); } }
@@ -240,8 +242,7 @@ function buildLFGLineup(players, positionHistory) {
   const catchers = players.filter(p => p.canCatch && !used.has(p.id));
   if (catchers.length) {
     const best = catchers.sort((a, b) => b.defRating - a.defRating)[0];
-    assignment['Catcher'] = best.id;
-    used.add(best.id);
+    assignment['Catcher'] = best.id; used.add(best.id);
   }
 
   const fieldPositions = [...INFIELD_POSITIONS, ...OUTFIELD_POSITIONS];
@@ -249,32 +250,29 @@ function buildLFGLineup(players, positionHistory) {
     const avail = sorted.filter(p => !used.has(p.id));
     if (!avail.length) break;
     const scored = avail.map(p => ({
-      p,
-      score: p.defRating * 10
-        + ((p.prefPositions || []).includes(pos) ? 5 : 0)
-        - (positionHistory[p.id]?.[pos] || 0) * 0.5
+      p, score: p.defRating * 10 + ((p.prefPositions || []).includes(pos) ? 5 : 0) - (positionHistory[p.id]?.[pos] || 0) * 0.5
     })).sort((a, b) => b.score - a.score);
-    assignment[pos] = scored[0].p.id;
-    used.add(scored[0].p.id);
+    assignment[pos] = scored[0].p.id; used.add(scored[0].p.id);
   }
 
   const remaining = sorted.filter(p => !used.has(p.id));
-  remaining.forEach((p, i) => {
-    assignment[`Bench ${i + 1}`] = p.id;
-  });
+  remaining.sort((a, b) => (benchCounts[a.id] || 0) - (benchCounts[b.id] || 0));
+  remaining.forEach((p, i) => { assignment[`Bench ${i + 1}`] = p.id; });
 
   return assignment;
 }
 
 // ── OOR (Shuffle Mode) ──
 
-function buildOORLineup(players, positionHistory) {
+function buildOORLineup(players, positionHistory, gameInnings = {}, standardInnings = 0) {
   if (!players.length) return null;
   const sorted = [...players].sort((a, b) => a.defRating - b.defRating + (Math.random() - 0.5));
   const assignment = {};
   const used = new Set();
 
-  // OOR: use a non-best pitcher if available (give them experience)
+  const benchCounts = {};
+  players.forEach(p => { benchCounts[p.id] = countBenchedInGame(gameInnings, standardInnings, p.id); });
+
   const pitchers = players.filter(p => p.canPitch).sort((a, b) => b.defRating - a.defRating);
   if (pitchers.length > 1) { assignment['Pitcher'] = pitchers[1].id; used.add(pitchers[1].id); }
   else if (pitchers.length) { assignment['Pitcher'] = pitchers[0].id; used.add(pitchers[0].id); }
@@ -284,28 +282,24 @@ function buildOORLineup(players, positionHistory) {
     .sort((a, b) => (positionHistory[a.id]?.['Catcher'] || 0) - (positionHistory[b.id]?.['Catcher'] || 0));
   if (catchers.length) { assignment['Catcher'] = catchers[0].id; used.add(catchers[0].id); }
 
-  // Bench strongest players (they rest)
   const benchCount = Math.max(0, players.length - 9);
-  const strong = [...players].filter(p => !used.has(p.id)).sort((a, b) => b.defRating - a.defRating);
+  const strong = [...players].filter(p => !used.has(p.id)).sort((a, b) => {
+    const aBenched = benchCounts[a.id] || 0;
+    const bBenched = benchCounts[b.id] || 0;
+    if (aBenched === 0 && bBenched > 0) return -1;
+    if (bBenched === 0 && aBenched > 0) return 1;
+    return b.defRating - a.defRating;
+  });
   const benched = [];
-  for (const p of strong) {
-    if (benched.length >= benchCount) break;
-    benched.push(p);
-    used.add(p.id);
-  }
+  for (const p of strong) { if (benched.length >= benchCount) break; benched.push(p); used.add(p.id); }
   benched.forEach((p, i) => { assignment[`Bench ${i + 1}`] = p.id; });
 
-  // Fill field — lower-rated first, reward first-timers
   const fieldPositions = [...INFIELD_POSITIONS, ...OUTFIELD_POSITIONS];
   for (const pos of fieldPositions) {
     const avail = sorted.filter(p => !used.has(p.id));
     if (!avail.length) break;
-    const scored = avail.map(p => ({
-      p,
-      score: -(positionHistory[p.id]?.[pos] || 0) * 5 + (Math.random() * 2)
-    })).sort((a, b) => b.score - a.score);
-    assignment[pos] = scored[0].p.id;
-    used.add(scored[0].p.id);
+    const scored = avail.map(p => ({ p, score: -(positionHistory[p.id]?.[pos] || 0) * 5 + (Math.random() * 2) })).sort((a, b) => b.score - a.score);
+    assignment[pos] = scored[0].p.id; used.add(scored[0].p.id);
   }
 
   return assignment;

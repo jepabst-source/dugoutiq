@@ -137,6 +137,32 @@ export default function DefenseTab() {
     setOor(result.oor);
   };
 
+  const handleLfgSwap = (position, newPlayerId) => {
+    setLfg(prev => {
+      const updated = { ...prev };
+      if (newPlayerId) {
+        const oldPosition = Object.keys(updated).find(pos => updated[pos] === newPlayerId && pos !== position);
+        const displacedPlayerId = updated[position];
+        updated[position] = newPlayerId;
+        if (oldPosition) updated[oldPosition] = displacedPlayerId || undefined;
+      } else { updated[position] = undefined; }
+      return updated;
+    });
+  };
+
+  const handleOorSwap = (position, newPlayerId) => {
+    setOor(prev => {
+      const updated = { ...prev };
+      if (newPlayerId) {
+        const oldPosition = Object.keys(updated).find(pos => updated[pos] === newPlayerId && pos !== position);
+        const displacedPlayerId = updated[position];
+        updated[position] = newPlayerId;
+        if (oldPosition) updated[oldPosition] = displacedPlayerId || undefined;
+      } else { updated[position] = undefined; }
+      return updated;
+    });
+  };
+
   const handleReshuffleInning = (ing) => {
     const result = buildFullRotation({ players: activePlayers, standardInnings, settings, positionHistory, inningModes });
     setInnings(prev => ({ ...prev, [ing]: result.innings[ing] || prev[ing] }));
@@ -323,6 +349,7 @@ export default function DefenseTab() {
                 benchCount={benchCount}
                 accentClass="text-lime border-lime bg-white"
                 onRegenerate={handleRegenerateLFG}
+                onSwap={handleLfgSwap}
               />
               <PocketCard
                 label="OOR"
@@ -332,6 +359,7 @@ export default function DefenseTab() {
                 benchCount={benchCount}
                 accentClass="text-chalk-dim border-lime bg-white"
                 onRegenerate={handleRegenerateOOR}
+                onSwap={handleOorSwap}
               />
             </div>
           </div>
@@ -465,11 +493,10 @@ function PositionRow({ pos, playerId, players, onSwap, type }) {
 
 // ── Pocket Card (LFG / OOR) ──
 
-function PocketCard({ label, sublabel, assignment, players, benchCount, accentClass, onRegenerate }) {
+function PocketCard({ label, sublabel, assignment, players, benchCount, accentClass, onRegenerate, onSwap }) {
   if (!assignment) return null;
 
   const benchPositions = POSITIONS.bench.slice(0, benchCount);
-  const allPositions = [...POSITIONS.infield, ...POSITIONS.outfield, ...benchPositions];
 
   return (
     <div className={`border rounded-xl overflow-hidden ${accentClass}`}>
@@ -487,19 +514,27 @@ function PocketCard({ label, sublabel, assignment, players, benchCount, accentCl
           🔀
         </button>
       </div>
-      <div className="p-3">
-        {allPositions.map(pos => {
-          const pid = assignment[pos];
-          const player = players.find(p => p.id === pid);
-          const isBench = pos.startsWith('Bench');
-          if (!pid) return null;
-          return (
-            <div key={pos} className={`flex items-center gap-2 py-1 text-xs ${isBench ? 'opacity-50' : ''}`}>
-              <span className="w-20 text-chalk-muted font-semibold">{isBench ? 'Bench' : pos}</span>
-              <span className="text-chalk">{player?.name || '—'}</span>
-            </div>
-          );
-        })}
+      <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border">
+        <div className="p-3">
+          <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-2">Infield</div>
+          {POSITIONS.infield.map(pos => (
+            <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="infield" />
+          ))}
+        </div>
+        <div className="p-3">
+          <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-2">Outfield</div>
+          {POSITIONS.outfield.map(pos => (
+            <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="outfield" />
+          ))}
+          {benchPositions.length > 0 && (
+            <>
+              <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mt-3 mb-2">Bench</div>
+              {benchPositions.map(pos => (
+                <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="bench" />
+              ))}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

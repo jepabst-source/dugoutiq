@@ -5,9 +5,93 @@ import StarRating from '../shared/StarRating';
 const POSITIONS = ['Pitcher', 'Catcher', '1st Base', '2nd Base', 'Shortstop', '3rd Base', 'Left Field', 'Center Field', 'Right Field'];
 
 export default function RosterTab() {
-  const { players, addPlayer, updatePlayer, removePlayer } = useTeam();
+  const { players, team, addPlayer, updatePlayer, removePlayer, getPlayerStats } = useTeam();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+
+  const [showPrintConfig, setShowPrintConfig] = useState(false);
+  const [printOpts, setPrintOpts] = useState({
+    defRating: false,
+    gloveArm: false,
+    obp: false,
+    coachNotes: false,
+    blankNotes: true,
+  });
+
+  const togglePrintOpt = (key) => setPrintOpts(prev => ({ ...prev, [key]: !prev[key] }));
+
+  const printRoster = () => {
+    const opts = printOpts;
+    const sorted = [...players].sort((a, b) => (a.number || 99) - (b.number || 99));
+
+    // Build header columns
+    let headers = '<th class="num"></th><th class="jersey">#</th><th class="name">Player</th>';
+    if (opts.defRating) headers += '<th class="stat">Def</th>';
+    if (opts.gloveArm) headers += '<th class="stat">Glove</th><th class="stat">Arm</th>';
+    if (opts.obp) headers += '<th class="stat">OBP</th>';
+    if (opts.coachNotes) headers += '<th class="notes-col">Notes</th>';
+    if (opts.blankNotes) headers += '<th class="blank-col">Notes</th>';
+
+    // Build rows
+    const rows = sorted.map((p, i) => {
+      const stats = getPlayerStats(p.id);
+      let row = `<td class="num">${i + 1}</td>`;
+      row += `<td class="jersey">${p.number || '\u2014'}</td>`;
+      row += `<td class="name">${p.name}</td>`;
+      if (opts.defRating) row += `<td class="stat">${p.defRating}\u2605</td>`;
+      if (opts.gloveArm) {
+        row += `<td class="stat">${p.catchRating ? p.catchRating + '\u2605' : '\u2014'}</td>`;
+        row += `<td class="stat">${p.throwRating ? p.throwRating + '\u2605' : '\u2014'}</td>`;
+      }
+      if (opts.obp) row += `<td class="stat">${stats.obp !== null ? stats.obp.toFixed(3).replace(/^0/, '') : '\u2014'}</td>`;
+      if (opts.coachNotes) row += `<td class="notes-col">${p.notes || ''}</td>`;
+      if (opts.blankNotes) row += `<td class="blank-col"><div class="notes-line"></div></td>`;
+      return `<tr>${row}</tr>`;
+    }).join('');
+
+    const html = `
+      <html><head><title>${team?.name || 'Roster'} \u2014 Practice Sheet</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; padding: 24px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: #888; padding: 6px 8px; border-bottom: 2px solid #1a4332; }
+        td { padding: 8px; border-bottom: 1px solid #ddd; font-size: 13px; vertical-align: top; }
+        .num { width: 24px; text-align: center; color: #999; font-weight: 700; }
+        .jersey { width: 40px; text-align: center; color: #1a4332; font-weight: 700; font-size: 15px; }
+        .name { font-weight: 600; white-space: nowrap; }
+        .stat { width: 50px; text-align: center; color: #555; font-size: 12px; }
+        .notes-col { font-size: 11px; color: #666; max-width: 200px; }
+        .blank-col { width: auto; }
+        .notes-line { border-bottom: 1px dotted #bbb; height: 22px; min-width: 120px; }
+      </style></head><body>
+      <div style="display:flex;align-items:center;gap:12px;border-bottom:3px solid #1a4332;padding-bottom:8px;margin-bottom:16px;">
+        <img src="/logo-square.jpg" alt="Dugout IQ" style="width:36px;height:36px;border-radius:8px;">
+        <div style="font-size:18px;font-weight:700;color:#1a4332;">${team?.name || 'Team'} \u2014 Practice Sheet</div>
+      </div>
+      <table>
+        <thead><tr>${headers}</tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      </body></html>
+    `;
+
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;top:-10000px;left:-10000px;width:0;height:0;';
+    document.body.appendChild(iframe);
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+    iframe.onload = () => {
+      setTimeout(() => {
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+        setTimeout(() => document.body.removeChild(iframe), 1000);
+      }, 250);
+    };
+    setShowPrintConfig(false);
+  };
 
   return (
     <div>
@@ -19,14 +103,64 @@ export default function RosterTab() {
             {players.length} player{players.length !== 1 ? 's' : ''} · Set ratings, roles, and preferences
           </p>
         </div>
-        <button
-          onClick={() => { setShowForm(!showForm); setEditingId(null); }}
-          className="px-4 py-2 rounded-lg bg-lime text-field font-bold text-sm
-                     hover:bg-lime-bright active:scale-[0.97] transition-all"
-        >
-          {showForm ? 'Cancel' : '+ Add Player'}
-        </button>
+        <div className="flex gap-2">
+          {players.length > 0 && !('ontouchstart' in window) && (
+            <button onClick={() => setShowPrintConfig(true)}
+              className="px-3 py-2 rounded-lg bg-border text-chalk-dim font-bold text-xs
+                         hover:bg-border-light active:scale-[0.97] transition-all">
+              🖨 Practice Sheet
+            </button>
+          )}
+          <button
+            onClick={() => { setShowForm(!showForm); setEditingId(null); }}
+            className="px-4 py-2 rounded-lg bg-lime text-field font-bold text-sm
+                       hover:bg-lime-bright active:scale-[0.97] transition-all"
+          >
+            {showForm ? 'Cancel' : '+ Add Player'}
+          </button>
+        </div>
       </div>
+
+      {/* Print Config Modal */}
+      {showPrintConfig && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40" onClick={() => setShowPrintConfig(false)}>
+          <div className="bg-white border border-gray-200 rounded-2xl p-5 w-full max-w-sm mx-4 shadow-2xl"
+               onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-bold text-gray-800 mb-1">Practice Sheet</h3>
+            <p className="text-xs text-gray-500 mb-4">Choose what to include on the printout.</p>
+
+            <div className="space-y-2.5 mb-5">
+              {[
+                ['defRating', 'Defensive rating (overall stars)'],
+                ['gloveArm', 'Glove & arm ratings (if entered)'],
+                ['obp', 'On-base percentage'],
+                ['coachNotes', 'Coach notes (from roster)'],
+                ['blankNotes', 'Blank notes column (write during practice)'],
+              ].map(([key, label]) => (
+                <label key={key} className="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" checked={printOpts[key]}
+                    onChange={() => togglePrintOpt(key)}
+                    className="w-4 h-4 accent-[#1a4332] rounded" />
+                  <span className="text-sm text-gray-700">{label}</span>
+                </label>
+              ))}
+            </div>
+
+            <div className="flex gap-2">
+              <button onClick={printRoster}
+                className="flex-1 py-2.5 rounded-xl bg-[#1a4332] text-white font-bold text-sm
+                           hover:bg-[#152e26] active:scale-[0.97] transition-all">
+                🖨 Print
+              </button>
+              <button onClick={() => setShowPrintConfig(false)}
+                className="px-4 py-2.5 rounded-xl bg-gray-100 text-gray-600 font-semibold text-sm
+                           hover:bg-gray-200 transition-colors">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add/Edit Form */}
       {showForm && (
@@ -90,7 +224,7 @@ function PlayerCard({ player, onEdit, onRemove, onRatingChange, onCatcherToggle,
         )}
       </div>
 
-      {/* Def Rating + Stars inline */}
+      {/* Def Rating + Stars */}
       <div className="flex items-center gap-1 mb-2">
         <span className="text-xs text-chalk-muted">Def Rating: {p.defRating}/5</span>
         <StarRating value={p.defRating} onChange={onRatingChange} size="sm" />
@@ -131,7 +265,7 @@ function PlayerCard({ player, onEdit, onRemove, onRatingChange, onCatcherToggle,
         </button>
       </div>
 
-      {/* Bottom row: Position prefs (left) + Trash (right) */}
+      {/* Bottom row: Position prefs left, trash right */}
       <div className="flex items-center gap-1.5">
         {p.prefPositions?.length > 0 && p.prefPositions.map(pos => (
           <span key={pos} className="px-2 py-0.5 text-[10px] font-semibold text-chalk-muted border border-border rounded">
@@ -152,11 +286,27 @@ function PlayerForm({ onSave, onCancel, initial }) {
   const [name, setName] = useState(initial?.name || '');
   const [number, setNumber] = useState(initial?.number || '');
   const [defRating, setDefRating] = useState(initial?.defRating || 3);
+  const [catchRating, setCatchRating] = useState(initial?.catchRating || 0);
+  const [throwRating, setThrowRating] = useState(initial?.throwRating || 0);
+  const [showBreakdown, setShowBreakdown] = useState(!!(initial?.catchRating || initial?.throwRating));
   const [canPitch, setCanPitch] = useState(initial?.canPitch || false);
   const [canCatch, setCanCatch] = useState(initial?.canCatch || false);
   const [prefPositions, setPrefPositions] = useState(initial?.prefPositions || []);
   const [notes, setNotes] = useState(initial?.notes || '');
   const [saving, setSaving] = useState(false);
+
+  // When catch/throw change, auto-compute defRating (round up the average)
+  const updateBreakdown = (newCatch, newThrow) => {
+    setCatchRating(newCatch);
+    setThrowRating(newThrow);
+    if (newCatch > 0 && newThrow > 0) {
+      setDefRating(Math.ceil((newCatch + newThrow) / 2));
+    } else if (newCatch > 0) {
+      setDefRating(newCatch);
+    } else if (newThrow > 0) {
+      setDefRating(newThrow);
+    }
+  };
 
   const togglePref = (pos) => {
     setPrefPositions(prev =>
@@ -168,7 +318,7 @@ function PlayerForm({ onSave, onCancel, initial }) {
     e.preventDefault();
     if (!name.trim()) return;
     setSaving(true);
-    await onSave({
+    const data = {
       name: name.trim(),
       number: number.trim(),
       defRating,
@@ -176,7 +326,13 @@ function PlayerForm({ onSave, onCancel, initial }) {
       canCatch,
       prefPositions,
       notes: notes.trim(),
-    });
+    };
+    // Only store breakdown if coach used it
+    if (showBreakdown && (catchRating > 0 || throwRating > 0)) {
+      data.catchRating = catchRating;
+      data.throwRating = throwRating;
+    }
+    await onSave(data);
     setSaving(false);
   };
 
@@ -202,7 +358,33 @@ function PlayerForm({ onSave, onCancel, initial }) {
           </div>
           <div>
             <label className="block text-[10px] font-semibold text-chalk-muted uppercase tracking-wider mb-1">Def. Rating</label>
-            <StarRating value={defRating} onChange={setDefRating} size="md" />
+            {!showBreakdown ? (
+              <div>
+                <StarRating value={defRating} onChange={setDefRating} size="md" />
+                <button type="button" onClick={() => setShowBreakdown(true)}
+                  className="text-[9px] text-sky hover:underline mt-1 block">
+                  Break down by glove + arm
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-chalk-muted w-10">Glove</span>
+                  <StarRating value={catchRating} onChange={(v) => updateBreakdown(v, throwRating)} size="sm" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-chalk-muted w-10">Arm</span>
+                  <StarRating value={throwRating} onChange={(v) => updateBreakdown(catchRating, v)} size="sm" />
+                </div>
+                <div className="text-[10px] text-chalk-muted">
+                  = <span className="font-bold text-gold">{defRating}★</span> overall
+                  <button type="button" onClick={() => { setShowBreakdown(false); setCatchRating(0); setThrowRating(0); }}
+                    className="text-[9px] text-chalk-muted/60 hover:underline ml-2">
+                    use single rating instead
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

@@ -4,8 +4,13 @@ import {
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
   sendEmailVerification, sendPasswordResetEmail, updateProfile,
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db, googleProvider } from '../lib/firebase';
+import { initPushNotifications, cleanupPushNotifications } from '../services/notifications';
+import { initRevenueCat, logoutRevenueCat } from '../services/payments';
+import { enableBiometricLogin, disableBiometricLogin } from '../services/biometric';
+import { isNative } from '../services/platform';
+import { createDemoTeam } from '../utils/demoTeam';
 
 const AuthContext = createContext(null);
 
@@ -59,6 +64,16 @@ export function AuthProvider({ children }) {
           await setDoc(userRef, newUser);
           setUserDoc(newUser);
           setAllTeams([]);
+          // Create Demo Dolphins team for the new user
+          try {
+            const demoId = await createDemoTeam(firebaseUser.uid);
+            setActiveTeamId(demoId);
+            const updatedSnap = await getDoc(userRef);
+            if (updatedSnap.exists()) setUserDoc(updatedSnap.data());
+            setAllTeams([{ id: demoId, name: 'Demo Dolphins', sport: 'softball', seasonLabel: 'Spring', seasonYear: new Date().getFullYear() }]);
+          } catch (err) {
+            console.error('Demo team creation error:', err);
+          }
           // Google Ads conversion tracking
           if (typeof gtag === 'function') {
             gtag('event', 'conversion', {
@@ -78,6 +93,24 @@ export function AuthProvider({ children }) {
     });
     return unsub;
   }, []);
+
+  // Register push notifications and RevenueCat after login
+  useEffect(() => {
+    if (!user) return;
+    initPushNotifications({
+      onToken: async (token) => {
+        // Save the FCM token to the user's Firestore doc for server-side sends
+        try {
+          await updateDoc(doc(db, 'users', user.uid), { fcmToken: token });
+        } catch {}
+      },
+    });
+    // Init RevenueCat with Firebase UID on native
+    initRevenueCat(user.uid);
+    // Enable biometric login for next app launch on native
+    if (isNative()) enableBiometricLogin();
+    return () => { cleanupPushNotifications(); };
+  }, [user]);
 
   // Persist active team selection
   useEffect(() => {
@@ -131,7 +164,11 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const logout = () => signOut(auth);
+  const logout = async () => {
+    disableBiometricLogin();
+    await logoutRevenueCat();
+    return signOut(auth);
+  };
 
   return (
     <AuthContext.Provider value={{

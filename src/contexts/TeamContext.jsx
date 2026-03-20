@@ -21,6 +21,7 @@ const DEFAULT_SETTINGS = {
     'Shortstop': 3,
   },
   assistantFullAccess: false,
+  trackingMode: 'simple', // 'simple' or 'advanced' — default for Game Day and Scorer
 };
 
 // Scoring system — advanced outcomes map to same points as simple
@@ -152,6 +153,26 @@ export function TeamProvider({ children }) {
 
   const createTeam = useCallback(async ({ name, sport, seasonYear, seasonLabel }) => {
     if (!user) return null;
+
+    // Delete any demo teams before creating the real one
+    if (userDoc?.teamIds?.length) {
+      for (const tid of userDoc.teamIds) {
+        try {
+          const tSnap = await getDoc(doc(db, 'teams', tid));
+          if (tSnap.exists() && tSnap.data().isDemo) {
+            const playerSnap = await getDocs(collection(db, 'teams', tid, 'players'));
+            await Promise.all(playerSnap.docs.map(d => deleteDoc(d.ref)));
+            const atBatSnap = await getDocs(collection(db, 'teams', tid, 'atBats'));
+            await Promise.all(atBatSnap.docs.map(d => deleteDoc(d.ref)));
+            const gameSnap = await getDocs(collection(db, 'teams', tid, 'games'));
+            await Promise.all(gameSnap.docs.map(d => deleteDoc(d.ref)));
+            await deleteDoc(doc(db, 'teams', tid));
+            await updateDoc(doc(db, 'users', user.uid), { teamIds: arrayRemove(tid) });
+          }
+        } catch (err) { console.error('Demo cleanup error:', err); }
+      }
+    }
+
     const teamRef = doc(collection(db, 'teams'));
     const teamData = {
       name,
@@ -172,7 +193,7 @@ export function TeamProvider({ children }) {
     setActiveTeamId(teamRef.id);
     await refreshUserDoc();
     return teamRef.id;
-  }, [user, setActiveTeamId, refreshUserDoc]);
+  }, [user, userDoc, setActiveTeamId, refreshUserDoc]);
 
   const updateTeam = useCallback(async (updates) => {
     if (!activeTeamId) return;
@@ -210,16 +231,22 @@ export function TeamProvider({ children }) {
 
   // ── AT-BAT CRUD ──
 
-  const logAtBat = useCallback(async ({ playerId, game, inning, outcome }) => {
+  const logAtBat = useCallback(async ({ playerId, game, inning, outcome, hitLocation }) => {
     if (!activeTeamId) return;
     const ref = doc(collection(db, 'teams', activeTeamId, 'atBats'));
-    await setDoc(ref, {
+    const data = {
       playerId,
       game: game || '1',
       inning: inning || 1,
       outcome,
       timestamp: Date.now(),
-    });
+    };
+    // Store hit location if provided (from spray chart tap)
+    if (hitLocation) {
+      data.hitX = hitLocation.x;
+      data.hitY = hitLocation.y;
+    }
+    await setDoc(ref, data);
   }, [activeTeamId]);
 
   const deleteAtBat = useCallback(async (atBatId) => {
@@ -391,6 +418,7 @@ export function TeamProvider({ children }) {
       teamName: team?.name || '',
       gameId: gameId || '',
       playerSnapshot: players.map(p => ({ id: p.id, name: p.name, number: p.number || '' })),
+      trackingMode: team?.settings?.trackingMode || 'simple',
       createdAt: Date.now(),
       expiresAt: Date.now() + (12 * 60 * 60 * 1000), // 12 hours
     });
