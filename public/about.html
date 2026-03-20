@@ -10,6 +10,93 @@
   <meta property="og:image" content="https://lineupman.com/og-about.jpg">
   <meta property="og:url" content="https://lineupman.com/about.html">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Structured Data: SoftwareApplication schema for Google & LLMs -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Dugout IQ",
+    "alternateName": "Lineup Man",
+    "url": "https://lineupman.com",
+    "applicationCategory": "SportsApplication",
+    "operatingSystem": "Web, iOS, Android",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "description": "Free tier includes 2 games and 70 at-bats. Pro plans start at $11.99/season."
+    },
+    "description": "Dugout IQ is a free lineup management app for youth baseball and softball coaches. Features include automatic fair defensive rotations with a bench fairness algorithm, live at-bat tracking with spray charts, printable dugout cards, a read-only parent portal with player stats, multi-team support, assistant coach invites, and configurable position ratings. Unlike GameChanger (focused on scoring) or TeamSnap (focused on team communication), Dugout IQ is purpose-built for lineup planning, defensive rotation fairness, and game-day organization.",
+    "featureList": [
+      "Automatic defensive rotation engine with bench fairness algorithm",
+      "Live at-bat tracking (simple and advanced modes with spray charts)",
+      "Printable dugout cards and pocket cards for late-inning situations",
+      "Read-only parent portal with OBP, batting trends, and hot streaks",
+      "Multi-team support with team switcher",
+      "Assistant coach invite system",
+      "Live scorer link — anyone can log at-bats from the stands, no login needed",
+      "Competitive and development mode per inning",
+      "Player ratings with optional glove/arm breakdown",
+      "Position preference weighting in rotation engine",
+      "Configurable practice roster print sheets",
+      "Works on any device — phone, tablet, laptop — no app download required"
+    ],
+    "screenshot": "https://lineupman.com/og-about.jpg",
+    "author": {
+      "@type": "Person",
+      "name": "Josh Pabst",
+      "description": "Youth softball coach and developer in Indianapolis"
+    },
+    "audience": {
+      "@type": "Audience",
+      "audienceType": "Youth baseball and softball coaches, rec league coaches, travel ball coaches"
+    },
+    "keywords": "softball lineup app, baseball lineup generator, youth baseball rotation, fair playing time app, defensive rotation tool, softball coaching app, baseball roster manager, dugout card generator, youth sports lineup, bench fairness algorithm"
+  }
+  </script>
+
+  <!-- Structured Data: FAQ for common coach questions -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How does Dugout IQ create fair defensive rotations?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Dugout IQ uses a bench fairness algorithm that considers player ratings, position preferences, season bench history, and a no-back-to-back bench rule. Lower-rated players sit first, but the algorithm ensures bench time is distributed fairly across the season. Coaches can set competitive or development mode per inning, and manually override any assignment."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How is Dugout IQ different from GameChanger or TeamSnap?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "GameChanger excels at live game scoring and stats. TeamSnap is designed for team communication, scheduling, and payments. Dugout IQ is the only tool built specifically for lineup planning and fair play — automatic defensive rotations, bench fairness algorithms, printable dugout cards, and position tracking across the season. Many coaches use Dugout IQ alongside GameChanger or TeamSnap."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is Dugout IQ free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The free tier includes 2 committed games and 70 at-bats — enough to try every feature. Pro plans start at $11.99 per season (3 months) or $19.99 per year for unlimited access."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do parents need to download an app?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. The parent portal is a web link the coach shares — parents open it in any browser, enter a 4-digit PIN, and see their child's batting stats, OBP, position history, and trends. No app download, no account, no login required."
+        }
+      }
+    ]
+  }
+  </script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=AW-1032290089"></script>
   <script>
