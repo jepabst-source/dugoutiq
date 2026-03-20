@@ -29,6 +29,7 @@ export default function GameDayTab() {
   const [advancedMode, setAdvancedMode] = useState(() => team?.settings?.trackingMode === 'advanced');
   const [showGameControls, setShowGameControls] = useState(false);
   const [pendingHit, setPendingHit] = useState(null); // { outcome } — waiting for spray chart tap
+  const [showScorerInfo, setShowScorerInfo] = useState(false);
 
   const activePlayers = getActivePlayers();
   const battingOrder = useMemo(() => generateBattingOrder(), [generateBattingOrder]);
@@ -95,21 +96,39 @@ export default function GameDayTab() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-lime">⚾ Play Ball</h2>
-        <button
-          onClick={async () => {
-            setGeneratingScorer(true);
-            const code = await generateScorerLink(gameNum);
-            if (code) {
-              const base = window.location.origin + window.location.pathname.replace(/\/$/, '');
-              setScorerLink(`${base}/score/${code}`);
-            }
-            setGeneratingScorer(false);
-          }}
-          disabled={generatingScorer}
-          className="px-3 py-2 rounded-lg bg-border text-chalk-dim font-bold text-xs
-                     hover:bg-border-light active:scale-[0.97] transition-all disabled:opacity-50">
-          {generatingScorer ? '...' : '📤 Invite Log Assistant'}
-        </button>
+        <div className="flex items-center gap-1.5">
+          <div className="relative">
+            <button
+              onClick={() => setShowScorerInfo(!showScorerInfo)}
+              className="w-5 h-5 rounded-full border border-chalk-muted/40 text-chalk-muted text-[10px] font-bold
+                         hover:border-sky hover:text-sky transition-colors flex items-center justify-center">
+              i
+            </button>
+            {showScorerInfo && (
+              <div className="absolute right-0 top-7 z-50 w-64 bg-panel border border-border rounded-xl shadow-xl p-3"
+                   onClick={() => setShowScorerInfo(false)}>
+                <p className="text-xs text-chalk leading-relaxed">
+                  Generate a link you can text to anyone in the stands — a parent, assistant, or friend. They tap players and log at-bats from their phone. <strong>No login needed.</strong> Stats sync to your account automatically. Link expires in 12 hours.
+                </p>
+              </div>
+            )}
+          </div>
+          <button
+            onClick={async () => {
+              setGeneratingScorer(true);
+              const code = await generateScorerLink(gameNum);
+              if (code) {
+                const base = window.location.origin + window.location.pathname.replace(/\/$/, '');
+                setScorerLink(`${base}/score/${code}`);
+              }
+              setGeneratingScorer(false);
+            }}
+            disabled={generatingScorer}
+            className="px-3 py-2 rounded-lg bg-border text-chalk-dim font-bold text-xs
+                       hover:bg-border-light active:scale-[0.97] transition-all disabled:opacity-50">
+            {generatingScorer ? '...' : '📤 Invite Log Assistant'}
+          </button>
+        </div>
       </div>
 
       {/* Scorer link */}
