@@ -1,23 +1,43 @@
 // Platform detection for Dugout IQ
-// Detects whether the app is running as native iOS, native Android, or web browser.
-//
-// Usage:
-//   import { isNative, isIOS, isAndroid, isWeb } from '../services/platform';
-//   if (isNative()) { ... use native APIs ... }
+// Works whether Capacitor is installed or not.
+// On web builds, Capacitor won't be available — all functions return web defaults.
 
-import { Capacitor } from '@capacitor/core';
+let _capacitor = null;
+let _loaded = false;
 
-/** True when running inside a Capacitor native shell (iOS or Android) */
-export const isNative = () => Capacitor.isNativePlatform();
+function getCapacitor() {
+  if (_loaded) return _capacitor;
+  _loaded = true;
+  try {
+    // window.Capacitor is injected by the native shell at runtime
+    if (typeof window !== 'undefined' && window.Capacitor) {
+      _capacitor = window.Capacitor;
+    }
+  } catch {}
+  return _capacitor;
+}
 
-/** True when running on iOS (native only) */
-export const isIOS = () => Capacitor.getPlatform() === 'ios';
+export const isNative = () => {
+  const cap = getCapacitor();
+  return cap ? cap.isNativePlatform() : false;
+};
 
-/** True when running on Android (native only) */
-export const isAndroid = () => Capacitor.getPlatform() === 'android';
+export const isIOS = () => {
+  const cap = getCapacitor();
+  return cap ? cap.getPlatform() === 'ios' : false;
+};
 
-/** True when running in a web browser (not native) */
-export const isWeb = () => Capacitor.getPlatform() === 'web';
+export const isAndroid = () => {
+  const cap = getCapacitor();
+  return cap ? cap.getPlatform() === 'android' : false;
+};
 
-/** Returns 'ios' | 'android' | 'web' */
-export const getPlatform = () => Capacitor.getPlatform();
+export const isWeb = () => {
+  const cap = getCapacitor();
+  return cap ? cap.getPlatform() === 'web' : true;
+};
+
+export const getPlatform = () => {
+  const cap = getCapacitor();
+  return cap ? cap.getPlatform() : 'web';
+};
