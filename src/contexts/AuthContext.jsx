@@ -4,7 +4,7 @@ import {
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
   sendEmailVerification, sendPasswordResetEmail, updateProfile,
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, serverTimestamp } from 'firebase/firestore';
 import { auth, db, googleProvider } from '../lib/firebase';
 import { initPushNotifications, cleanupPushNotifications } from '../services/notifications';
 import { initRevenueCat, logoutRevenueCat } from '../services/payments';
@@ -13,6 +13,7 @@ import { isNative } from '../services/platform';
 import { createDemoTeam } from '../utils/demoTeam';
 
 const AuthContext = createContext(null);
+const DEMO_ACCOUNT_EMAIL = 'test@lineupman.com';
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -30,6 +31,40 @@ export function AuthProvider({ children }) {
         const snap = await getDoc(userRef);
         if (snap.exists()) {
           const data = snap.data();
+
+          // Demo account auto-reset: wipe and recreate fresh every login
+          if (firebaseUser.email === DEMO_ACCOUNT_EMAIL) {
+            setCreatingDemo(true);
+            // Delete all existing teams
+            const existingTeamIds = data.teamIds || [];
+            for (const tid of existingTeamIds) {
+              try {
+                const playerSnap = await getDocs(collection(db, 'teams', tid, 'players'));
+                await Promise.all(playerSnap.docs.map(d => deleteDoc(d.ref)));
+                const abSnap = await getDocs(collection(db, 'teams', tid, 'atBats'));
+                await Promise.all(abSnap.docs.map(d => deleteDoc(d.ref)));
+                const gameSnap = await getDocs(collection(db, 'teams', tid, 'games'));
+                await Promise.all(gameSnap.docs.map(d => deleteDoc(d.ref)));
+                await deleteDoc(doc(db, 'teams', tid));
+              } catch {}
+            }
+            // Reset user doc
+            await setDoc(userRef, { ...data, teamIds: [] });
+            // Create fresh Demo Dolphins
+            try {
+              const demoId = await createDemoTeam(firebaseUser.uid);
+              setActiveTeamId(demoId);
+              const updatedSnap = await getDoc(userRef);
+              if (updatedSnap.exists()) setUserDoc(updatedSnap.data());
+              setAllTeams([{ id: demoId, name: 'Demo Dolphins', sport: 'softball', seasonLabel: 'Spring', seasonYear: new Date().getFullYear() }]);
+            } catch (err) {
+              console.error('Demo reset error:', err);
+            }
+            setCreatingDemo(false);
+            setLoading(false);
+            return; // skip normal team loading
+          }
+
           setUserDoc(data);
 
           // Load basic info for all teams

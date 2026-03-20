@@ -64,52 +64,54 @@ export async function createDemoTeam(userId) {
     playerIds.push(playerRef.id);
   }
 
-  // Create some at-bats across a game
-  const gameId = `demo-game-1`;
+  // Create 3 games worth of at-bats (every player bats once per game = 3 ABs each)
+  const opponents = ['Sample Sharks', 'Thunder Cats', 'River Rockets'];
   const now = Date.now();
-  for (let inning = 1; inning <= 3; inning++) {
-    // Each inning, ~4-5 players bat
-    const battersPerInning = Math.min(playerIds.length, 4 + Math.floor(Math.random() * 2));
-    for (let b = 0; b < battersPerInning; b++) {
-      const playerIdx = ((inning - 1) * 4 + b) % playerIds.length;
+  const positions = ['Pitcher', 'Catcher', '1st Base', '2nd Base', 'Shortstop', '3rd Base', 'Left Field', 'Center Field', 'Right Field'];
+
+  for (let g = 0; g < 3; g++) {
+    const gameId = `demo-game-${g + 1}`;
+    const gameTime = now - (2 - g) * 86400000; // spread across 3 days
+
+    // Each player gets 1 at-bat per game (across 3 innings)
+    for (let i = 0; i < playerIds.length; i++) {
+      const inning = (i % 3) + 1;
       const outcome = DEMO_OUTCOMES[Math.floor(Math.random() * DEMO_OUTCOMES.length)];
       const abRef = doc(collection(db, 'teams', teamId, 'atBats'));
       await setDoc(abRef, {
-        playerId: playerIds[playerIdx],
+        playerId: playerIds[i],
         game: gameId,
         inning,
         outcome,
-        timestamp: now - (3 - inning) * 600000 - b * 30000, // stagger timestamps
+        timestamp: gameTime - (3 - inning) * 600000 - i * 15000,
       });
     }
-  }
 
-  // Create a committed game
-  const gameRef = doc(collection(db, 'teams', teamId, 'games'));
-  const demoLineups = {};
-  const positions = ['Pitcher', 'Catcher', '1st Base', '2nd Base', 'Shortstop', '3rd Base', 'Left Field', 'Center Field', 'Right Field'];
-  for (let ing = 1; ing <= 3; ing++) {
-    const asgn = {};
-    // Shuffle player order slightly per inning
-    const shuffled = [...playerIds].sort(() => Math.random() - 0.5);
-    positions.forEach((pos, i) => {
-      if (shuffled[i]) asgn[pos] = shuffled[i];
-    });
-    // Remaining go to bench
-    shuffled.slice(9).forEach((pid, i) => {
-      asgn[`Bench ${i + 1}`] = pid;
-    });
-    demoLineups[ing] = asgn;
-  }
+    // Create committed defensive game
+    const gameRef = doc(collection(db, 'teams', teamId, 'games'));
+    const demoLineups = {};
+    for (let ing = 1; ing <= 3; ing++) {
+      const asgn = {};
+      const shuffled = [...playerIds].sort(() => Math.random() - 0.5);
+      positions.forEach((pos, idx) => {
+        if (shuffled[idx]) asgn[pos] = shuffled[idx];
+      });
+      shuffled.slice(9).forEach((pid, idx) => {
+        asgn[`Bench ${idx + 1}`] = pid;
+      });
+      demoLineups[ing] = asgn;
+    }
 
-  await setDoc(gameRef, {
-    gameNumber: 1,
-    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-    opponent: 'Sample Sharks',
-    innings: 3,
-    lineups: demoLineups,
-    committedAt: serverTimestamp(),
-  });
+    const gameDate = new Date(gameTime);
+    await setDoc(gameRef, {
+      gameNumber: g + 1,
+      date: gameDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      opponent: opponents[g],
+      innings: 3,
+      lineups: demoLineups,
+      committedAt: serverTimestamp(),
+    });
+  }
 
   // Add team to user's teamIds
   const userRef = doc(db, 'users', userId);

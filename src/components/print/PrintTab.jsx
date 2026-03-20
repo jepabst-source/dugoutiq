@@ -63,7 +63,7 @@ export default function PrintTab() {
           {/* PAGE 1 — DUGOUT CARD */}
           {/* Header */}
           <div className="flex items-center justify-between border-b-[3px] border-[#1a4332] pb-2 mb-4">
-            <div className="text-2xl font-bold text-[#1a4332] tracking-tight">⚾ {team?.name || 'Dugout IQ'}</div>
+            <div className="text-2xl font-bold text-[#1a4332] tracking-tight flex items-center gap-2"><img src="/logo-square.jpg" className="w-8 h-8 rounded" /> {team?.name || 'Dugout IQ'}</div>
             <div className="text-sm text-gray-500">
               Game {gameNum}{opponent ? ` vs ${opponent}` : ''} · {gameDate}
             </div>
@@ -139,7 +139,7 @@ export default function PrintTab() {
           {/* PAGE 2 — POCKET CARD */}
           <div className="break-before-page border-t-[3px] border-dashed border-gray-300 mt-8 pt-6 print:mt-0 print:pt-6 print:border-0">
             <div className="flex items-center justify-between border-b-[3px] border-[#1a4332] pb-2 mb-4">
-              <div className="text-lg font-bold text-[#1a4332]">⚾ {team?.name || 'Dugout IQ'} — Inning {totalInnings} Pocket Card</div>
+              <div className="text-lg font-bold text-[#1a4332] flex items-center gap-2"><img src="/logo-square.jpg" className="w-6 h-6 rounded" /> {team?.name || 'Dugout IQ'} — Inning {totalInnings} Pocket Card</div>
               <div className="text-xs text-gray-500">Game {gameNum} · {gameDate}</div>
             </div>
 
