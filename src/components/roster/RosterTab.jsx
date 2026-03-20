@@ -14,6 +14,7 @@ export default function RosterTab() {
     defRating: false,
     gloveArm: false,
     obp: false,
+    positions: false,
     coachNotes: false,
     blankNotes: true,
   });
@@ -29,6 +30,7 @@ export default function RosterTab() {
     if (opts.defRating) headers += '<th class="stat">Def</th>';
     if (opts.gloveArm) headers += '<th class="stat">Glove</th><th class="stat">Arm</th>';
     if (opts.obp) headers += '<th class="stat">OBP</th>';
+    if (opts.positions) headers += '<th class="pos-col">Positions</th>';
     if (opts.coachNotes) headers += '<th class="notes-col">Notes</th>';
     if (opts.blankNotes) headers += '<th class="blank-col">Notes</th>';
 
@@ -44,6 +46,14 @@ export default function RosterTab() {
         row += `<td class="stat">${p.throwRating ? p.throwRating + '\u2605' : '\u2014'}</td>`;
       }
       if (opts.obp) row += `<td class="stat">${stats.obp !== null ? stats.obp.toFixed(3).replace(/^0/, '') : '\u2014'}</td>`;
+      if (opts.positions) {
+        const prefs = (p.prefPositions || []).map(pos =>
+          pos.replace('Center Field', 'CF').replace('Left Field', 'LF').replace('Right Field', 'RF')
+             .replace('1st Base', '1B').replace('2nd Base', '2B').replace('3rd Base', '3B')
+             .replace('Shortstop', 'SS').replace('Pitcher', 'P').replace('Catcher', 'C')
+        ).join(', ');
+        row += `<td class="pos-col">${prefs || '\u2014'}</td>`;
+      }
       if (opts.coachNotes) row += `<td class="notes-col">${p.notes || ''}</td>`;
       if (opts.blankNotes) row += `<td class="blank-col"><div class="notes-line"></div></td>`;
       return `<tr>${row}</tr>`;
@@ -62,6 +72,7 @@ export default function RosterTab() {
         .name { font-weight: 600; white-space: nowrap; }
         .stat { width: 50px; text-align: center; color: #555; font-size: 12px; }
         .notes-col { font-size: 11px; color: #666; max-width: 200px; }
+        .pos-col { font-size: 11px; color: #555; white-space: nowrap; }
         .blank-col { width: auto; }
         .notes-line { border-bottom: 1px dotted #bbb; height: 22px; min-width: 120px; }
       </style></head><body>
@@ -134,6 +145,7 @@ export default function RosterTab() {
                 ['defRating', 'Defensive rating (overall stars)'],
                 ['gloveArm', 'Glove & arm ratings (if entered)'],
                 ['obp', 'On-base percentage'],
+                ['positions', 'Preferred positions'],
                 ['coachNotes', 'Coach notes (from roster)'],
                 ['blankNotes', 'Blank notes column (write during practice)'],
               ].map(([key, label]) => (
