@@ -1,8 +1,6 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTeam } from '../contexts/TeamContext';
-import { isNative } from '../services/platform';
-import { checkProEntitlement } from '../services/payments';
 
 const FREE_GAME_LIMIT = 2;
 const FREE_ATBAT_LIMIT = 70;
@@ -10,19 +8,9 @@ const FREE_ATBAT_LIMIT = 70;
 export function usePlan() {
   const { userDoc, user } = useAuth();
   const { savedGames, atBats } = useTeam();
-  const [nativePro, setNativePro] = useState(false);
 
   const FOUNDER_EMAILS = ['jepabst@gmail.com'];
-
-  // On native, check RevenueCat entitlement
-  useEffect(() => {
-    if (isNative() && user) {
-      checkProEntitlement().then(isPro => setNativePro(isPro));
-    }
-  }, [user]);
-
-  // Pro if: Firestore says pro, OR RevenueCat says pro (native), OR founder
-  const isPro = userDoc?.plan === 'pro' || nativePro || FOUNDER_EMAILS.includes(user?.email);
+  const isPro = userDoc?.plan === 'pro' || FOUNDER_EMAILS.includes(user?.email);
   const gameCount = savedGames?.length || 0;
   const atBatCount = atBats?.length || 0;
 

@@ -21,7 +21,6 @@ const DEFAULT_SETTINGS = {
     'Shortstop': 3,
   },
   assistantFullAccess: false,
-  trackingMode: 'simple', // 'simple' or 'advanced' — default for Game Day and Scorer
 };
 
 // Scoring system — advanced outcomes map to same points as simple
@@ -211,22 +210,16 @@ export function TeamProvider({ children }) {
 
   // ── AT-BAT CRUD ──
 
-  const logAtBat = useCallback(async ({ playerId, game, inning, outcome, hitLocation }) => {
+  const logAtBat = useCallback(async ({ playerId, game, inning, outcome }) => {
     if (!activeTeamId) return;
     const ref = doc(collection(db, 'teams', activeTeamId, 'atBats'));
-    const data = {
+    await setDoc(ref, {
       playerId,
       game: game || '1',
       inning: inning || 1,
       outcome,
       timestamp: Date.now(),
-    };
-    // Store hit location if provided (from spray chart tap)
-    if (hitLocation) {
-      data.hitX = hitLocation.x;
-      data.hitY = hitLocation.y;
-    }
-    await setDoc(ref, data);
+    });
   }, [activeTeamId]);
 
   const deleteAtBat = useCallback(async (atBatId) => {
@@ -398,7 +391,6 @@ export function TeamProvider({ children }) {
       teamName: team?.name || '',
       gameId: gameId || '',
       playerSnapshot: players.map(p => ({ id: p.id, name: p.name, number: p.number || '' })),
-      trackingMode: team?.settings?.trackingMode || 'simple',
       createdAt: Date.now(),
       expiresAt: Date.now() + (12 * 60 * 60 * 1000), // 12 hours
     });

@@ -359,33 +359,6 @@ export default function SettingsTab() {
         </div>
       </Section>
 
-      {/* At-Bat Tracking Mode */}
-      <Section title="⚾ At-Bat Tracking">
-        <p className="text-xs text-chalk-muted mb-4">
-          Choose the default tracking mode for Play Ball and scorer links. You can still switch modes during a game.
-        </p>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setRuleValue('trackingMode', 'simple')}
-            className={`flex-1 py-3 rounded-xl border-2 font-bold text-sm transition-all
-              ${(settings.trackingMode || 'simple') === 'simple'
-                ? 'border-lime bg-lime/10 text-lime'
-                : 'border-border bg-field text-chalk-muted hover:border-lime/30'}`}>
-            Simple
-            <div className="text-[10px] font-normal mt-0.5 opacity-70">K · Hit · Walk · Out</div>
-          </button>
-          <button
-            onClick={() => setRuleValue('trackingMode', 'advanced')}
-            className={`flex-1 py-3 rounded-xl border-2 font-bold text-sm transition-all
-              ${settings.trackingMode === 'advanced'
-                ? 'border-lime bg-lime/10 text-lime'
-                : 'border-border bg-field text-chalk-muted hover:border-lime/30'}`}>
-            Advanced
-            <div className="text-[10px] font-normal mt-0.5 opacity-70">1B · 2B · 3B · HR · BB · HBP · SAC + spray chart</div>
-          </button>
-        </div>
-      </Section>
-
       {/* Rotation Rules */}
       <Section title="⚙️ Rotation Rules">
         <p className="text-xs text-chalk-muted mb-4">These rules control how the defensive rotation engine assigns players to positions.</p>
@@ -431,24 +404,24 @@ export default function SettingsTab() {
         <p className="text-xs text-chalk-muted mb-4">
           Set a preferred minimum rating for each position. The rotation engine uses these as guidelines when auto-generating lineups. You can always manually override any assignment.
         </p>
-        <div className="space-y-0">
+        <div className="space-y-2">
           {ALL_POSITIONS.filter(p => p !== 'Pitcher').map(pos => {
             const currentMin = (settings.positionMinRatings || {})[pos] || 0;
             return (
-              <div key={pos} className="flex items-center gap-3 py-0.5">
+              <div key={pos} className="flex items-center gap-3 py-1.5">
                 <span className="text-sm text-chalk w-24 font-semibold">{pos}</span>
                 <div className="flex gap-0.5">
                   {[1, 2, 3, 4, 5].map(star => (
                     <button key={star} type="button"
                       onClick={() => setPositionMinRating(pos, star === currentMin ? 0 : star)}
-                      className={`text-lg transition-transform hover:scale-110
+                      className={`text-xl transition-transform hover:scale-110
                         ${star <= currentMin ? 'text-gold' : 'text-border-light'}`}>
                       ★
                     </button>
                   ))}
                 </div>
-                <span className="text-[10px] text-chalk-muted">
-                  {currentMin > 0 ? `${currentMin}★ min` : ''}
+                <span className="text-xs text-chalk-muted">
+                  {currentMin > 0 ? `${currentMin}★ minimum` : 'no minimum'}
                 </span>
               </div>
             );
@@ -518,14 +491,39 @@ export default function SettingsTab() {
       {/* Suggestion Box */}
       <Section title="💡 Suggestion Box">
         <p className="text-xs text-chalk-muted mb-3">
-          Have an idea, feature request, or found a bug? We'd love to hear from you.
+          Have an idea or feature request? We'd love to hear from you.
         </p>
-        <a
-          href={`mailto:support@lineupman.com?subject=Dugout IQ Feedback&body=%0A%0A—%0AFrom: ${encodeURIComponent(user?.displayName || '')} (${encodeURIComponent(user?.email || '')})%0ATeam: ${encodeURIComponent(team?.name || '')}`}
-          className="inline-block px-4 py-2 rounded-lg bg-lime text-field font-bold text-sm
-                     hover:bg-lime-bright active:scale-[0.97] transition-all no-underline">
-          📨 Email Us
-        </a>
+        <textarea
+          id="feedback-text"
+          rows={3}
+          placeholder="What would make this app better for you?"
+          className="w-full px-3 py-2 rounded-lg bg-field border border-border text-chalk text-sm
+                     placeholder:text-chalk-muted/40 focus:border-lime focus:outline-none resize-none mb-3"
+        />
+        <button
+          onClick={async () => {
+            const text = document.getElementById('feedback-text')?.value?.trim();
+            if (!text) return;
+            try {
+              const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
+              const { db } = await import('../../lib/firebase');
+              await addDoc(collection(db, 'feedback'), {
+                message: text,
+                email: user?.email || '',
+                displayName: user?.displayName || '',
+                teamName: team?.name || '',
+                createdAt: serverTimestamp(),
+              });
+              document.getElementById('feedback-text').value = '';
+              showSaved('Thanks! Message sent.');
+            } catch (err) {
+              console.error('Feedback error:', err);
+            }
+          }}
+          className="px-4 py-2 rounded-lg bg-lime text-field font-bold text-sm
+                     hover:bg-lime-bright active:scale-[0.97] transition-all">
+          📨 Send Feedback
+        </button>
       </Section>
 
       {/* Danger Zone */}

@@ -44,7 +44,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md text-center">
         {/* Logo */}
         <div className="mb-6">
-          <img src="/logo-square.jpg" alt="Dugout IQ" className="w-48 mx-auto rounded-2xl shadow-md" />
+          <img src="/logo-square.jpg" alt="Dugout IQ" className="w-32 mx-auto rounded-2xl shadow-md" />
         </div>
         <p className="text-gray-500 text-sm tracking-widest uppercase mb-8">
           Smart Lineup Manager
@@ -161,10 +161,6 @@ export default function LoginPage() {
         <p className="mt-2 text-xs text-gray-400">
           Your data stays private. We never share coach or player information.
         </p>
-        <a href="/about.html"
-          className="inline-block mt-4 text-xs text-blue-500 font-semibold hover:underline">
-          Learn what Dugout IQ can do →
-        </a>
       </div>
     </div>
   );

@@ -2,16 +2,12 @@ import { useState, useMemo, useCallback } from 'react';
 import { useTeam, PTS } from '../../contexts/TeamContext';
 import { usePlan } from '../../hooks/usePlan';
 import UpgradeModal from '../shared/UpgradeModal';
-import SprayChart from '../shared/SprayChart';
-import { hapticSuccess, hapticLight, hapticError } from '../../services/haptics';
-import { shareLink } from '../../services/sharing';
 
 const OUTCOME_LABELS = { K: 'Strikeout', out: 'Hit into Out', walk: 'Walk', hit: 'Hit' };
-const HIT_OUTCOMES = ['single', 'double', 'triple', 'hr', 'out'];
 
 export default function GameDayTab() {
   const {
-    players, atBats, attendance, team,
+    players, atBats, attendance,
     getActivePlayers, generateBattingOrder,
     logAtBat, deleteAtBat, getRollingAvg,
     generateScorerLink,
@@ -26,10 +22,8 @@ export default function GameDayTab() {
   const [generatingScorer, setGeneratingScorer] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const plan = usePlan();
-  const [advancedMode, setAdvancedMode] = useState(() => team?.settings?.trackingMode === 'advanced');
+  const [advancedMode, setAdvancedMode] = useState(false);
   const [showGameControls, setShowGameControls] = useState(false);
-  const [pendingHit, setPendingHit] = useState(null); // { outcome } — waiting for spray chart tap
-  const [showScorerInfo, setShowScorerInfo] = useState(false);
 
   const activePlayers = getActivePlayers();
   const battingOrder = useMemo(() => generateBattingOrder(), [generateBattingOrder]);
@@ -55,19 +49,15 @@ export default function GameDayTab() {
   const ourTotal = ourScore.reduce((a, b) => a + b, 0);
   const theirTotal = theirScore.reduce((a, b) => a + b, 0);
 
-  const handleRecord = useCallback(async (outcome, hitLocation) => {
+  const handleRecord = useCallback(async (outcome) => {
     if (!selectedPlayerId) return;
-    if (!plan.canLogAtBat) { hapticError(); setShowUpgrade(true); return; }
+    if (!plan.canLogAtBat) { setShowUpgrade(true); return; }
     await logAtBat({
       playerId: selectedPlayerId,
       game: gameNum,
       inning: currentInning,
       outcome,
-      hitLocation: hitLocation || null,
     });
-    // Haptic feedback: success vibration for on-base, light tap for outs
-    const onBase = ['hit', '1B', '2B', '3B', 'HR', 'walk', 'BB', 'HBP', 'single', 'double', 'triple', 'hr', 'hbp'].includes(outcome);
-    onBase ? hapticSuccess() : hapticLight();
     setSelectedPlayerId(null);
   }, [selectedPlayerId, gameNum, currentInning, logAtBat]);
 
@@ -96,39 +86,21 @@ export default function GameDayTab() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-lime">⚾ Play Ball</h2>
-        <div className="flex items-center gap-1.5">
-          <div className="relative">
-            <button
-              onClick={() => setShowScorerInfo(!showScorerInfo)}
-              className="w-5 h-5 rounded-full border border-chalk-muted/40 text-chalk-muted text-[10px] font-bold
-                         hover:border-sky hover:text-sky transition-colors flex items-center justify-center">
-              i
-            </button>
-            {showScorerInfo && (
-              <div className="absolute right-0 top-7 z-50 w-64 bg-panel border border-border rounded-xl shadow-xl p-3"
-                   onClick={() => setShowScorerInfo(false)}>
-                <p className="text-xs text-chalk leading-relaxed">
-                  Generate a link you can text to anyone in the stands — a parent, assistant, or friend. They tap players and log at-bats from their phone. <strong>No login needed.</strong> Stats sync to your account automatically. Link expires in 12 hours.
-                </p>
-              </div>
-            )}
-          </div>
-          <button
-            onClick={async () => {
-              setGeneratingScorer(true);
-              const code = await generateScorerLink(gameNum);
-              if (code) {
-                const base = window.location.origin + window.location.pathname.replace(/\/$/, '');
-                setScorerLink(`${base}/score/${code}`);
-              }
-              setGeneratingScorer(false);
-            }}
-            disabled={generatingScorer}
-            className="px-3 py-2 rounded-lg bg-border text-chalk-dim font-bold text-xs
-                       hover:bg-border-light active:scale-[0.97] transition-all disabled:opacity-50">
-            {generatingScorer ? '...' : '📤 Invite Log Assistant'}
-          </button>
-        </div>
+        <button
+          onClick={async () => {
+            setGeneratingScorer(true);
+            const code = await generateScorerLink(gameNum);
+            if (code) {
+              const base = window.location.origin + window.location.pathname.replace(/\/$/, '');
+              setScorerLink(`${base}/score/${code}`);
+            }
+            setGeneratingScorer(false);
+          }}
+          disabled={generatingScorer}
+          className="px-3 py-2 rounded-lg bg-border text-chalk-dim font-bold text-xs
+                     hover:bg-border-light active:scale-[0.97] transition-all disabled:opacity-50">
+          {generatingScorer ? '...' : '📤 Invite Log Assistant'}
+        </button>
       </div>
 
       {/* Scorer link */}
@@ -140,20 +112,9 @@ export default function GameDayTab() {
               className="flex-1 px-3 py-2 rounded-lg bg-panel border border-border text-chalk text-xs focus:outline-none"
               onClick={e => e.target.select()} />
             <button
-              onClick={async () => {
-                const { method } = await shareLink({
-                  title: 'Dugout IQ Scorer',
-                  text: 'Tap to log at-bats — no login needed',
-                  url: scorerLink,
-                });
-                if (method === 'clipboard') {
-                  // Brief visual feedback that it was copied
-                  const btn = document.activeElement;
-                  if (btn) { btn.textContent = '✓ Copied'; setTimeout(() => { btn.textContent = '📋 Share'; }, 1500); }
-                }
-              }}
+              onClick={() => { navigator.clipboard.writeText(scorerLink); }}
               className="px-3 py-2 rounded-lg bg-sky text-field font-bold text-xs hover:bg-sky/80 transition-all whitespace-nowrap">
-              📋 Share
+              📋 Copy
             </button>
           </div>
           <p className="text-[10px] text-chalk-muted mt-1">Text this to anyone — no login needed. They tap players and log at-bats from the stands.</p>
@@ -299,41 +260,41 @@ export default function GameDayTab() {
                   K
                   <span className="text-[9px] font-normal opacity-70">strikeout</span>
                 </button>
-                <button onClick={() => setPendingHit({ outcome: 'out' })}
+                <button onClick={() => handleRecord('out')}
                   className="py-3 rounded-xl bg-dirt/10 border-2 border-dirt/25 text-dirt font-bold text-base
                              active:scale-95 transition-all flex flex-col items-center">
                   OUT
-                  <span className="text-[9px] font-normal opacity-70">fielded out → tap field</span>
+                  <span className="text-[9px] font-normal opacity-70">fielded out</span>
                 </button>
               </div>
-              {/* Hits row — these open the spray chart */}
+              {/* Hits row */}
               <div className="grid grid-cols-4 gap-2">
-                <button onClick={() => setPendingHit({ outcome: 'single' })}
+                <button onClick={() => handleRecord('single')}
                   className="py-3 rounded-xl bg-lime/10 border-2 border-lime/25 text-lime font-bold text-sm
                              active:scale-95 transition-all flex flex-col items-center">
                   1B
                   <span className="text-[8px] font-normal opacity-70">single</span>
                 </button>
-                <button onClick={() => setPendingHit({ outcome: 'double' })}
+                <button onClick={() => handleRecord('double')}
                   className="py-3 rounded-xl bg-lime/15 border-2 border-lime/30 text-lime font-bold text-sm
                              active:scale-95 transition-all flex flex-col items-center">
                   2B
                   <span className="text-[8px] font-normal opacity-70">double</span>
                 </button>
-                <button onClick={() => setPendingHit({ outcome: 'triple' })}
+                <button onClick={() => handleRecord('triple')}
                   className="py-3 rounded-xl bg-lime/20 border-2 border-lime/35 text-lime-bright font-bold text-sm
                              active:scale-95 transition-all flex flex-col items-center">
                   3B
                   <span className="text-[8px] font-normal opacity-70">triple</span>
                 </button>
-                <button onClick={() => setPendingHit({ outcome: 'hr' })}
+                <button onClick={() => handleRecord('hr')}
                   className="py-3 rounded-xl bg-gold/15 border-2 border-gold/30 text-gold font-bold text-sm
                              active:scale-95 transition-all flex flex-col items-center">
                   HR
                   <span className="text-[8px] font-normal opacity-70">homer</span>
                 </button>
               </div>
-              {/* Other row — these record directly (no location) */}
+              {/* Other row */}
               <div className="grid grid-cols-3 gap-2">
                 <button onClick={() => handleRecord('walk')}
                   className="py-3 rounded-xl bg-sky/10 border-2 border-sky/25 text-sky font-bold text-sm
@@ -354,42 +315,6 @@ export default function GameDayTab() {
                   <span className="text-[9px] font-normal opacity-70">sacrifice</span>
                 </button>
               </div>
-
-              {/* Spray Chart overlay — appears after tapping a hit type */}
-              {pendingHit && (
-                <div className="bg-field border-2 border-lime/30 rounded-xl p-3 mt-2">
-                  <div className="text-center mb-1">
-                    <span className="text-xs font-bold text-lime">
-                      {pendingHit.outcome === 'out' ? 'OUT' :
-                       pendingHit.outcome === 'single' ? '1B' :
-                       pendingHit.outcome === 'double' ? '2B' :
-                       pendingHit.outcome === 'triple' ? '3B' : 'HR'}
-                    </span>
-                    <span className="text-[10px] text-chalk-muted ml-2">Tap the field where it went</span>
-                  </div>
-                  <SprayChart
-                    pendingOutcome={pendingHit.outcome}
-                    onTap={({ x, y }) => {
-                      handleRecord(pendingHit.outcome, { x, y });
-                      setPendingHit(null);
-                    }}
-                  />
-                  <button
-                    onClick={() => {
-                      // Skip location — record without spray data
-                      handleRecord(pendingHit.outcome);
-                      setPendingHit(null);
-                    }}
-                    className="w-full mt-2 py-1.5 text-[10px] text-chalk-muted bg-border/30 rounded-lg hover:bg-border transition-colors">
-                    Skip — record without location
-                  </button>
-                  <button
-                    onClick={() => setPendingHit(null)}
-                    className="w-full mt-1 py-1.5 text-[10px] text-chalk-muted hover:text-red transition-colors">
-                    Cancel
-                  </button>
-                </div>
-              )}
             </div>
           )}
 

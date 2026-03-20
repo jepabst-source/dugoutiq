@@ -63,10 +63,7 @@ export default function PrintTab() {
           {/* PAGE 1 — DUGOUT CARD */}
           {/* Header */}
           <div className="flex items-center justify-between border-b-[3px] border-[#1a4332] pb-2 mb-4">
-            <div className="flex items-center gap-3">
-              <img src="/logo-square.jpg" alt="Dugout IQ" className="w-10 h-10 rounded-lg" />
-              <div className="text-2xl font-bold text-[#1a4332] tracking-tight">{team?.name || 'Dugout IQ'}</div>
-            </div>
+            <div className="text-2xl font-bold text-[#1a4332] tracking-tight">⚾ {team?.name || 'Dugout IQ'}</div>
             <div className="text-sm text-gray-500">
               Game {gameNum}{opponent ? ` vs ${opponent}` : ''} · {gameDate}
             </div>

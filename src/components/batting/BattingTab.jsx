@@ -288,10 +288,11 @@ function SortableBattingSlot({ player, index }) {
 
       {/* Stats */}
       <div className="text-right">
+        <div className="text-lg font-bold text-lime">{avgDisplay}</div>
+        <div className="text-[10px] text-chalk-muted">{absNote}</div>
         {stats.obp !== null && (
-          <div className="text-2xl font-bold text-sky">{stats.obp.toFixed(3).replace(/^0/, '')} <span className="text-xs font-semibold">OBP</span></div>
+          <div className="text-[10px] text-sky">{stats.obp.toFixed(3).replace(/^0/, '')} OBP</div>
         )}
-        <div className="text-[10px] text-chalk-muted">{avgDisplay} avg · {absNote}</div>
       </div>
     </div>
   );

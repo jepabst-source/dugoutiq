@@ -1,16 +1,13 @@
 import { useState, useMemo } from 'react';
 import { useTeam, PTS } from '../../contexts/TeamContext';
 import { POSITIONS } from '../../utils/rotationEngine';
-import SprayChart from '../shared/SprayChart';
 
 const OUTCOME_LABELS = { K: 'K', out: 'Out', walk: 'BB', hit: 'Hit', single: '1B', double: '2B', triple: '3B', hr: 'HR', hbp: 'HBP', sac: 'SAC' };
 const POS_ORDER = [...POSITIONS.infield, ...POSITIONS.outfield, 'Bench'];
 
 export default function HistoryTab() {
-  const { players, atBats, savedGames, team, getPlayerStats, getRollingAvg, getPositionHistory, deleteGame, deleteAtBat, clearAllAtBats } = useTeam();
+  const { players, atBats, savedGames, getPlayerStats, getRollingAvg, getPositionHistory, deleteGame, deleteAtBat, clearAllAtBats } = useTeam();
   const [clearing, setClearing] = useState(false);
-  const [expandedPlayer, setExpandedPlayer] = useState(null);
-  const showSpray = team?.settings?.trackingMode === 'advanced';
 
   // Player stats summary
   const playerStats = useMemo(() => {
@@ -164,53 +161,23 @@ export default function HistoryTab() {
               </tr>
             </thead>
             <tbody>
-              {playerStats.map(p => {
-                const isExpanded = expandedPlayer === p.id;
-                const playerHits = showSpray ? atBats.filter(ab =>
-                  ab.playerId === p.id && ab.hitX != null && ab.hitY != null
-                ) : [];
-                return (
-                  <tr key={p.id}
-                    onClick={() => playerHits.length > 0 ? setExpandedPlayer(isExpanded ? null : p.id) : null}
-                    className={`border-b border-border/30 transition-colors ${playerHits.length > 0 ? 'hover:bg-panel-hover cursor-pointer' : ''}`}>
-                    <td className="px-3 py-2 font-semibold text-chalk">
-                      {p.name}
-                      <span className="ml-1.5 text-gold text-xs">{p.defRating}★</span>
-                      {playerHits.length > 0 && (
-                        <span className="ml-1 text-[9px] text-sky">{isExpanded ? '▲' : '▼'}</span>
-                      )}
-                    </td>
-                    <td className="text-center px-2 py-2 font-bold text-lime">
-                      {p.avgAbs > 0 ? p.avg.toFixed(2) : '—'}
-                    </td>
-                    <td className="text-center px-2 py-2 text-chalk-dim">{p.totalAbs}</td>
-                    <td className="text-center px-2 py-2 text-gold font-semibold">{p.pts}</td>
-                    <td className="text-center px-2 py-2 text-sky">
-                      {p.obp !== null ? p.obp.toFixed(3).replace(/^0/, '') : '—'}
-                    </td>
-                    <td className="text-center px-2 py-2 text-chalk-dim">{p.gamesPlayed}</td>
-                  </tr>
-                );
-              })}
-              {/* Spray chart expansion row */}
-              {expandedPlayer && (() => {
-                const playerHits = atBats.filter(ab =>
-                  ab.playerId === expandedPlayer && ab.hitX != null && ab.hitY != null
-                );
-                const p = players.find(x => x.id === expandedPlayer);
-                if (playerHits.length === 0) return null;
-                return (
-                  <tr key={`spray-${expandedPlayer}`}>
-                    <td colSpan={6} className="px-3 py-3 bg-field/50">
-                      <div className="text-center mb-2">
-                        <span className="text-xs font-bold text-chalk">{p?.name}</span>
-                        <span className="text-[10px] text-chalk-muted ml-2">{playerHits.length} tracked hit{playerHits.length !== 1 ? 's' : ''}</span>
-                      </div>
-                      <SprayChart hits={playerHits} />
-                    </td>
-                  </tr>
-                );
-              })()}
+              {playerStats.map(p => (
+                <tr key={p.id} className="border-b border-border/30 hover:bg-panel-hover transition-colors">
+                  <td className="px-3 py-2 font-semibold text-chalk">
+                    {p.name}
+                    <span className="ml-1.5 text-gold text-xs">{p.defRating}★</span>
+                  </td>
+                  <td className="text-center px-2 py-2 font-bold text-lime">
+                    {p.avgAbs > 0 ? p.avg.toFixed(2) : '—'}
+                  </td>
+                  <td className="text-center px-2 py-2 text-chalk-dim">{p.totalAbs}</td>
+                  <td className="text-center px-2 py-2 text-gold font-semibold">{p.pts}</td>
+                  <td className="text-center px-2 py-2 text-sky">
+                    {p.obp !== null ? p.obp.toFixed(3).replace(/^0/, '') : '—'}
+                  </td>
+                  <td className="text-center px-2 py-2 text-chalk-dim">{p.gamesPlayed}</td>
+                </tr>
+              ))}
               {playerStats.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-3 py-8 text-center text-chalk-muted">
