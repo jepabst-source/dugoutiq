@@ -527,20 +527,20 @@ function PositionRow({ pos, playerId, players, onSwap, type, isBeingDragged }) {
     <div
       ref={setDropRef}
       className={`flex items-center gap-1.5 mb-1.5 rounded-md transition-colors
-        ${isOver ? 'bg-lime/10 ring-1 ring-lime/30' : ''}
-        ${isBeingDragged ? 'opacity-40' : ''}`}
+        ${isOver ? 'bg-lime/10 ring-1 ring-lime/30' : ''}`}
     >
       <span className={`inline-block px-2 py-0.5 text-[9px] font-bold uppercase rounded border tracking-wide w-20 text-center shrink-0 ${typeColors[type]}`}>
         {pos.startsWith('Bench') ? 'Bench' : pos}
       </span>
 
-      {/* Drag handle — sits between position label and dropdown, attached to the player */}
+      {/* Drag handle + dropdown — this side greys out when dragging */}
       <div
         ref={setDragRef}
         {...listeners}
         {...attributes}
-        className={`flex items-center justify-center w-5 h-7 rounded shrink-0 select-none
-          ${playerId ? 'text-chalk-muted/30 cursor-grab hover:text-chalk-muted active:cursor-grabbing' : 'text-transparent'}`}
+        className={`flex items-center justify-center w-5 h-7 rounded shrink-0 select-none transition-opacity
+          ${playerId ? 'text-chalk-muted/30 cursor-grab hover:text-chalk-muted active:cursor-grabbing' : 'text-transparent'}
+          ${isBeingDragged ? 'opacity-30' : ''}`}
         aria-label="Drag to swap"
       >
         ⠿
@@ -549,8 +549,9 @@ function PositionRow({ pos, playerId, players, onSwap, type, isBeingDragged }) {
       <select
         value={playerId || ''}
         onChange={e => onSwap(pos, e.target.value)}
-        className="flex-1 px-2 py-1.5 rounded-md bg-field border border-border text-chalk text-xs
-                   focus:border-lime focus:outline-none min-w-0"
+        className={`flex-1 px-2 py-1.5 rounded-md bg-field border border-border text-chalk text-xs
+                   focus:border-lime focus:outline-none min-w-0 transition-opacity
+                   ${isBeingDragged ? 'opacity-30' : ''}`}
       >
         <option value="">— —</option>
         {players.map(p => (
