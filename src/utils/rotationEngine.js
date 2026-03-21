@@ -119,12 +119,12 @@ export function buildFullRotation({ players, standardInnings, settings, position
           if (tier !== 0) return tier;
           return benchHistory(a) - benchHistory(b);
         }
-        // Competitive: weight bench history by ratio for 4-5★ players
-        const aEff = a.defRating >= 4 ? benchHistory(a) * ratio : benchHistory(a);
-        const bEff = b.defRating >= 4 ? benchHistory(b) * ratio : benchHistory(b);
-        if (aEff !== bEff) return aEff - bEff;
-        // Tiebreak: lower rated benches first
-        return a.defRating - b.defRating;
+        // Competitive: ratio-weighted bench history + rating offset
+        // Rating offset ensures higher-rated players sort later even at 0 benches
+        // e.g. 2★=0.2, 3★=0.3, 4★=0.4+(ratio), 5★=0.5+(ratio)
+        const aEff = benchHistory(a) * (a.defRating >= 4 ? ratio : 1) + a.defRating * 0.1;
+        const bEff = benchHistory(b) * (b.defRating >= 4 ? ratio : 1) + b.defRating * 0.1;
+        return aEff - bEff;
       };
 
       const noB2B = settings.noBackToBackBench;
