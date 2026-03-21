@@ -180,14 +180,10 @@ export function buildFullRotation({ players, standardInnings, settings, position
 // ── Field position assignment ──
 
 function scoreFieldPlayer(p, pos, ing, gameInnings, positionHistory, settings, isDevInning) {
-  // Position minimum rating check (configurable per position)
+  // Position minimum rating check — enforced in ALL innings (coach's explicit floor)
   const minRatings = settings.positionMinRatings || {};
   const minRating = minRatings[pos];
-  if (minRating && p.defRating < minRating) {
-    if (!isDevInning) return -9999; // Hard block in competitive
-    // Soft penalty in dev — still prefer qualified players
-    return p.defRating * 10 - 30;
-  }
+  if (minRating && p.defRating < minRating) return -9999;
 
   // Infield cap check — skipped during development innings
   if (settings.infieldCapEnabled && !isDevInning && INFIELD_POSITIONS.includes(pos)) {
@@ -205,7 +201,9 @@ function scoreFieldPlayer(p, pos, ing, gameInnings, positionHistory, settings, i
   const posCount = countPosInGame(gameInnings, ing, pos, p.id);
 
   const histCount = positionHistory[p.id]?.[pos] || 0;
-  return p.defRating * 10
+  // Rating matters more for infield (skill-sensitive) than outfield (variety-driven)
+  const ratingWeight = OUTFIELD_POSITIONS.includes(pos) ? 4 : 10;
+  return p.defRating * ratingWeight
     + jitter
     - (posCount >= 2 ? 999 : posCount === 1 ? 20 : 0)
     - (prevPos === pos ? 8 : 0)
