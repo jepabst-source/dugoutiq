@@ -28,6 +28,11 @@ export default defineConfig({
         warn(warning);
       },
       external: (id) => nativeExternals.some(ext => id === ext),
+      output: {
+        manualChunks: {
+          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/analytics'],
+        },
+      },
     },
   },
 })
