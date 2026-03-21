@@ -80,55 +80,84 @@ export function buildFullRotation({ players, standardInnings, settings, position
       }
     }
 
-    // 3. Bench selection
+    // 3. Bench selection — tier-based fairness system
     const benched = new Set();
     if (benchCount > 0) {
       // Count bench from saved games AND current game being generated
       const benchHistory = (p) => {
-        const savedBench = (positionHistory[p.id]?.['Bench 1'] || 0) 
+        const savedBench = (positionHistory[p.id]?.['Bench 1'] || 0)
           + (positionHistory[p.id]?.['Bench 2'] || 0)
           + (positionHistory[p.id]?.['Bench 3'] || 0);
         const currentGameBench = countBenchedInGame(innings, ing - 1, p.id);
         return savedBench + currentGameBench;
       };
 
-      const lowerPlayers = players.filter(p => p.defRating <= 3);
-      const avgLowerBench = lowerPlayers.length
-        ? lowerPlayers.reduce((s, p) => s + benchHistory(p), 0) / lowerPlayers.length
-        : 0;
-      const upperQuota = avgLowerBench / 3;
+      // Min-rating immunity: if a position's min-rating pool is thin (≤1 eligible),
+      // those players are immune from bench in competitive innings
+      const immuneIds = new Set();
+      if (!isDevInning) {
+        const minRatings = settings.positionMinRatings || {};
+        for (const [pos, minRating] of Object.entries(minRatings)) {
+          if (!minRating || pos === 'Pitcher' || pos === 'Catcher') continue;
+          const eligible = players.filter(p => !used.has(p.id) && p.defRating >= minRating);
+          if (eligible.length <= 1) {
+            eligible.forEach(p => immuneIds.add(p.id));
+          }
+        }
+      }
+
+      // Tier-based bench fairness
+      const ratio = settings.benchRatioTier2 || 1.5; // 1.5 = Tier 2 benches half as often
+      const tier1 = players.filter(p => p.defRating <= 3 && !used.has(p.id) && !immuneIds.has(p.id));
+      const tier2 = players.filter(p => p.defRating >= 4 && !used.has(p.id) && !immuneIds.has(p.id));
 
       const benchSort = (a, b) => {
-            if (isDevInning) {
-              // Dev innings: higher rated sit first — give developing players field time
-              const tier = b.defRating - a.defRating;
-              if (tier !== 0) return tier;
-              return benchHistory(a) - benchHistory(b);
-            }
-            // Competitive: lower rated sit first
-            const nudge = avgLowerBench >= 3;
-            const aEff = (nudge && a.defRating >= 4 && benchHistory(a) < upperQuota) ? a.defRating - 1.5 : a.defRating;
-            const bEff = (nudge && b.defRating >= 4 && benchHistory(b) < upperQuota) ? b.defRating - 1.5 : b.defRating;
-            const tier = Math.round(aEff) - Math.round(bEff);
-            if (tier !== 0) return tier;
-            // Secondary: STRICT — fewest total bench appearances sits next (hard tiebreaker)
-            return benchHistory(a) - benchHistory(b);
-          };
+        if (isDevInning) {
+          // Dev innings: higher rated sit first — give developing players field time
+          const tier = b.defRating - a.defRating;
+          if (tier !== 0) return tier;
+          return benchHistory(a) - benchHistory(b);
+        }
+        // Competitive: fewest bench sits first (strict within-tier fairness)
+        return benchHistory(a) - benchHistory(b);
+      };
 
-      // Pass 1: exclude players benched last inning (if no-back-to-back is enabled)
+      // Determine how many from each tier should bench this inning
+      // Tier 1 gets benched at base rate, Tier 2 at 1/ratio of that rate
+      const tier1Sorted = [...tier1].sort(benchSort);
+      const tier2Sorted = [...tier2].sort(benchSort);
+      const tier1AvgBench = tier1.length ? tier1.reduce((s, p) => s + benchHistory(p), 0) / tier1.length : 0;
+      const tier2AvgBench = tier2.length ? tier2.reduce((s, p) => s + benchHistory(p), 0) / tier2.length : 0;
+      const tier2TargetAvg = tier1AvgBench / ratio;
+
+      // Pick candidates: tier 1 first (lower rated sit first), then tier 2 only if under quota
+      let candidates = [];
+      // Always start with Tier 1 players (lower rated bench first in competitive)
+      if (!isDevInning) {
+        candidates.push(...tier1Sorted);
+        // Add Tier 2 players only if they're under their target bench rate
+        if (tier2.length && tier2AvgBench < tier2TargetAvg) {
+          candidates.push(...tier2Sorted);
+        }
+      } else {
+        // Dev: merge all and sort by dev logic (higher rated sit first)
+        candidates = [...tier1, ...tier2].sort(benchSort);
+      }
+
       const noB2B = settings.noBackToBackBench;
-      const pass1 = sorted
-        .filter(p => !used.has(p.id) && countBenchedInGame(innings, ing - 1, p.id) === 0 && (!noB2B || !benchedLastInning.has(p.id)))
-        .sort(benchSort);
+
+      // Pass 1: respect back-to-back + immunity + not already benched this game inning
+      const pass1 = candidates
+        .filter(p => !used.has(p.id) && !benched.has(p.id) && countBenchedInGame(innings, ing - 1, p.id) === 0 && (!noB2B || !benchedLastInning.has(p.id)));
       for (const p of pass1) { if (benched.size >= benchCount) break; benched.add(p.id); used.add(p.id); }
 
-      // Pass 2: relax back-to-back constraint
+      // Pass 2: relax back-to-back constraint, still respect immunity
       if (benched.size < benchCount) {
-        const pass2 = sorted.filter(p => !used.has(p.id) && countBenchedInGame(innings, ing - 1, p.id) === 0).sort(benchSort);
+        const pass2 = sorted.filter(p => !used.has(p.id) && !immuneIds.has(p.id) && countBenchedInGame(innings, ing - 1, p.id) === 0).sort(benchSort);
         for (const p of pass2) { if (benched.size >= benchCount) break; benched.add(p.id); used.add(p.id); }
       }
 
-      // Pass 3: anyone remaining
+      // Pass 3: anyone remaining (last resort — even immune players if absolutely needed)
       if (benched.size < benchCount) {
         const pass3 = sorted.filter(p => !used.has(p.id)).sort(benchSort);
         for (const p of pass3) { if (benched.size >= benchCount) break; benched.add(p.id); used.add(p.id); }

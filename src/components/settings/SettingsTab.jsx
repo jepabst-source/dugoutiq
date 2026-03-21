@@ -401,6 +401,44 @@ export default function SettingsTab() {
         </div>
       </Section>
 
+      {/* Defense Toolbox */}
+      <Section title="🛠️ Defense Toolbox">
+        <p className="text-xs text-chalk-muted mb-4">
+          Fine-tune how the rotation engine handles bench fairness and player placement.
+        </p>
+
+        <div className="space-y-4">
+          {/* Bench Ratio for 4-5★ players */}
+          <div className="bg-field/50 border border-border rounded-lg p-3">
+            <div className="text-sm text-chalk font-semibold mb-1">Stud Bench Ratio</div>
+            <p className="text-[10px] text-chalk-muted mb-3">
+              How much less often 4-5★ players bench compared to 1-3★ players. Higher = studs bench less.
+            </p>
+            <div className="flex items-center gap-3">
+              <input
+                type="range"
+                min="1"
+                max="3"
+                step="0.5"
+                value={settings.benchRatioTier2 ?? 1.5}
+                onChange={e => setRuleValue('benchRatioTier2', Number(e.target.value))}
+                className="flex-1 accent-lime"
+              />
+              <span className="text-sm font-bold text-lime w-12 text-right">
+                {settings.benchRatioTier2 ?? 1.5}x
+              </span>
+            </div>
+            <div className="flex justify-between text-[10px] text-chalk-muted mt-1">
+              <span>1x (equal)</span>
+              <span>1.5x</span>
+              <span>2x</span>
+              <span>2.5x</span>
+              <span>3x (rarely)</span>
+            </div>
+          </div>
+        </div>
+      </Section>
+
       {/* Position Minimum Ratings */}
       <Section title="⭐ Position Minimum Ratings">
         <p className="text-xs text-chalk-muted mb-4">
