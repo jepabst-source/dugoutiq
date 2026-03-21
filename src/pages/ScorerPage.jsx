@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { doc, getDoc, collection, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import HomePlateLoader from '../components/shared/HomePlateLoader';
 
 export default function ScorerPage({ scorerCode }) {
   const [scorerData, setScorerData] = useState(null);
@@ -43,11 +44,7 @@ export default function ScorerPage({ scorerCode }) {
 
   const handleUndo = () => { if (recentLog.length) setRecentLog(prev => prev.slice(1)); };
 
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
-      <div className="text-center"><div className="text-4xl mb-3 animate-pulse">⚾</div><p className="text-gray-400 text-sm">Loading...</p></div>
-    </div>
-  );
+  if (loading) return <HomePlateLoader message="Loading scorer..." />;
 
   if (error) return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">

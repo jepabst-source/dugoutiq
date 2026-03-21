@@ -81,6 +81,26 @@ select option {
   color: var(--color-chalk);
 }
 
+/* Home plate loader trace animation */
+.home-plate-trace {
+  animation: trace-plate 1.6s ease-in-out infinite;
+}
+
+@keyframes trace-plate {
+  0% {
+    stroke-dashoffset: 260;
+    opacity: 0.6;
+  }
+  50% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: -260;
+    opacity: 0.6;
+  }
+}
+
 /* Print styles */
 @media print {
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }

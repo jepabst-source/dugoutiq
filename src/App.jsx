@@ -7,6 +7,7 @@ import JoinTeamPage from './pages/JoinTeamPage';
 import ScorerPage from './pages/ScorerPage';
 import PortalPage from './pages/PortalPage';
 import AppShell from './pages/AppShell';
+import HomePlateLoader from './components/shared/HomePlateLoader';
 
 function getInviteCode() {
   const path = window.location.pathname;
@@ -66,14 +67,7 @@ function AppContent() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-4xl mb-3 animate-pulse">⚾</div>
-          <p className="text-chalk-muted text-sm">Loading Dugout IQ...</p>
-        </div>
-      </div>
-    );
+    return <HomePlateLoader />;
   }
 
   // Invite link flow
@@ -90,14 +84,7 @@ function AppContent() {
 
   // Demo team being created — show loading, not CreateTeamPage
   if (creatingDemo) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-4xl mb-3 animate-pulse">⚾</div>
-          <p className="text-chalk-muted text-sm">Setting up your demo team...</p>
-        </div>
-      </div>
-    );
+    return <HomePlateLoader message="Setting up your demo team..." />;
   }
 
   // Logged in but no teams yet
