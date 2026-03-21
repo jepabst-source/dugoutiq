@@ -20,6 +20,7 @@ const DEFAULT_SETTINGS = {
     '1st Base': 4,
     'Shortstop': 3,
   },
+  benchRatioTier2: 1.5,  // How often 4-5★ players bench relative to 1-3★ (e.g. 1.5 = half as often)
   assistantFullAccess: false,
   trackingMode: 'simple', // 'simple' or 'advanced' — default for Game Day and Scorer
 };
