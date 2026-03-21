@@ -90,16 +90,16 @@ export default function ScorerPage({ scorerCode }) {
               <div className="grid grid-cols-2 gap-3 mb-3">
                 <button onClick={() => handleRecord('K')} disabled={recording}
                   className="py-5 rounded-xl bg-red-50 border-2 border-red-200 text-red-600 font-bold text-xl active:scale-95 transition-all flex flex-col items-center gap-1 disabled:opacity-50">
-                  K<span className="text-[10px] font-normal opacity-70">strikeout · 0 pts</span></button>
+                  K<span className="text-[10px] font-normal opacity-70">strikeout</span></button>
                 <button onClick={() => handleRecord('hit')} disabled={recording}
                   className="py-5 rounded-xl bg-green-100 border-2 border-green-300 text-green-600 font-bold text-xl active:scale-95 transition-all flex flex-col items-center gap-1 disabled:opacity-50">
-                  HIT<span className="text-[10px] font-normal opacity-70">2 pts</span></button>
+                  HIT<span className="text-[10px] font-normal opacity-70">base hit</span></button>
                 <button onClick={() => handleRecord('walk')} disabled={recording}
                   className="py-5 rounded-xl bg-blue-50 border-2 border-blue-200 text-blue-600 font-bold text-xl active:scale-95 transition-all flex flex-col items-center gap-1 disabled:opacity-50">
-                  WALK<span className="text-[10px] font-normal opacity-70">1 pt</span></button>
+                  WALK<span className="text-[10px] font-normal opacity-70">walked</span></button>
                 <button onClick={() => handleRecord('out')} disabled={recording}
                   className="py-5 rounded-xl bg-amber-50 border-2 border-amber-200 text-amber-600 font-bold text-xl active:scale-95 transition-all flex flex-col items-center gap-1 disabled:opacity-50">
-                  HIT-OUT<span className="text-[10px] font-normal opacity-70">fielded · 1 pt</span></button>
+                  HIT-OUT<span className="text-[10px] font-normal opacity-70">fielded out</span></button>
               </div>
             ) : (
               <div className="space-y-2 mb-3">
