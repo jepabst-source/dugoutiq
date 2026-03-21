@@ -5,6 +5,29 @@ This file lives in the repo and deploys with the code. If we need to roll back, 
 
 ---
 
+## v35 — March 21, 2026
+**UI Polish: Loading animation, toast notifications, drag-and-drop fielding**
+
+Features:
+- Home plate trace loading animation — replaces pulsing baseball emoji with an SVG home plate that draws itself in brand colors (navy). Applied to all loading states (app init, demo team setup, scorer page).
+- Toast notification system — replaces browser `alert()` with styled slide-in toasts. Three variants: success (navy), error (red), warning (gold). Auto-dismiss after 3.5s, tap to dismiss early.
+- Drag-and-drop player swaps on Fielding tab — each position row now has a grip handle (⠿) on the left for dragging players between positions. Dropdown selects still work on the right. Applied to inning cards and pocket cards (LFG/OOR). Uses existing @dnd-kit library.
+
+Files changed:
+- `src/components/shared/HomePlateLoader.jsx` — new component
+- `src/components/shared/Toast.jsx` — new component (ToastProvider + useToast hook)
+- `src/components/defense/DefenseTab.jsx` — drag-and-drop added to PositionRow, InningCard, PocketCard
+- `src/pages/AppShell.jsx` — alert → toast
+- `src/pages/ScorerPage.jsx` — loading state updated
+- `src/components/settings/SettingsTab.jsx` — alert → toast
+- `src/components/shared/UpgradeModal.jsx` — alert → toast
+- `src/App.jsx` — HomePlateLoader + ToastProvider wired in
+- `src/index.css` — toast and home plate trace animations
+
+Rollback: `git checkout v34`
+
+---
+
 ## v32 — March 20, 2026
 **Fix: Blank page crash from static Capacitor import**
 - `platform.js` had `import { Capacitor } from '@capacitor/core'` which doesn't exist on web
