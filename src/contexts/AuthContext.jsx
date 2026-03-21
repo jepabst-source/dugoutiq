@@ -27,7 +27,6 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        setUser(firebaseUser);
         const userRef = doc(db, 'users', firebaseUser.uid);
         const snap = await getDoc(userRef);
         if (snap.exists()) {
@@ -123,6 +122,7 @@ export function AuthProvider({ children }) {
             });
           }
         }
+        setUser(firebaseUser);
       } else {
         setUser(null);
         setUserDoc(null);
