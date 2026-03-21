@@ -229,26 +229,26 @@ export default function GameDayTab() {
             /* Simple mode */
             <div className="grid grid-cols-2 gap-3 mb-3">
               <button onClick={() => handleRecord('K')}
-                className="py-5 sm:py-4 rounded-xl bg-red/10 border-2 border-red/25 text-red font-bold text-xl sm:text-lg
-                           hover:bg-red/20 active:scale-95 transition-all flex flex-col items-center gap-1">
+                className="py-5 sm:py-4 rounded-xl bg-red-50 border-2 border-red-200 text-red-600 font-bold text-xl sm:text-lg
+                           hover:bg-red-100 active:scale-95 transition-all flex flex-col items-center gap-1">
                 K
                 <span className="text-[10px] font-normal opacity-70">strikeout · 0 pts</span>
               </button>
               <button onClick={() => handleRecord('hit')}
-                className="py-5 sm:py-4 rounded-xl bg-lime/20 border-2 border-lime/40 text-lime font-bold text-xl sm:text-lg
-                           hover:bg-lime/30 active:scale-95 transition-all flex flex-col items-center gap-1">
+                className="py-5 sm:py-4 rounded-xl bg-green-100 border-2 border-green-300 text-green-600 font-bold text-xl sm:text-lg
+                           hover:bg-green-200 active:scale-95 transition-all flex flex-col items-center gap-1">
                 HIT
                 <span className="text-[10px] font-normal opacity-70">2 pts</span>
               </button>
               <button onClick={() => handleRecord('walk')}
-                className="py-5 sm:py-4 rounded-xl bg-sky/10 border-2 border-sky/25 text-sky font-bold text-xl sm:text-lg
-                           hover:bg-sky/20 active:scale-95 transition-all flex flex-col items-center gap-1">
+                className="py-5 sm:py-4 rounded-xl bg-blue-50 border-2 border-blue-200 text-blue-600 font-bold text-xl sm:text-lg
+                           hover:bg-blue-100 active:scale-95 transition-all flex flex-col items-center gap-1">
                 WALK
                 <span className="text-[10px] font-normal opacity-70">1 pt</span>
               </button>
               <button onClick={() => handleRecord('out')}
-                className="py-5 sm:py-4 rounded-xl bg-dirt/10 border-2 border-dirt/25 text-dirt font-bold text-xl sm:text-lg
-                           hover:bg-dirt/20 active:scale-95 transition-all flex flex-col items-center gap-1">
+                className="py-5 sm:py-4 rounded-xl bg-amber-50 border-2 border-amber-200 text-amber-600 font-bold text-xl sm:text-lg
+                           hover:bg-amber-100 active:scale-95 transition-all flex flex-col items-center gap-1">
                 HIT-OUT
                 <span className="text-[10px] font-normal opacity-70">fielded · 1 pt</span>
               </button>
@@ -259,13 +259,13 @@ export default function GameDayTab() {
               {/* Outs row */}
               <div className="grid grid-cols-2 gap-2">
                 <button onClick={() => handleRecord('K')}
-                  className="py-3 rounded-xl bg-red/10 border-2 border-red/25 text-red font-bold text-base
+                  className="py-3 rounded-xl bg-red-50 border-2 border-red-200 text-red-600 font-bold text-base
                              active:scale-95 transition-all flex flex-col items-center">
                   K
                   <span className="text-[9px] font-normal opacity-70">strikeout</span>
                 </button>
                 <button onClick={() => handleRecord('out')}
-                  className="py-3 rounded-xl bg-dirt/10 border-2 border-dirt/25 text-dirt font-bold text-base
+                  className="py-3 rounded-xl bg-amber-50 border-2 border-amber-200 text-amber-600 font-bold text-base
                              active:scale-95 transition-all flex flex-col items-center">
                   OUT
                   <span className="text-[9px] font-normal opacity-70">fielded out</span>
@@ -274,25 +274,25 @@ export default function GameDayTab() {
               {/* Hits row */}
               <div className="grid grid-cols-4 gap-2">
                 <button onClick={() => handleRecord('single')}
-                  className="py-3 rounded-xl bg-lime/10 border-2 border-lime/25 text-lime font-bold text-sm
+                  className="py-3 rounded-xl bg-green-50 border-2 border-green-200 text-green-600 font-bold text-sm
                              active:scale-95 transition-all flex flex-col items-center">
                   1B
                   <span className="text-[8px] font-normal opacity-70">single</span>
                 </button>
                 <button onClick={() => handleRecord('double')}
-                  className="py-3 rounded-xl bg-lime/15 border-2 border-lime/30 text-lime font-bold text-sm
+                  className="py-3 rounded-xl bg-green-50 border-2 border-green-200 text-green-600 font-bold text-sm
                              active:scale-95 transition-all flex flex-col items-center">
                   2B
                   <span className="text-[8px] font-normal opacity-70">double</span>
                 </button>
                 <button onClick={() => handleRecord('triple')}
-                  className="py-3 rounded-xl bg-lime/20 border-2 border-lime/35 text-lime-bright font-bold text-sm
+                  className="py-3 rounded-xl bg-green-100 border-2 border-green-300 text-green-700 font-bold text-sm
                              active:scale-95 transition-all flex flex-col items-center">
                   3B
                   <span className="text-[8px] font-normal opacity-70">triple</span>
                 </button>
                 <button onClick={() => handleRecord('hr')}
-                  className="py-3 rounded-xl bg-gold/15 border-2 border-gold/30 text-gold font-bold text-sm
+                  className="py-3 rounded-xl bg-amber-50 border-2 border-amber-300 text-amber-700 font-bold text-sm
                              active:scale-95 transition-all flex flex-col items-center">
                   HR
                   <span className="text-[8px] font-normal opacity-70">homer</span>
@@ -301,19 +301,19 @@ export default function GameDayTab() {
               {/* Other row */}
               <div className="grid grid-cols-3 gap-2">
                 <button onClick={() => handleRecord('walk')}
-                  className="py-3 rounded-xl bg-sky/10 border-2 border-sky/25 text-sky font-bold text-sm
+                  className="py-3 rounded-xl bg-blue-50 border-2 border-blue-200 text-blue-600 font-bold text-sm
                              active:scale-95 transition-all flex flex-col items-center">
                   BB
                   <span className="text-[9px] font-normal opacity-70">walk</span>
                 </button>
                 <button onClick={() => handleRecord('hbp')}
-                  className="py-3 rounded-xl bg-sky/10 border-2 border-sky/25 text-sky font-bold text-sm
+                  className="py-3 rounded-xl bg-blue-50 border-2 border-blue-200 text-blue-600 font-bold text-sm
                              active:scale-95 transition-all flex flex-col items-center">
                   HBP
                   <span className="text-[9px] font-normal opacity-70">hit by pitch</span>
                 </button>
                 <button onClick={() => handleRecord('sac')}
-                  className="py-3 rounded-xl bg-dirt/10 border-2 border-dirt/25 text-dirt font-bold text-sm
+                  className="py-3 rounded-xl bg-amber-50 border-2 border-amber-200 text-amber-600 font-bold text-sm
                              active:scale-95 transition-all flex flex-col items-center">
                   SAC
                   <span className="text-[9px] font-normal opacity-70">sacrifice</span>
@@ -380,10 +380,10 @@ export default function GameDayTab() {
             inningAtBats.map(ab => {
               const p = players.find(x => x.id === ab.playerId);
               const outcomeClass = {
-                K: 'bg-red/15 text-red border-red/25',
-                out: 'bg-dirt/15 text-dirt border-dirt/25',
-                walk: 'bg-sky/15 text-sky border-sky/25',
-                hit: 'bg-lime/15 text-lime border-lime/25',
+                K: 'bg-red-50 text-red-600 border-red-200',
+                out: 'bg-amber-50 text-amber-600 border-amber-200',
+                walk: 'bg-blue-50 text-blue-600 border-blue-200',
+                hit: 'bg-green-50 text-green-600 border-green-200',
               }[ab.outcome] || '';
               return (
                 <div key={ab.id} className="flex items-center justify-between px-3 py-2 border-b border-border/50 last:border-0">
