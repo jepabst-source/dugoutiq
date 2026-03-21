@@ -81,6 +81,22 @@ select option {
   color: var(--color-chalk);
 }
 
+/* Toast notifications */
+.toast-enter {
+  animation: toast-in 0.25s ease-out;
+}
+.toast-exit {
+  animation: toast-out 0.25s ease-in forwards;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(-12px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toast-out {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(-12px) scale(0.95); }
+}
+
 /* Home plate loader trace animation */
 .home-plate-trace {
   animation: trace-plate 1.6s ease-in-out infinite;

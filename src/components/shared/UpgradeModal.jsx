@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import app from '../../lib/firebase';
+import { useToast } from './Toast';
 
 export default function UpgradeModal({ onClose, lockReason }) {
   const [loading, setLoading] = useState('');
+  const toast = useToast();
 
   const handleUpgrade = async (plan) => {
     setLoading(plan);
@@ -16,7 +18,7 @@ export default function UpgradeModal({ onClose, lockReason }) {
       }
     } catch (err) {
       console.error('Checkout error:', err);
-      alert('Something went wrong. Please try again.');
+      toast('Something went wrong. Please try again.', 'error');
     }
     setLoading('');
   };

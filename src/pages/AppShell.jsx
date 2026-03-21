@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTeam } from '../contexts/TeamContext';
 import { usePlan } from '../hooks/usePlan';
+import { useToast } from '../components/shared/Toast';
 import RosterTab from '../components/roster/RosterTab';
 import BattingTab from '../components/batting/BattingTab';
 import DefenseTab from '../components/defense/DefenseTab';
@@ -26,6 +27,7 @@ const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
 export default function AppShell() {
   const { user, logout, allTeams, setActiveTeamId, activeTeamId, resendVerification } = useAuth();
   const { team } = useTeam();
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState('roster');
   const [showTeamMenu, setShowTeamMenu] = useState(false);
   const [showCreateTeam, setShowCreateTeam] = useState(false);
@@ -224,7 +226,7 @@ export default function AppShell() {
         {needsVerification && (
           <div className="text-[10px] text-gold">
             Please verify your email address.{' '}
-            <button onClick={async () => { await resendVerification(); alert('Verification email sent!'); }}
+            <button onClick={async () => { await resendVerification(); toast('Verification email sent!'); }}
               className="underline font-semibold hover:text-gold-bright">Resend</button>
           </div>
         )}

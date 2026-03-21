@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTeam } from '../../contexts/TeamContext';
 import { useAuth } from '../../contexts/AuthContext';
 import StarRating from '../shared/StarRating';
+import { useToast } from '../shared/Toast';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 
@@ -10,6 +11,7 @@ const ALL_POSITIONS = ['Pitcher', 'Catcher', '1st Base', '2nd Base', 'Shortstop'
 export default function SettingsTab() {
   const { team, updateTeam, updateSettings, generateInviteCode, removeAssistant, deleteTeam, getActivePlayers, battingOrder: savedOrder } = useTeam();
   const { user } = useAuth();
+  const toast = useToast();
   const settings = team?.settings || {};
 
   const [teamName, setTeamName] = useState(team?.name || '');
@@ -32,7 +34,7 @@ export default function SettingsTab() {
       // We need to temporarily render it offscreen
       const printEl = document.getElementById('print-export-target');
       if (!printEl) {
-        alert('Generate a lineup on the Fielding tab first, then try again.');
+        toast('Generate a lineup on the Fielding tab first, then try again.', 'warning');
         setExporting(false);
         return;
       }
@@ -101,7 +103,7 @@ export default function SettingsTab() {
       }, 'image/jpeg', 0.92);
     } catch (err) {
       console.error('Export error:', err);
-      alert('Export failed: ' + (err.message || err));
+      toast('Export failed: ' + (err.message || err), 'error');
       setExporting(false);
     }
   }, [team]);

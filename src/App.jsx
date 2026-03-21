@@ -8,6 +8,7 @@ import ScorerPage from './pages/ScorerPage';
 import PortalPage from './pages/PortalPage';
 import AppShell from './pages/AppShell';
 import HomePlateLoader from './components/shared/HomePlateLoader';
+import { ToastProvider } from './components/shared/Toast';
 
 function getInviteCode() {
   const path = window.location.pathname;
@@ -124,7 +125,9 @@ function JoinTeamWrapper({ inviteCode }) {
 export default function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <ToastProvider>
+        <AppContent />
+      </ToastProvider>
     </AuthProvider>
   );
 }
