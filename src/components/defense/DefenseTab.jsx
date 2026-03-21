@@ -233,13 +233,16 @@ export default function DefenseTab() {
       </div>
 
       {/* Rules info */}
-      <div className="text-xs text-chalk-muted bg-lime/5 border-l-2 border-lime/30 px-3 py-2 rounded-r-lg mb-4">
-        {settings.noBackToBackBench && '✓ No back-to-back bench'}
-        {settings.infieldCapEnabled && ` · ✓ Max ${settings.infieldCapValue} infield innings`}
-        {` · Toggle ⚔️ Competitive / 🔄 Development per inning`}
-        {Object.entries(settings.positionMinRatings || {}).map(([pos, min]) =>
-          ` · ${pos} ${min}★+`
-        ).join('')}
+      <div className="flex items-start justify-between text-xs text-chalk-muted bg-lime/5 border-l-2 border-lime/30 px-3 py-2 rounded-r-lg mb-4">
+        <span>
+          {settings.noBackToBackBench && '✓ No back-to-back bench'}
+          {settings.infieldCapEnabled && ` · ✓ Max ${settings.infieldCapValue} infield innings`}
+          {` · Toggle ⚔️ Competitive / 🔄 Development per inning`}
+          {Object.entries(settings.positionMinRatings || {}).map(([pos, min]) =>
+            ` · ${pos} ${min}★+`
+          ).join('')}
+        </span>
+        <span className="text-chalk-muted/60 shrink-0 ml-3">Edit rules in Settings</span>
       </div>
 
       {/* Attendance */}
