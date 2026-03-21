@@ -106,14 +106,11 @@ export function buildFullRotation({ players, standardInnings, settings, position
         }
       }
 
-      // Tier-based bench fairness
+      // Ratio-weighted bench sort
+      // Inflate tier 2 bench history so they sort later → bench less often
+      // At ratio 1.5: a 4★ with 2 benches (eff 3.0) sorts like a 3★ with 3 benches
       const ratio = settings.benchRatioTier2 || 1.5;
       const available = players.filter(p => !used.has(p.id));
-      const tier1Pool = available.filter(p => p.defRating <= 3);
-      const tier2Pool = available.filter(p => p.defRating >= 4);
-      const tier1AvgBench = tier1Pool.length ? tier1Pool.reduce((s, p) => s + benchHistory(p), 0) / tier1Pool.length : 0;
-      const tier2AvgBench = tier2Pool.length ? tier2Pool.reduce((s, p) => s + benchHistory(p), 0) / tier2Pool.length : 0;
-      const tier2UnderQuota = tier2Pool.length > 0 && tier2AvgBench < tier1AvgBench / ratio;
 
       const benchSort = (a, b) => {
         if (isDevInning) {
@@ -122,22 +119,16 @@ export function buildFullRotation({ players, standardInnings, settings, position
           if (tier !== 0) return tier;
           return benchHistory(a) - benchHistory(b);
         }
-        // Competitive: tier 1 (≤3★) benches before tier 2 (≥4★)
-        // Tier 2 only mixes in when they're under their quota
-        const aTier = a.defRating >= 4 ? 2 : 1;
-        const bTier = b.defRating >= 4 ? 2 : 1;
-        if (aTier !== bTier && !tier2UnderQuota) return aTier - bTier;
-        // Within same tier (or both eligible): fewest bench sits first, lower rated as tiebreak
-        const diff = benchHistory(a) - benchHistory(b);
-        if (diff !== 0) return diff;
+        // Competitive: weight bench history by ratio for 4-5★ players
+        const aEff = a.defRating >= 4 ? benchHistory(a) * ratio : benchHistory(a);
+        const bEff = b.defRating >= 4 ? benchHistory(b) * ratio : benchHistory(b);
+        if (aEff !== bEff) return aEff - bEff;
+        // Tiebreak: lower rated benches first
         return a.defRating - b.defRating;
       };
 
       const noB2B = settings.noBackToBackBench;
-      // Build pool: tier 1 always included; tier 2 only when under quota (or dev inning)
-      const allCandidates = available
-        .filter(p => isDevInning || p.defRating <= 3 || tier2UnderQuota)
-        .sort(benchSort);
+      const allCandidates = available.sort(benchSort);
 
       // Pass 1: prefer players not yet benched this game, respect back-to-back + immunity
       const pass1 = allCandidates
@@ -156,9 +147,9 @@ export function buildFullRotation({ players, standardInnings, settings, position
         for (const p of pass3) { if (benched.size >= benchCount) break; benched.add(p.id); used.add(p.id); }
       }
 
-      // Pass 4: last resort — anyone remaining (even tier 2 excluded from pool, even immune)
+      // Pass 4: last resort — anyone remaining (even immune)
       if (benched.size < benchCount) {
-        const pass4 = available.filter(p => !used.has(p.id)).sort(benchSort);
+        const pass4 = allCandidates.filter(p => !used.has(p.id));
         for (const p of pass4) { if (benched.size >= benchCount) break; benched.add(p.id); used.add(p.id); }
       }
     }
