@@ -401,8 +401,8 @@ export default function SettingsTab() {
         </div>
       </Section>
 
-      {/* Defense Toolbox */}
-      <Section title="🛠️ Defense Toolbox">
+      {/* Fielding Toolbox */}
+      <Section title="🛠️ Fielding Toolbox">
         <p className="text-xs text-chalk-muted mb-4">
           Fine-tune how the rotation engine handles bench fairness and player placement.
         </p>
