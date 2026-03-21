@@ -183,7 +183,11 @@ function scoreFieldPlayer(p, pos, ing, gameInnings, positionHistory, settings, i
   // Position minimum rating check (configurable per position)
   const minRatings = settings.positionMinRatings || {};
   const minRating = minRatings[pos];
-  if (minRating && !isDevInning && p.defRating < minRating) return -9999;
+  if (minRating && p.defRating < minRating) {
+    if (!isDevInning) return -9999; // Hard block in competitive
+    // Soft penalty in dev — still prefer qualified players
+    return p.defRating * 10 - 30;
+  }
 
   // Infield cap check — skipped during development innings
   if (settings.infieldCapEnabled && !isDevInning && INFIELD_POSITIONS.includes(pos)) {
