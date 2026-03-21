@@ -55,7 +55,7 @@ export function TeamProvider({ children }) {
       setLoadingTeam(false);
     }, (err) => {
       console.error('Team subscription error:', err);
-      setTeam(null);
+      // Don't wipe data on transient errors — keep stale data visible
       setLoadingTeam(false);
     });
 
@@ -74,7 +74,8 @@ export function TeamProvider({ children }) {
           .filter(p => p.active !== false)
           .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
         setPlayers(list);
-      }
+      },
+      (err) => console.error('Players subscription error:', err)
     );
 
     return unsub;
@@ -91,7 +92,8 @@ export function TeamProvider({ children }) {
           .map(d => ({ id: d.id, ...d.data() }))
           .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
         setAtBats(list);
-      }
+      },
+      (err) => console.error('AtBats subscription error:', err)
     );
 
     return unsub;
@@ -120,7 +122,8 @@ export function TeamProvider({ children }) {
           .map(d => ({ id: d.id, ...d.data() }))
           .sort((a, b) => (b.gameNumber || 0) - (a.gameNumber || 0));
         setSavedGames(list);
-      }
+      },
+      (err) => console.error('Games subscription error:', err)
     );
 
     return unsub;

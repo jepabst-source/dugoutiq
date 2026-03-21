@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import {
   onAuthStateChanged, signInWithPopup, signOut,
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
@@ -20,6 +20,7 @@ export function AuthProvider({ children }) {
   const [userDoc, setUserDoc] = useState(null);
   const [loading, setLoading] = useState(true);
   const [creatingDemo, setCreatingDemo] = useState(false);
+  const demoResetDone = useRef(false);
   const [activeTeamId, setActiveTeamId] = useState(null);
   const [allTeams, setAllTeams] = useState([]); // [{id, name, sport, seasonLabel, seasonYear}]
 
@@ -33,7 +34,8 @@ export function AuthProvider({ children }) {
           const data = snap.data();
 
           // Demo account auto-reset: wipe and recreate fresh every login
-          if (firebaseUser.email === DEMO_ACCOUNT_EMAIL) {
+          if (firebaseUser.email === DEMO_ACCOUNT_EMAIL && !demoResetDone.current) {
+            demoResetDone.current = true;
             setCreatingDemo(true);
             // Delete all existing teams
             const existingTeamIds = data.teamIds || [];
