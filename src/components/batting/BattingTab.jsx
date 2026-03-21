@@ -304,10 +304,13 @@ function SortableBattingSlot({ player, index }) {
 
       {/* Stats */}
       <div className="text-right">
-        <div className="text-lg font-bold text-lime">{avgDisplay}</div>
+        <div className="text-lg font-bold text-sky">
+          {rolling.obp !== null ? rolling.obp.toFixed(3).replace(/^0/, '') : '—'}
+          <span className="text-[10px] font-semibold text-sky/60 ml-0.5">OBP</span>
+        </div>
         <div className="text-[10px] text-chalk-muted">{absNote}</div>
-        {rolling.obp !== null && (
-          <div className="text-[10px] text-sky">{rolling.obp.toFixed(3).replace(/^0/, '')} OBP</div>
+        {player.avgAbs > 0 && (
+          <div className="text-[10px] text-lime">{avgDisplay} avg</div>
         )}
       </div>
     </div>
