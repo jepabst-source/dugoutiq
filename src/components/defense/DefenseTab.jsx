@@ -506,9 +506,16 @@ function InningCard({ inning, assignment, isDevInning, mode, players, benchCount
 
 // ── Position Row (with drag handle + swap dropdown) ──
 
+const SHORT_POS = {
+  'Left Field': 'Left Fld',
+  'Center Field': 'Center Fld',
+  'Right Field': 'Right Fld',
+};
+
 function PositionRow({ pos, playerId, players, onSwap, type, isBeingDragged }) {
   const player = players.find(p => p.id === playerId);
   const isCatcher = pos === 'Catcher';
+  const displayPos = pos.startsWith('Bench') ? 'Bench' : (SHORT_POS[pos] || pos);
 
   const { attributes, listeners, setNodeRef: setDragRef, isDragging } = useDraggable({
     id: pos,
@@ -527,7 +534,7 @@ function PositionRow({ pos, playerId, players, onSwap, type, isBeingDragged }) {
     <div ref={setDropRef} className="flex items-center gap-1.5 mb-1.5">
       {/* Position label — never affected by drag */}
       <span className={`inline-block px-2 py-0.5 text-[9px] font-bold uppercase rounded border tracking-wide w-20 text-center shrink-0 ${typeColors[type]}`}>
-        {pos.startsWith('Bench') ? 'Bench' : pos}
+        {displayPos}
       </span>
 
       {/* Player area — this is what greys out and highlights */}
