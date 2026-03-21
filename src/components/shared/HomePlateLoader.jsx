@@ -1,8 +1,9 @@
 export default function HomePlateLoader({ message = 'Loading Dugout IQ...' }) {
-  // Home plate: 2x wide flat top, 1x straight sides, angled to bottom point
-  const points = '15,5 85,5 85,40 50,75 15,40';
+  // Home plate: square creased at side/bottom midpoints
+  // Top full width, sides straight halfway, then angle to center bottom
+  const points = '15,10 85,10 85,45 50,80 15,45';
   // Approximate perimeter for stroke-dasharray
-  const perimeter = 240;
+  const perimeter = 250;
 
   return (
     <div className="min-h-screen flex items-center justify-center">
