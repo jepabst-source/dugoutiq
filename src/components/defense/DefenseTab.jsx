@@ -78,7 +78,32 @@ export default function DefenseTab({ onNavigate }) {
 
   const handleRepeatPrevious = (ing) => {
     if (ing <= 1) return;
-    setInnings(prev => ({ ...prev, [ing]: { ...prev[ing - 1] } }));
+    // Only repeat premium positions — never repeat bench assignments
+    const LOCK_POSITIONS = ['Pitcher', '1st Base', '2nd Base', 'Shortstop'];
+
+    setInnings(prev => {
+      const prevInning = prev[ing - 1];
+      if (!prevInning) return prev;
+      const current = { ...prev[ing] };
+
+      for (const pos of LOCK_POSITIONS) {
+        const playerId = prevInning[pos];
+        if (!playerId) continue;
+
+        // Find where this player sits in the current inning
+        const currentPos = Object.keys(current).find(k => current[k] === playerId);
+        // Find who the engine placed at the target position
+        const displaced = current[pos];
+
+        // Swap them
+        current[pos] = playerId;
+        if (currentPos && displaced) {
+          current[currentPos] = displaced;
+        }
+      }
+
+      return { ...prev, [ing]: current };
+    });
   };
 
   const handleGenerate = useCallback(() => {
@@ -453,8 +478,8 @@ function InningCard({ inning, assignment, isDevInning, mode, players, benchCount
             {inning > 1 && (
               <button onClick={onRepeatPrevious}
                 className="px-2.5 py-1 text-xs font-semibold bg-border/50 text-chalk-dim rounded-md hover:bg-border transition-colors"
-                title="Copy lineup from previous inning">
-                📋 Repeat
+                title="Repeat P, SS, 2B, 1B from previous inning">
+                🔒 Repeat
               </button>
             )}
             <button onClick={onReshuffle}
