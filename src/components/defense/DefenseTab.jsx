@@ -495,7 +495,7 @@ function InningCard({ inning, assignment, isDevInning, mode, players, benchCount
 
       <DragOverlay dropAnimation={null}>
         {activePlayer ? (
-          <div className="px-4 py-2 rounded-lg bg-lime text-white text-sm font-bold shadow-xl whitespace-nowrap">
+          <div className="px-6 py-2.5 rounded-lg bg-lime text-white text-sm font-bold shadow-xl whitespace-nowrap min-w-[140px] text-center">
             {activePlayer.name}
           </div>
         ) : null}
@@ -636,7 +636,7 @@ function PocketCard({ label, sublabel, assignment, players, benchCount, accentCl
 
       <DragOverlay dropAnimation={null}>
         {activePlayer ? (
-          <div className="px-4 py-2 rounded-lg bg-lime text-white text-sm font-bold shadow-xl whitespace-nowrap">
+          <div className="px-6 py-2.5 rounded-lg bg-lime text-white text-sm font-bold shadow-xl whitespace-nowrap min-w-[140px] text-center">
             {activePlayer.name}
           </div>
         ) : null}
