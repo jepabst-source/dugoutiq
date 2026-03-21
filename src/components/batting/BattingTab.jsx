@@ -69,7 +69,7 @@ export default function BattingTab() {
       if (b.pts !== a.pts) return b.pts - a.pts;
       return b.defRating - a.defRating;
     });
-  }, [players, activePlayers, atBats, sortMode]);
+  }, [players, activePlayers, atBats, sortMode, rollingWindow]);
 
   // Set order from auto-generated if not manually reordered
   useState(() => {
