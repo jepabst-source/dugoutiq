@@ -203,8 +203,9 @@ function scoreFieldPlayer(p, pos, ing, gameInnings, positionHistory, settings, i
   const posCount = countPosInGame(gameInnings, ing, pos, p.id);
 
   const histCount = positionHistory[p.id]?.[pos] || 0;
-  // Rating matters more for infield (skill-sensitive) than outfield (variety-driven)
-  const ratingWeight = OUTFIELD_POSITIONS.includes(pos) ? 4 : 10;
+  // Competitive: rating matters more for infield than outfield
+  // Dev: rating barely matters — variety and history drive assignments
+  const ratingWeight = isDevInning ? 2 : (OUTFIELD_POSITIONS.includes(pos) ? 4 : 10);
   return p.defRating * ratingWeight
     + jitter
     - (posCount >= 2 ? 999 : posCount === 1 ? 20 : 0)
