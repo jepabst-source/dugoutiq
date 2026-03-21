@@ -58,7 +58,7 @@ export default function PrintTab() {
         </div>
       ) : (
         /* Print Page */
-        <div id="print-export-target" className="bg-white text-black rounded-lg p-6 max-w-[900px] mx-auto print:p-0 print:max-w-full print:rounded-none" style={{ fontFamily: "'DM Sans', Arial, sans-serif" }}>
+        <div id="print-export-target" className="bg-white text-black rounded-lg p-6 print:p-0 print:rounded-none" style={{ fontFamily: "'DM Sans', Arial, sans-serif" }}>
 
           {/* PAGE 1 — DUGOUT CARD */}
           {/* Header */}
