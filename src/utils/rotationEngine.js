@@ -114,10 +114,10 @@ export function buildFullRotation({ players, standardInnings, settings, position
 
       const benchSort = (a, b) => {
         if (isDevInning) {
-          // Dev innings: higher rated sit first — give developing players field time
-          const tier = b.defRating - a.defRating;
-          if (tier !== 0) return tier;
-          return benchHistory(a) - benchHistory(b);
+          // Dev innings: no tier protection, just pure fairness — fewest benches first
+          const diff = benchHistory(a) - benchHistory(b);
+          if (diff !== 0) return diff;
+          return a.defRating - b.defRating; // lower rated as tiebreak
         }
         // Competitive: tier 2 (4-5★) gets a flat offset equal to the ratio value
         // This means they won't bench until tier 1 avg bench count exceeds the ratio
