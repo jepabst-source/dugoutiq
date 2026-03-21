@@ -90,42 +90,51 @@ export default function ScorerPage({ scorerCode }) {
               <div className="grid grid-cols-2 gap-3 mb-3">
                 <button onClick={() => handleRecord('K')} disabled={recording}
                   className="py-5 rounded-xl bg-red-50 border-2 border-red-200 text-red-600 font-bold text-xl active:scale-95 transition-all flex flex-col items-center gap-1 disabled:opacity-50">
-                  K<span className="text-[10px] font-normal opacity-70">strikeout</span></button>
+                  K<span className="text-[10px] font-normal opacity-70">strikeout · 0 pts</span></button>
                 <button onClick={() => handleRecord('hit')} disabled={recording}
-                  className="py-5 rounded-xl bg-green-50 border-2 border-green-200 text-green-600 font-bold text-xl active:scale-95 transition-all flex flex-col items-center gap-1 disabled:opacity-50">
-                  HIT<span className="text-[10px] font-normal opacity-70">base hit</span></button>
+                  className="py-5 rounded-xl bg-green-100 border-2 border-green-300 text-green-600 font-bold text-xl active:scale-95 transition-all flex flex-col items-center gap-1 disabled:opacity-50">
+                  HIT<span className="text-[10px] font-normal opacity-70">2 pts</span></button>
                 <button onClick={() => handleRecord('walk')} disabled={recording}
                   className="py-5 rounded-xl bg-blue-50 border-2 border-blue-200 text-blue-600 font-bold text-xl active:scale-95 transition-all flex flex-col items-center gap-1 disabled:opacity-50">
-                  WALK<span className="text-[10px] font-normal opacity-70">walked</span></button>
+                  WALK<span className="text-[10px] font-normal opacity-70">1 pt</span></button>
                 <button onClick={() => handleRecord('out')} disabled={recording}
                   className="py-5 rounded-xl bg-amber-50 border-2 border-amber-200 text-amber-600 font-bold text-xl active:scale-95 transition-all flex flex-col items-center gap-1 disabled:opacity-50">
-                  OUT<span className="text-[10px] font-normal opacity-70">fielded out</span></button>
+                  HIT-OUT<span className="text-[10px] font-normal opacity-70">fielded · 1 pt</span></button>
               </div>
             ) : (
               <div className="space-y-2 mb-3">
                 <div className="grid grid-cols-2 gap-2">
                   <button onClick={() => handleRecord('K')} disabled={recording}
-                    className="py-3 rounded-xl bg-red-50 border-2 border-red-200 text-red-600 font-bold text-base active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">K</button>
+                    className="py-3 rounded-xl bg-red-50 border-2 border-red-200 text-red-600 font-bold text-base active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">
+                    K<span className="text-[9px] font-normal opacity-70">strikeout</span></button>
                   <button onClick={() => handleRecord('out')} disabled={recording}
-                    className="py-3 rounded-xl bg-amber-50 border-2 border-amber-200 text-amber-600 font-bold text-base active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">OUT</button>
+                    className="py-3 rounded-xl bg-amber-50 border-2 border-amber-200 text-amber-600 font-bold text-base active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">
+                    OUT<span className="text-[9px] font-normal opacity-70">fielded out</span></button>
                 </div>
                 <div className="grid grid-cols-4 gap-2">
                   <button onClick={() => handleRecord('single')} disabled={recording}
-                    className="py-3 rounded-xl bg-green-50 border-2 border-green-200 text-green-600 font-bold text-sm active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">1B</button>
+                    className="py-3 rounded-xl bg-green-50 border-2 border-green-200 text-green-600 font-bold text-sm active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">
+                    1B<span className="text-[8px] font-normal opacity-70">single</span></button>
                   <button onClick={() => handleRecord('double')} disabled={recording}
-                    className="py-3 rounded-xl bg-green-50 border-2 border-green-200 text-green-600 font-bold text-sm active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">2B</button>
+                    className="py-3 rounded-xl bg-green-50 border-2 border-green-200 text-green-600 font-bold text-sm active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">
+                    2B<span className="text-[8px] font-normal opacity-70">double</span></button>
                   <button onClick={() => handleRecord('triple')} disabled={recording}
-                    className="py-3 rounded-xl bg-green-50 border-2 border-green-200 text-green-700 font-bold text-sm active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">3B</button>
+                    className="py-3 rounded-xl bg-green-100 border-2 border-green-300 text-green-700 font-bold text-sm active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">
+                    3B<span className="text-[8px] font-normal opacity-70">triple</span></button>
                   <button onClick={() => handleRecord('hr')} disabled={recording}
-                    className="py-3 rounded-xl bg-amber-50 border-2 border-amber-300 text-amber-700 font-bold text-sm active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">HR</button>
+                    className="py-3 rounded-xl bg-amber-50 border-2 border-amber-300 text-amber-700 font-bold text-sm active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">
+                    HR<span className="text-[8px] font-normal opacity-70">homer</span></button>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <button onClick={() => handleRecord('walk')} disabled={recording}
-                    className="py-3 rounded-xl bg-blue-50 border-2 border-blue-200 text-blue-600 font-bold text-sm active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">BB</button>
+                    className="py-3 rounded-xl bg-blue-50 border-2 border-blue-200 text-blue-600 font-bold text-sm active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">
+                    BB<span className="text-[9px] font-normal opacity-70">walk</span></button>
                   <button onClick={() => handleRecord('hbp')} disabled={recording}
-                    className="py-3 rounded-xl bg-blue-50 border-2 border-blue-200 text-blue-600 font-bold text-sm active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">HBP</button>
+                    className="py-3 rounded-xl bg-blue-50 border-2 border-blue-200 text-blue-600 font-bold text-sm active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">
+                    HBP<span className="text-[9px] font-normal opacity-70">hit by pitch</span></button>
                   <button onClick={() => handleRecord('sac')} disabled={recording}
-                    className="py-3 rounded-xl bg-amber-50 border-2 border-amber-200 text-amber-600 font-bold text-sm active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">SAC</button>
+                    className="py-3 rounded-xl bg-amber-50 border-2 border-amber-200 text-amber-600 font-bold text-sm active:scale-95 transition-all flex flex-col items-center disabled:opacity-50">
+                    SAC<span className="text-[9px] font-normal opacity-70">sacrifice</span></button>
                 </div>
               </div>
             )}
