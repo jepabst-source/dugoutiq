@@ -361,9 +361,11 @@ export default function SettingsTab() {
         </div>
       </Section>
 
-      {/* Rotation Rules */}
-      <Section title="⚙️ Rotation Rules">
-        <p className="text-xs text-chalk-muted mb-4">These rules control how the defensive rotation engine assigns players to positions.</p>
+      {/* Fielding Toolbox */}
+      <Section title="🛠️ Fielding Toolbox">
+        <p className="text-xs text-chalk-muted mb-4">
+          Fine-tune how the rotation engine handles bench fairness and player placement.
+        </p>
 
         <div className="space-y-3">
           <RuleToggle
@@ -372,12 +374,6 @@ export default function SettingsTab() {
             enabled={settings.noBackToBackBench}
             onChange={() => toggleRule('noBackToBackBench')}
           />
-
-          <div className="px-3 py-2 bg-field/50 border border-border rounded-lg">
-            <div className="text-xs text-chalk-muted">
-              ⚔️ Competitive / 🔄 Development defaults are set below in Default Game Length. You can override per game on the Defense tab.
-            </div>
-          </div>
 
           <RuleToggle
             label="Infield innings cap"
@@ -398,17 +394,7 @@ export default function SettingsTab() {
             </div>
           )}
 
-        </div>
-      </Section>
-
-      {/* Fielding Toolbox */}
-      <Section title="🛠️ Fielding Toolbox">
-        <p className="text-xs text-chalk-muted mb-4">
-          Fine-tune how the rotation engine handles bench fairness and player placement.
-        </p>
-
-        <div className="space-y-4">
-          {/* Bench Ratio for 4-5★ players */}
+          {/* All-Star Bench Ratio */}
           <div className="bg-field/50 border border-border rounded-lg p-3">
             <div className="text-sm text-chalk font-semibold mb-1">All-Star Bench Ratio</div>
             <p className="text-[10px] text-chalk-muted mb-3">
@@ -434,6 +420,12 @@ export default function SettingsTab() {
               <span>2x</span>
               <span>2.5x</span>
               <span>3x (rarely)</span>
+            </div>
+          </div>
+
+          <div className="px-3 py-2 bg-field/50 border border-border rounded-lg">
+            <div className="text-xs text-chalk-muted">
+              ⚔️ Competitive / 🔄 Development defaults are set below in Default Game Length. You can override per game on the Defense tab.
             </div>
           </div>
         </div>
