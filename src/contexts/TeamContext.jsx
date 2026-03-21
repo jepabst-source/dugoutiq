@@ -270,9 +270,12 @@ export function TeamProvider({ children }) {
       .filter(a => a.playerId === playerId)
       .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
       .slice(0, window);
-    if (!playerAbs.length) return { avg: 0, absCount: 0, pts: 0 };
+    if (!playerAbs.length) return { avg: 0, absCount: 0, pts: 0, obp: null };
     const pts = playerAbs.reduce((s, a) => s + (PTS[a.outcome] ?? 0), 0);
-    return { avg: pts / playerAbs.length, absCount: playerAbs.length, pts };
+    const onBase = playerAbs.filter(a => IS_ON_BASE[a.outcome]).length;
+    const obpAbs = playerAbs.filter(a => a.outcome !== 'sac').length;
+    const obp = obpAbs ? onBase / obpAbs : null;
+    return { avg: pts / playerAbs.length, absCount: playerAbs.length, pts, obp };
   }, [atBats, team]);
 
   const getPlayerStats = useCallback((playerId) => {

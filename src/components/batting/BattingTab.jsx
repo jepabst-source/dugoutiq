@@ -57,11 +57,11 @@ export default function BattingTab() {
     return [...active].map(p => {
       const stats = getPlayerStats(p.id);
       const rolling = getRollingAvg(p.id);
-      return { ...p, ...stats, avg: rolling.avg, avgAbs: rolling.absCount };
+      return { ...p, ...stats, avg: rolling.avg, avgAbs: rolling.absCount, rollingObp: rolling.obp };
     }).sort((a, b) => {
       if (sortMode === 'obp') {
-        const aObp = a.obp ?? -1;
-        const bObp = b.obp ?? -1;
+        const aObp = a.rollingObp ?? -1;
+        const bObp = b.rollingObp ?? -1;
         if (bObp !== aObp) return bObp - aObp;
         return b.defRating - a.defRating;
       }
@@ -305,8 +305,8 @@ function SortableBattingSlot({ player, index }) {
       <div className="text-right">
         <div className="text-lg font-bold text-lime">{avgDisplay}</div>
         <div className="text-[10px] text-chalk-muted">{absNote}</div>
-        {stats.obp !== null && (
-          <div className="text-[10px] text-sky">{stats.obp.toFixed(3).replace(/^0/, '')} OBP</div>
+        {rolling.obp !== null && (
+          <div className="text-[10px] text-sky">{rolling.obp.toFixed(3).replace(/^0/, '')} OBP</div>
         )}
       </div>
     </div>
