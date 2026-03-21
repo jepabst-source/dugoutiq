@@ -3,6 +3,17 @@ import { useTeam } from '../../contexts/TeamContext';
 import { buildFullRotation, POSITIONS, INFIELD_POSITIONS, OUTFIELD_POSITIONS } from '../../utils/rotationEngine';
 import { usePlan } from '../../hooks/usePlan';
 import UpgradeModal from '../shared/UpgradeModal';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  useDraggable,
+  useDroppable,
+  DragOverlay,
+} from '@dnd-kit/core';
 
 export default function DefenseTab() {
   const {
@@ -373,6 +384,29 @@ export default function DefenseTab() {
 
 function InningCard({ inning, assignment, isDevInning, mode, players, benchCount, onSwap, onReshuffle, onRepeatPrevious, onToggleMode, allInnings, noBackToBack }) {
   const benchPositions = POSITIONS.bench.slice(0, benchCount);
+  const [activeId, setActiveId] = useState(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
+  );
+
+  // Find which position is being dragged so we can show an overlay
+  const activePos = activeId;
+  const activePlayerId = activePos ? assignment[activePos] : null;
+  const activePlayer = activePlayerId ? players.find(p => p.id === activePlayerId) : null;
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    setActiveId(null);
+    if (!over || active.id === over.id) return;
+    const fromPos = active.id;
+    const toPos = over.id;
+    const draggedPlayerId = assignment[fromPos];
+    if (draggedPlayerId) {
+      onSwap(toPos, draggedPlayerId);
+    }
+  };
 
   // Check for back-to-back bench warnings
   const benchWarnings = [];
@@ -421,47 +455,67 @@ function InningCard({ inning, assignment, isDevInning, mode, players, benchCount
       </div>
 
       {/* Positions grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border">
-        {/* Infield */}
-        <div className="p-3">
-          <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-2">Infield</div>
-          {POSITIONS.infield.map(pos => (
-            <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="infield" />
-          ))}
+      <DndContext sensors={sensors} collisionDetection={closestCenter}
+        onDragStart={(e) => setActiveId(e.active.id)}
+        onDragEnd={handleDragEnd}
+        onDragCancel={() => setActiveId(null)}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border">
+          {/* Infield */}
+          <div className="p-3">
+            <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-2">Infield</div>
+            {POSITIONS.infield.map(pos => (
+              <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="infield" isBeingDragged={activeId === pos} />
+            ))}
+          </div>
+
+          {/* Outfield + Bench */}
+          <div className="p-3">
+            <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-2">Outfield</div>
+            {POSITIONS.outfield.map(pos => (
+              <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="outfield" isBeingDragged={activeId === pos} />
+            ))}
+
+            {benchPositions.length > 0 && (
+              <>
+                <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mt-3 mb-2">Bench</div>
+                {benchPositions.map(pos => (
+                  <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="bench" isBeingDragged={activeId === pos} />
+                ))}
+              </>
+            )}
+
+            {benchWarnings.length > 0 && (
+              <div className="mt-2 px-2 py-1.5 text-[11px] text-red bg-red/10 border border-red/20 rounded-lg">
+                ⚠ {benchWarnings.join(', ')} benched back-to-back!
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Outfield + Bench */}
-        <div className="p-3">
-          <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-2">Outfield</div>
-          {POSITIONS.outfield.map(pos => (
-            <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="outfield" />
-          ))}
-
-          {benchPositions.length > 0 && (
-            <>
-              <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mt-3 mb-2">Bench</div>
-              {benchPositions.map(pos => (
-                <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="bench" />
-              ))}
-            </>
-          )}
-
-          {benchWarnings.length > 0 && (
-            <div className="mt-2 px-2 py-1.5 text-[11px] text-red bg-red/10 border border-red/20 rounded-lg">
-              ⚠ {benchWarnings.join(', ')} benched back-to-back!
+        <DragOverlay dropAnimation={null}>
+          {activePlayer ? (
+            <div className="px-3 py-1.5 rounded-md bg-lime text-white text-xs font-bold shadow-lg">
+              {activePlayer.name}
             </div>
-          )}
-        </div>
-      </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
     </div>
   );
 }
 
-// ── Position Row (with swap dropdown) ──
+// ── Position Row (with drag handle + swap dropdown) ──
 
-function PositionRow({ pos, playerId, players, onSwap, type }) {
+function PositionRow({ pos, playerId, players, onSwap, type, isBeingDragged }) {
   const player = players.find(p => p.id === playerId);
   const isCatcher = pos === 'Catcher';
+
+  const { attributes, listeners, setNodeRef: setDragRef, isDragging } = useDraggable({
+    id: pos,
+    disabled: !playerId,
+  });
+
+  const { setNodeRef: setDropRef, isOver } = useDroppable({ id: pos });
 
   const typeColors = {
     infield: 'bg-sky/15 text-sky border-sky/25',
@@ -470,15 +524,32 @@ function PositionRow({ pos, playerId, players, onSwap, type }) {
   };
 
   return (
-    <div className="flex items-center gap-2 mb-1.5">
-      <span className={`inline-block px-2 py-0.5 text-[9px] font-bold uppercase rounded border tracking-wide w-20 text-center ${typeColors[type]}`}>
+    <div
+      ref={setDropRef}
+      className={`flex items-center gap-1.5 mb-1.5 rounded-md transition-colors
+        ${isOver ? 'bg-lime/10 ring-1 ring-lime/30' : ''}
+        ${isBeingDragged ? 'opacity-40' : ''}`}
+    >
+      {/* Drag handle — only visible when a player is assigned */}
+      <div
+        ref={setDragRef}
+        {...listeners}
+        {...attributes}
+        className={`flex items-center justify-center w-5 h-7 rounded text-chalk-muted/40 shrink-0 select-none
+          ${playerId ? 'cursor-grab hover:text-chalk-muted active:cursor-grabbing' : ''}`}
+        aria-label="Drag to swap"
+      >
+        {playerId ? '⠿' : ''}
+      </div>
+
+      <span className={`inline-block px-2 py-0.5 text-[9px] font-bold uppercase rounded border tracking-wide w-20 text-center shrink-0 ${typeColors[type]}`}>
         {pos.startsWith('Bench') ? 'Bench' : pos}
       </span>
       <select
         value={playerId || ''}
         onChange={e => onSwap(pos, e.target.value)}
         className="flex-1 px-2 py-1.5 rounded-md bg-field border border-border text-chalk text-xs
-                   focus:border-lime focus:outline-none"
+                   focus:border-lime focus:outline-none min-w-0"
       >
         <option value="">— —</option>
         {players.map(p => (
@@ -497,6 +568,25 @@ function PocketCard({ label, sublabel, assignment, players, benchCount, accentCl
   if (!assignment) return null;
 
   const benchPositions = POSITIONS.bench.slice(0, benchCount);
+  const [activeId, setActiveId] = useState(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
+  );
+
+  const activePlayerId = activeId ? assignment[activeId] : null;
+  const activePlayer = activePlayerId ? players.find(p => p.id === activePlayerId) : null;
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    setActiveId(null);
+    if (!over || active.id === over.id) return;
+    const draggedPlayerId = assignment[active.id];
+    if (draggedPlayerId) {
+      onSwap(over.id, draggedPlayerId);
+    }
+  };
 
   return (
     <div className={`border rounded-xl overflow-hidden ${accentClass}`}>
@@ -514,28 +604,40 @@ function PocketCard({ label, sublabel, assignment, players, benchCount, accentCl
           🔀
         </button>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border">
-        <div className="p-3">
-          <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-2">Infield</div>
-          {POSITIONS.infield.map(pos => (
-            <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="infield" />
-          ))}
+      <DndContext sensors={sensors} collisionDetection={closestCenter}
+        onDragStart={(e) => setActiveId(e.active.id)}
+        onDragEnd={handleDragEnd}
+        onDragCancel={() => setActiveId(null)}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border">
+          <div className="p-3">
+            <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-2">Infield</div>
+            {POSITIONS.infield.map(pos => (
+              <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="infield" isBeingDragged={activeId === pos} />
+            ))}
+          </div>
+          <div className="p-3">
+            <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-2">Outfield</div>
+            {POSITIONS.outfield.map(pos => (
+              <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="outfield" isBeingDragged={activeId === pos} />
+            ))}
+            {benchPositions.length > 0 && (
+              <>
+                <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mt-3 mb-2">Bench</div>
+                {benchPositions.map(pos => (
+                  <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="bench" isBeingDragged={activeId === pos} />
+                ))}
+              </>
+            )}
+          </div>
         </div>
-        <div className="p-3">
-          <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-2">Outfield</div>
-          {POSITIONS.outfield.map(pos => (
-            <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="outfield" />
-          ))}
-          {benchPositions.length > 0 && (
-            <>
-              <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mt-3 mb-2">Bench</div>
-              {benchPositions.map(pos => (
-                <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="bench" />
-              ))}
-            </>
-          )}
-        </div>
-      </div>
+        <DragOverlay dropAnimation={null}>
+          {activePlayer ? (
+            <div className="px-3 py-1.5 rounded-md bg-lime text-white text-xs font-bold shadow-lg">
+              {activePlayer.name}
+            </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
     </div>
   );
 }
