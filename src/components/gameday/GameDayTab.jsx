@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { useTeam, PTS } from '../../contexts/TeamContext';
 import { usePlan } from '../../hooks/usePlan';
 import UpgradeModal from '../shared/UpgradeModal';
+import InfoTip from '../shared/InfoTip';
 
 const OUTCOME_LABELS = { K: 'Strikeout', out: 'Hit into Out', walk: 'Walk', hit: 'Hit' };
 
@@ -101,6 +102,7 @@ export default function GameDayTab() {
                      hover:bg-border-light active:scale-[0.97] transition-all disabled:opacity-50">
           {generatingScorer ? '...' : '📤 Invite Log Assistant'}
         </button>
+        <InfoTip text="Generate a link to share with a parent or helper in the stands. They can log at-bats from their phone — no account needed. The link expires after 12 hours." />
       </div>
 
       {/* Scorer link */}
