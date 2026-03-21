@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useTeam, PTS } from '../../contexts/TeamContext';
 import { usePlan } from '../../hooks/usePlan';
 import UpgradeModal from '../shared/UpgradeModal';
+import InfoTip from '../shared/InfoTip';
 import {
   DndContext,
   closestCenter,
@@ -163,7 +164,7 @@ export default function BattingTab() {
             </button>
           ))}
         </div>
-        <span className="text-[10px] text-chalk-muted/50 hidden sm:inline ml-1">Lower = more shuffle</span>
+        <InfoTip text="Fewer at-bats means more lineup shuffling game to game. More at-bats gives a steadier, more predictable order." />
       </div>
 
       {/* Scoring legend */}
