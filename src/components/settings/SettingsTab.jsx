@@ -410,7 +410,7 @@ export default function SettingsTab() {
         <div className="space-y-4">
           {/* Bench Ratio for 4-5★ players */}
           <div className="bg-field/50 border border-border rounded-lg p-3">
-            <div className="text-sm text-chalk font-semibold mb-1">Stud Bench Ratio</div>
+            <div className="text-sm text-chalk font-semibold mb-1">All-Star Bench Ratio</div>
             <p className="text-[10px] text-chalk-muted mb-3">
               How much less often 4-5★ players bench compared to 1-3★ players. Higher = studs bench less.
             </p>
