@@ -235,8 +235,8 @@ export default function GameDayTab() {
                 <span className="text-[10px] font-normal opacity-70">strikeout · 0 pts</span>
               </button>
               <button onClick={() => handleRecord('hit')}
-                className="py-5 sm:py-4 rounded-xl bg-lime/10 border-2 border-lime/25 text-lime font-bold text-xl sm:text-lg
-                           hover:bg-lime/20 active:scale-95 transition-all flex flex-col items-center gap-1">
+                className="py-5 sm:py-4 rounded-xl bg-lime/20 border-2 border-lime/40 text-lime font-bold text-xl sm:text-lg
+                           hover:bg-lime/30 active:scale-95 transition-all flex flex-col items-center gap-1">
                 HIT
                 <span className="text-[10px] font-normal opacity-70">2 pts</span>
               </button>
