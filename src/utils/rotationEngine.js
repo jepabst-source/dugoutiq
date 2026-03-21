@@ -237,25 +237,24 @@ function assignFieldPositions(fieldPlayers, fieldPositions, ing, gameInnings, po
     }
   }
 
+  // Always fill min-rated positions FIRST so qualified players aren't eaten up
+  const minRatings = settings.positionMinRatings || {};
+  const minRatedPos = fieldPositions.filter(p => minRatings[p]);
+  const unratedPos = fieldPositions.filter(p => !minRatings[p]);
+
   if (isDevInning) {
-    const allPos = [...infield, ...outfield].sort(() => Math.random() - 0.5);
-    bestFit(allPos, fieldPlayers);
+    // Min-rated positions first, then shuffle the rest
+    bestFit(minRatedPos.sort((a, b) => (minRatings[b] || 0) - (minRatings[a] || 0)), fieldPlayers);
+    bestFit(unratedPos.sort(() => Math.random() - 0.5), fieldPlayers);
   } else {
-    // Shuffle within infield/outfield so no position always gets first pick
-    bestFit(infield.sort(() => Math.random() - 0.5), fieldPlayers);
+    // Competitive: min-rated infield first, then remaining infield, then outfield
+    const minRatedInfield = infield.filter(p => minRatings[p]).sort((a, b) => (minRatings[b] || 0) - (minRatings[a] || 0));
+    const unratedInfield = infield.filter(p => !minRatings[p]).sort(() => Math.random() - 0.5);
+    bestFit([...minRatedInfield, ...unratedInfield], fieldPlayers);
     bestFit(outfield.sort(() => Math.random() - 0.5), fieldPlayers);
   }
 
-  // Fallback for unfilled — still respect min-ratings
-  const minRatings = settings.positionMinRatings || {};
-  for (const pos of fieldPositions) {
-    if (assignment[pos]) continue;
-    const minRating = minRatings[pos];
-    const effectiveMin = isDevInning && minRating ? Math.max(1, minRating - 1) : (minRating || 0);
-    const remaining = fieldPlayers.find(p => !usedPlayers.has(p.id) && p.defRating >= effectiveMin);
-    if (remaining) { assignment[pos] = remaining.id; usedPlayers.add(remaining.id); }
-  }
-  // Last resort: fill any still-empty positions with whoever's left
+  // Fallback: fill remaining with whoever's left (min-rated positions already filled above)
   for (const pos of fieldPositions) {
     if (assignment[pos]) continue;
     const remaining = fieldPlayers.find(p => !usedPlayers.has(p.id));
