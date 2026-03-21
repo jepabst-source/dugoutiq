@@ -180,10 +180,12 @@ export function buildFullRotation({ players, standardInnings, settings, position
 // ── Field position assignment ──
 
 function scoreFieldPlayer(p, pos, ing, gameInnings, positionHistory, settings, isDevInning) {
-  // Position minimum rating check — enforced in ALL innings (coach's explicit floor)
+  // Position minimum rating check
+  // Competitive: hard block below min. Dev: allow 1★ below min (not 2+)
   const minRatings = settings.positionMinRatings || {};
   const minRating = minRatings[pos];
-  if (minRating && p.defRating < minRating) return -9999;
+  const effectiveMin = isDevInning ? Math.max(1, minRating - 1) : minRating;
+  if (minRating && p.defRating < effectiveMin) return -9999;
 
   // Infield cap check — skipped during development innings
   if (settings.infieldCapEnabled && !isDevInning && INFIELD_POSITIONS.includes(pos)) {
