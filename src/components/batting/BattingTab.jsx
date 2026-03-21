@@ -122,63 +122,56 @@ export default function BattingTab() {
     <div>
       {showUpgrade && <UpgradeModal onClose={() => setShowUpgrade(false)} lockReason={plan.lockReason} />}
       {/* Header */}
-      <div className="flex items-center justify-between mb-2">
-        <div>
-          <h2 className="text-xl font-bold text-lime">Batting Order</h2>
-          <p className="text-xs text-chalk-muted mt-0.5">
-            {sortMode === 'points' ? `Ranked by rolling average (last ${rollingWindow} ABs)` : 'Ranked by on-base percentage'} · Drag to reorder
-          </p>
-        </div>
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-xl font-bold text-lime">Batting Order</h2>
         <button
           onClick={handleGenerate}
           className="px-4 py-2 rounded-lg bg-lime text-white font-bold text-sm
                      hover:bg-lime-bright active:scale-[0.97] transition-all"
         >
-          ⚡ <span className="hidden sm:inline">Refresh Order</span><span className="sm:hidden">Refresh</span>
+          ⚡ Refresh
         </button>
       </div>
 
-      {/* Sort mode toggle + rolling window */}
-      <div className="flex items-center gap-3 mb-3 flex-wrap">
-        <span className="text-xs text-chalk-muted">Sort by:</span>
-        <div className="flex gap-1 bg-panel border border-border rounded-lg p-0.5">
-          <button onClick={() => setSortMode('points')}
-            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all
-              ${sortMode === 'points' ? 'bg-field-light text-lime' : 'text-chalk-muted hover:text-chalk'}`}>
-            Points System
-          </button>
-          <button onClick={() => setSortMode('obp')}
-            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all
-              ${sortMode === 'obp' ? 'bg-field-light text-sky' : 'text-chalk-muted hover:text-chalk'}`}>
-            OBP
-          </button>
-        </div>
-        <span className="text-xs text-chalk-muted ml-auto sm:ml-0">Rolling:</span>
-        <div className="flex gap-0.5 bg-panel border border-border rounded-lg p-0.5">
-          {[3, 5, 10].map(n => (
-            <button key={n}
-              onClick={() => updateSettings({ rollingWindow: n })}
+      {/* Sort mode + rolling window — two rows on mobile */}
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-chalk-muted">Sort:</span>
+          <div className="flex gap-0.5 bg-panel border border-border rounded-lg p-0.5">
+            <button onClick={() => setSortMode('points')}
               className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all
-                ${rollingWindow === n ? 'bg-field-light text-lime' : 'text-chalk-muted hover:text-chalk'}`}>
-              {n}
+                ${sortMode === 'points' ? 'bg-field-light text-lime' : 'text-chalk-muted hover:text-chalk'}`}>
+              Points
             </button>
-          ))}
+            <button onClick={() => setSortMode('obp')}
+              className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all
+                ${sortMode === 'obp' ? 'bg-field-light text-sky' : 'text-chalk-muted hover:text-chalk'}`}>
+              OBP
+            </button>
+          </div>
         </div>
-        <InfoTip text="Fewer at-bats means more lineup shuffling game to game. More at-bats gives a steadier, more predictable order." />
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-chalk-muted">Last:</span>
+          <div className="flex gap-0.5 bg-panel border border-border rounded-lg p-0.5">
+            {[3, 5, 10].map(n => (
+              <button key={n}
+                onClick={() => updateSettings({ rollingWindow: n })}
+                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all
+                  ${rollingWindow === n ? 'bg-field-light text-lime' : 'text-chalk-muted hover:text-chalk'}`}>
+                {n}
+              </button>
+            ))}
+          </div>
+          <InfoTip text="Fewer at-bats means more lineup shuffling game to game. More at-bats gives a steadier, more predictable order." />
+        </div>
       </div>
 
-      {/* Scoring legend */}
-      {sortMode === 'points' ? (
-        <div className="flex gap-2 flex-wrap mb-4 text-xs">
-          <span className="px-2 py-1 rounded bg-red/15 text-red border border-red/25">K = 0 pts</span>
-          <span className="px-2 py-1 rounded bg-chalk-muted/10 text-chalk-muted border border-border">Walk / Hit-Out = 1 pt</span>
-          <span className="px-2 py-1 rounded bg-lime/15 text-lime border border-lime/25">Hit = 2 pts</span>
-        </div>
-      ) : (
-        <div className="flex gap-2 flex-wrap mb-4 text-xs">
-          <span className="px-2 py-1 rounded bg-sky/15 text-sky border border-sky/25">OBP = (Hits + Walks) ÷ At-Bats</span>
-        </div>
-      )}
+      {/* Description + legend */}
+      <p className="text-[11px] text-chalk-muted mb-3">
+        {sortMode === 'points'
+          ? `Ranked by rolling avg (last ${rollingWindow} ABs)`
+          : 'Ranked by on-base percentage'}
+      </p>
 
       {/* Attendance */}
       <div className="bg-panel border border-border rounded-xl shadow-sm p-4 mb-4">
