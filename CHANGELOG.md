@@ -5,6 +5,31 @@ This file lives in the repo and deploys with the code. If we need to roll back, 
 
 ---
 
+## v36 — March 21, 2026
+**SEO fixes, pricing page feature images, roadmap**
+
+Features:
+- Pricing page overhaul — replaced emoji icon cards with square lifestyle photos (fair rotations tablet, at-bat tracking phone, parent portal phone). Added meta description, OG/Twitter tags, structured data with all 3 pricing tiers, Google Analytics, and keywords.
+- Canonical URLs added to all 6 marketing pages (index, about, compare, rotation-algorithm, pricing, privacy).
+- Privacy page — added Open Graph tags.
+- Sitemap — added pricing.html entry.
+- ROADMAP.md — new file with planned features (practice plans, game recaps, milestones), maybes (pitch count, live score), and SEO action items (Google Search Console, Business Profile).
+
+Files changed:
+- `public/pricing.html` — full SEO tags, lifestyle feature images, updated CSS
+- `public/about.html` — canonical URL
+- `public/compare.html` — canonical URL
+- `public/rotation-algorithm.html` — canonical URL
+- `public/privacy.html` — canonical URL, OG tags
+- `index.html` — canonical URL
+- `public/sitemap.xml` — added pricing.html
+- `public/screenshots/about fair rotations square.jpg` — new
+- `public/screenshots/about at bat tracking square.jpg` — new
+- `public/screenshots/about parent portal  square.jpg` — new
+- `ROADMAP.md` — new
+
+---
+
 ## v35 — March 21, 2026
 **UI Polish: Loading animation, toast notifications, drag-and-drop fielding**
 

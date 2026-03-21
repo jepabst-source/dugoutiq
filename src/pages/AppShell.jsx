@@ -235,9 +235,6 @@ export default function AppShell() {
             Free tier: {plan.gamesRemaining} game{plan.gamesRemaining !== 1 ? 's' : ''} · {plan.atBatsRemaining} at-bats remaining
           </div>
         )}
-        <div className="text-[10px] text-chalk-muted/40 tracking-wider">
-          ⚾ Lineup Man · by Josh Pabst
-        </div>
       </footer>
     </div>
   );

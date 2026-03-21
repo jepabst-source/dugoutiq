@@ -65,8 +65,15 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'DM Sans', sans-serif; background: #ffffff; color: #1f2937; }
-    .container { max-width: 720px; margin: 0 auto; padding: 40px 20px; }
-    .logo { width: 100px; border-radius: 16px; display: block; margin: 0 auto 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .nav { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 16px 24px; position: sticky; top: 0; z-index: 10; }
+    .nav-inner { max-width: 960px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+    .nav img { width: 80px; height: 80px; border-radius: 10px; }
+    .nav-cta { background: #1e3a5f; color: #fff; font-weight: 700; font-size: 14px; padding: 10px 24px; border-radius: 10px; text-decoration: none; }
+    .nav-cta:hover { background: #152a45; text-decoration: none; }
+    .nav-links { display: flex; gap: 24px; align-items: center; }
+    .nav-links a { color: #4b5563; font-size: 14px; font-weight: 500; text-decoration: none; }
+    .nav-links a:hover { color: #1e3a5f; }
+    .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
     h1 { text-align: center; font-size: 28px; margin-bottom: 8px; }
     .sub { text-align: center; color: #6b7280; font-size: 15px; margin-bottom: 40px; }
     .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 48px; }
@@ -77,8 +84,8 @@
     .feature .desc { font-size: 12px; color: #6b7280; }
     h2 { text-align: center; font-size: 22px; margin-bottom: 4px; }
     .pricing-sub { text-align: center; color: #6b7280; font-size: 14px; margin-bottom: 24px; }
-    .plans { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 48px; }
-    .plan { border-radius: 12px; padding: 24px; width: 220px; text-align: center; }
+    .plans { display: flex; justify-content: center; gap: 16px; flex-wrap: nowrap; margin-bottom: 48px; }
+    .plan { border-radius: 12px; padding: 24px; flex: 1; max-width: 280px; text-align: center; }
     .plan.free { background: #f9fafb; border: 1px solid #e5e7eb; }
     .plan.pro { background: #fff; border: 2px solid #2563eb; box-shadow: 0 2px 8px rgba(37,99,235,0.1); }
     .plan .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #6b7280; margin-bottom: 4px; }
@@ -94,8 +101,20 @@
   </style>
 </head>
 <body>
+  <div class="nav">
+    <div class="nav-inner">
+      <div class="nav-links">
+        <a href="/"><img src="/favicon.png" alt="Dugout IQ"></a>
+        <a href="/about.html">About</a>
+        <a href="/compare.html">Compare</a>
+        <a href="/pricing.html" style="color:#1e3a5f;font-weight:700;">Pricing</a>
+        <a href="/privacy.html">Privacy</a>
+      </div>
+      <a href="/" class="nav-cta">Open App</a>
+    </div>
+  </div>
+
   <div class="container">
-    <img src="/logo-square.jpg" alt="Dugout IQ" class="logo">
     <h1>Smart lineup management for youth coaches</h1>
     <p class="sub">Build fair defensive rotations, track at-bats, share live stats with parents — all from your phone.</p>
 
