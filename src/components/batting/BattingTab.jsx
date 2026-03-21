@@ -133,7 +133,7 @@ export default function BattingTab() {
           className="px-4 py-2 rounded-lg bg-lime text-white font-bold text-sm
                      hover:bg-lime-bright active:scale-[0.97] transition-all"
         >
-          ⚡ Refresh Order
+          ⚡ <span className="hidden sm:inline">Refresh Order</span><span className="sm:hidden">Refresh</span>
         </button>
       </div>
 
