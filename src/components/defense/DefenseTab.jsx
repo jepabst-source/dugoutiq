@@ -532,7 +532,7 @@ function PositionRow({ pos, playerId, players, onSwap, type, isBeingDragged }) {
 
   const isBattery = pos === 'Pitcher' || pos === 'Catcher';
   const typeColors = {
-    infield: isBattery ? 'bg-indigo-500/15 text-indigo-400 border-indigo-400/25' : 'bg-sky/15 text-sky border-sky/25',
+    infield: isBattery ? 'bg-sky text-white border-sky' : 'bg-sky/15 text-sky border-sky/25',
     outfield: 'bg-gold/15 text-gold border-gold/25',
     bench: 'bg-chalk-muted/10 text-chalk-muted border-border',
   };
