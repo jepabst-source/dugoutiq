@@ -1,9 +1,8 @@
 export default function HomePlateLoader({ message = 'Loading Dugout IQ...' }) {
-  // Real home plate: flat top, vertical sides, angled to a point
-  // Official shape: 17" top, 8.5" sides straight down, then two 12" edges to the point
-  const points = '20,8 80,8 80,48 50,88 20,48';
+  // Proportions matched to logo: wide flat top, short sides, angled to point
+  const points = '10,5 90,5 90,35 50,68 10,35';
   // Approximate perimeter for stroke-dasharray
-  const perimeter = 252;
+  const perimeter = 246;
 
   return (
     <div className="min-h-screen flex items-center justify-center">
@@ -12,7 +11,7 @@ export default function HomePlateLoader({ message = 'Loading Dugout IQ...' }) {
           <svg
             width="72"
             height="72"
-            viewBox="0 0 100 96"
+            viewBox="0 0 100 73"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             className="home-plate-loader"
