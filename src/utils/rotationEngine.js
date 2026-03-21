@@ -78,21 +78,23 @@ const OUTFIELD_POSITIONS = ['Left Field', 'Center Field', 'Right Field'];
 // Scoring constants
 // ---------------------------------------------------------------------------
 
-const SCORE_MIN_RATING_BLOCK = -9999;
-const SCORE_INFIELD_CAP_BLOCK = -9999;
-const SCORE_THIRD_REPEAT = -999;
-const SCORE_SECOND_REPEAT = -20;
+const SCORE_MIN_RATING_BLOCK    = -9999;
+const SCORE_INFIELD_CAP_BLOCK   = -9999;
+const SCORE_THIRD_REPEAT        = -999;
+const SCORE_SECOND_REPEAT       = -20;
 const SCORE_SAME_AS_LAST_INNING = -8;
-const SCORE_CROSS_GAME_HISTORY = -5;
-const SCORE_NEW_POSITION_BONUS = 3;   // per slot below 3 history count (max +9)
-const SCORE_PREFERRED_POSITION = 5;
-const SCORE_COMING_OFF_BENCH = 4;
-const SCORE_JITTER_RANGE = 0.5;       // total range; applied as (random - 0.5) * 0.5
-const RATING_WEIGHT_COMPETITIVE_INFIELD = 10;
+const SCORE_CROSS_GAME_HISTORY  = -5;
+const SCORE_NEW_POSITION_BONUS  = 3;    // per slot below 3 history count (max +9)
+const SCORE_PREFERRED_POSITION  = 5;
+const SCORE_COMING_OFF_BENCH    = 4;
+const SCORE_JITTER_RANGE        = 0.5;  // total range; applied as (random - 0.5) * 0.5
+
+const RATING_WEIGHT_COMPETITIVE_INFIELD  = 10;
 const RATING_WEIGHT_COMPETITIVE_OUTFIELD = 4;
-const RATING_WEIGHT_DEV = 2;
+const RATING_WEIGHT_DEV                  = 2;
+
 const DEFAULT_BENCH_RATIO_TIER2 = 1.5;
-const TIER2_MIN_RATING = 4;
+const TIER2_MIN_RATING          = 4;
 
 // ---------------------------------------------------------------------------
 // Helpers (preserved as-is)
@@ -126,7 +128,7 @@ function countPosInGame(gameInnings, upToInning, pos, playerId) {
 }
 
 // ---------------------------------------------------------------------------
-// Bench history helper — includes saved history + current game
+// Bench history — saved history + current game
 // ---------------------------------------------------------------------------
 
 function getBenchHistory(playerId, positionHistory, gameInnings, currentInning) {
@@ -138,12 +140,13 @@ function getBenchHistory(playerId, positionHistory, gameInnings, currentInning) 
 
 // ---------------------------------------------------------------------------
 // Min-rating immunity — competitive only
-// If only 1 player meets a position's min-rating, they are immune from bench
+// If only 1 player meets a position's min-rating, they are immune from bench.
 // ---------------------------------------------------------------------------
 
 function computeImmuneIds(players, usedIds, settings) {
   const immuneIds = new Set();
   const minRatings = settings.positionMinRatings || {};
+
   for (const [pos, minRating] of Object.entries(minRatings)) {
     if (!minRating || pos === 'Pitcher' || pos === 'Catcher') continue;
     const eligible = players.filter(p => !usedIds.has(p.id) && p.defRating >= minRating);
@@ -151,6 +154,7 @@ function computeImmuneIds(players, usedIds, settings) {
       eligible.forEach(p => immuneIds.add(p.id));
     }
   }
+
   return immuneIds;
 }
 
@@ -165,16 +169,17 @@ function selectBench(players, usedIds, benchCount, ing, gameInnings, positionHis
   const used = new Set(usedIds);
   const ratio = settings.benchRatioTier2 ?? DEFAULT_BENCH_RATIO_TIER2;
   const noB2B = settings.noBackToBackBench;
-
   const immuneIds = isDevInning ? new Set() : computeImmuneIds(players, used, settings);
 
   const benchHistory = (p) => getBenchHistory(p.id, positionHistory, gameInnings, ing);
 
   const benchSort = (a, b) => {
     if (isDevInning) {
+      // Pure fairness: fewest bench sits first, lower rated as tiebreak
       const diff = benchHistory(a) - benchHistory(b);
       return diff !== 0 ? diff : a.defRating - b.defRating;
     }
+    // Competitive: tier 2 offset + tiny rating tiebreak (lower rated benches first)
     const aEff = benchHistory(a) + (a.defRating >= TIER2_MIN_RATING ? ratio : 0) + a.defRating * 0.01;
     const bEff = benchHistory(b) + (b.defRating >= TIER2_MIN_RATING ? ratio : 0) + b.defRating * 0.01;
     return aEff - bEff;
@@ -222,7 +227,7 @@ function scoreFieldPlayer(p, pos, ing, gameInnings, positionHistory, settings, i
   const minRatings = settings.positionMinRatings || {};
   const minRating = minRatings[pos];
 
-  // Min-rating check
+  // Min-rating enforcement
   if (minRating) {
     const effectiveMin = isDevInning ? Math.max(1, minRating - 1) : minRating;
     if (p.defRating < effectiveMin) return SCORE_MIN_RATING_BLOCK;
@@ -248,7 +253,7 @@ function scoreFieldPlayer(p, pos, ing, gameInnings, positionHistory, settings, i
     ? RATING_WEIGHT_DEV
     : (OUTFIELD_POSITIONS.includes(pos) ? RATING_WEIGHT_COMPETITIVE_OUTFIELD : RATING_WEIGHT_COMPETITIVE_INFIELD);
 
-  const isBenchPos = prevPos && prevPos.startsWith('Bench');
+  const comingOffBench = prevPos && prevPos.startsWith('Bench');
 
   return p.defRating * ratingWeight
     + jitter
@@ -257,7 +262,7 @@ function scoreFieldPlayer(p, pos, ing, gameInnings, positionHistory, settings, i
     + histCount * SCORE_CROSS_GAME_HISTORY
     + Math.max(0, 3 - histCount) * SCORE_NEW_POSITION_BONUS
     + ((p.prefPositions || []).includes(pos) ? SCORE_PREFERRED_POSITION : 0)
-    + (ing > 1 && isBenchPos ? SCORE_COMING_OFF_BENCH : 0);
+    + (ing > 1 && comingOffBench ? SCORE_COMING_OFF_BENCH : 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -269,7 +274,6 @@ function assignFieldPositions(fieldPlayers, fieldPositions, ing, gameInnings, po
   const usedPlayers = new Set();
   const minRatings = settings.positionMinRatings || {};
 
-  // Score and assign the best player for each position in the given order
   function bestFit(positions, candidates) {
     for (const pos of positions) {
       const avail = candidates.filter(p => !usedPlayers.has(p.id));
@@ -314,7 +318,7 @@ function assignFieldPositions(fieldPlayers, fieldPositions, ing, gameInnings, po
     bestFit(outfield.sort(() => Math.random() - 0.5), fieldPlayers);
   }
 
-  // Fallback: fill remaining positions, respecting min-ratings first
+  // Fallback: fill any remaining empty positions
   for (const pos of fieldPositions) {
     if (assignment[pos]) continue;
     const effectiveMin = minRatings[pos]
@@ -322,7 +326,7 @@ function assignFieldPositions(fieldPlayers, fieldPositions, ing, gameInnings, po
       : 0;
     // Try qualified players first
     let fill = fieldPlayers.find(p => !usedPlayers.has(p.id) && p.defRating >= effectiveMin);
-    // Last-resort: anyone remaining (even unqualified)
+    // Last-resort: anyone remaining
     if (!fill) {
       fill = fieldPlayers.find(p => !usedPlayers.has(p.id));
     }
