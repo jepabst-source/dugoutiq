@@ -530,21 +530,22 @@ function PositionRow({ pos, playerId, players, onSwap, type, isBeingDragged }) {
         ${isOver ? 'bg-lime/10 ring-1 ring-lime/30' : ''}
         ${isBeingDragged ? 'opacity-40' : ''}`}
     >
-      {/* Drag handle — only visible when a player is assigned */}
+      <span className={`inline-block px-2 py-0.5 text-[9px] font-bold uppercase rounded border tracking-wide w-20 text-center shrink-0 ${typeColors[type]}`}>
+        {pos.startsWith('Bench') ? 'Bench' : pos}
+      </span>
+
+      {/* Drag handle — sits between position label and dropdown, attached to the player */}
       <div
         ref={setDragRef}
         {...listeners}
         {...attributes}
-        className={`flex items-center justify-center w-5 h-7 rounded text-chalk-muted/40 shrink-0 select-none
-          ${playerId ? 'cursor-grab hover:text-chalk-muted active:cursor-grabbing' : ''}`}
+        className={`flex items-center justify-center w-5 h-7 rounded shrink-0 select-none
+          ${playerId ? 'text-chalk-muted/30 cursor-grab hover:text-chalk-muted active:cursor-grabbing' : 'text-transparent'}`}
         aria-label="Drag to swap"
       >
-        {playerId ? '⠿' : ''}
+        ⠿
       </div>
 
-      <span className={`inline-block px-2 py-0.5 text-[9px] font-bold uppercase rounded border tracking-wide w-20 text-center shrink-0 ${typeColors[type]}`}>
-        {pos.startsWith('Bench') ? 'Bench' : pos}
-      </span>
       <select
         value={playerId || ''}
         onChange={e => onSwap(pos, e.target.value)}
