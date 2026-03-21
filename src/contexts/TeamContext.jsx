@@ -55,7 +55,7 @@ export function TeamProvider({ children }) {
       setLoadingTeam(false);
     }, (err) => {
       console.error('Team subscription error:', err);
-      setTeam(null);
+      // Don't wipe data on transient errors — keep stale data visible
       setLoadingTeam(false);
     });
 
