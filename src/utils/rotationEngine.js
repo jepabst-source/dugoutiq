@@ -246,7 +246,16 @@ function assignFieldPositions(fieldPlayers, fieldPositions, ing, gameInnings, po
     bestFit(outfield.sort(() => Math.random() - 0.5), fieldPlayers);
   }
 
-  // Fallback for unfilled
+  // Fallback for unfilled — still respect min-ratings
+  const minRatings = settings.positionMinRatings || {};
+  for (const pos of fieldPositions) {
+    if (assignment[pos]) continue;
+    const minRating = minRatings[pos];
+    const effectiveMin = isDevInning && minRating ? Math.max(1, minRating - 1) : (minRating || 0);
+    const remaining = fieldPlayers.find(p => !usedPlayers.has(p.id) && p.defRating >= effectiveMin);
+    if (remaining) { assignment[pos] = remaining.id; usedPlayers.add(remaining.id); }
+  }
+  // Last resort: fill any still-empty positions with whoever's left
   for (const pos of fieldPositions) {
     if (assignment[pos]) continue;
     const remaining = fieldPlayers.find(p => !usedPlayers.has(p.id));
