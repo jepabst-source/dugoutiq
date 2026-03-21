@@ -6,18 +6,18 @@ import { collection, doc, setDoc, serverTimestamp, arrayUnion, updateDoc } from 
 import { db } from '../lib/firebase';
 
 const DEMO_PLAYERS = [
-  { name: 'Ava M', number: '3', defRating: 5, canPitch: true, canCatch: false, prefPositions: ['Pitcher', 'Shortstop'], catchRating: 5, throwRating: 4, notes: 'Team captain. Great arm.' },
-  { name: 'Bella R', number: '7', defRating: 4, canPitch: false, canCatch: true, prefPositions: ['Catcher', '1st Base'], catchRating: 5, throwRating: 3, notes: 'Strongest catcher on the team.' },
-  { name: 'Chloe T', number: '12', defRating: 4, canPitch: true, canCatch: false, prefPositions: ['Pitcher', '3rd Base'], catchRating: 3, throwRating: 5, notes: 'Cannon arm. Developing as pitcher.' },
-  { name: 'Daisy K', number: '9', defRating: 4, canPitch: false, canCatch: false, prefPositions: ['Shortstop', '2nd Base'], catchRating: 4, throwRating: 4, notes: '' },
-  { name: 'Emma L', number: '22', defRating: 3, canPitch: false, canCatch: false, prefPositions: ['2nd Base'], catchRating: 3, throwRating: 3, notes: 'Reliable. Never misses practice.' },
-  { name: 'Fiona J', number: '5', defRating: 3, canPitch: false, canCatch: true, prefPositions: ['1st Base', 'Left Field'], catchRating: 4, throwRating: 2, notes: 'Good hands, working on throws.' },
-  { name: 'Grace P', number: '11', defRating: 3, canPitch: false, canCatch: false, prefPositions: ['Center Field'], catchRating: 3, throwRating: 3, notes: 'Fastest on the team.' },
-  { name: 'Hannah W', number: '8', defRating: 3, canPitch: false, canCatch: false, prefPositions: ['Left Field', 'Right Field'], catchRating: 3, throwRating: 2, notes: '' },
-  { name: 'Izzy B', number: '15', defRating: 2, canPitch: false, canCatch: false, prefPositions: ['Right Field'], catchRating: 2, throwRating: 2, notes: 'First year. Improving fast.' },
-  { name: 'Jade S', number: '2', defRating: 2, canPitch: false, canCatch: false, prefPositions: ['Left Field', '2nd Base'], catchRating: 3, throwRating: 1, notes: 'Great attitude. Needs reps.' },
-  { name: 'Katie N', number: '17', defRating: 2, canPitch: false, canCatch: false, prefPositions: ['Right Field'], catchRating: 2, throwRating: 2, notes: '' },
-  { name: 'Lily D', number: '21', defRating: 1, canPitch: false, canCatch: false, prefPositions: [], catchRating: 1, throwRating: 1, notes: 'Brand new to the sport. Be patient.' },
+  { name: 'Kyle M', number: '3', defRating: 5, canPitch: true, canCatch: false, prefPositions: ['Pitcher', 'Shortstop'], catchRating: 5, throwRating: 4, notes: 'Team captain. Great arm.' },
+  { name: 'Jamie R', number: '7', defRating: 4, canPitch: false, canCatch: true, prefPositions: ['Catcher', '1st Base'], catchRating: 5, throwRating: 3, notes: 'Strongest catcher on the team.' },
+  { name: 'Blake T', number: '12', defRating: 4, canPitch: true, canCatch: false, prefPositions: ['Pitcher', '3rd Base'], catchRating: 3, throwRating: 5, notes: 'Cannon arm. Developing as pitcher.' },
+  { name: 'Jordan K', number: '9', defRating: 4, canPitch: false, canCatch: false, prefPositions: ['Shortstop', '2nd Base'], catchRating: 4, throwRating: 4, notes: '' },
+  { name: 'Alex L', number: '22', defRating: 3, canPitch: false, canCatch: false, prefPositions: ['2nd Base'], catchRating: 3, throwRating: 3, notes: 'Reliable. Never misses practice.' },
+  { name: 'Taylor J', number: '5', defRating: 3, canPitch: false, canCatch: true, prefPositions: ['1st Base', 'Left Field'], catchRating: 4, throwRating: 2, notes: 'Good hands, working on throws.' },
+  { name: 'Cameron P', number: '11', defRating: 3, canPitch: false, canCatch: false, prefPositions: ['Center Field'], catchRating: 3, throwRating: 3, notes: 'Fastest on the team.' },
+  { name: 'Riley W', number: '8', defRating: 3, canPitch: false, canCatch: false, prefPositions: ['Left Field', 'Right Field'], catchRating: 3, throwRating: 2, notes: '' },
+  { name: 'Morgan B', number: '15', defRating: 2, canPitch: false, canCatch: false, prefPositions: ['Right Field'], catchRating: 2, throwRating: 2, notes: 'First year. Improving fast.' },
+  { name: 'Quinn S', number: '2', defRating: 2, canPitch: false, canCatch: false, prefPositions: ['Left Field', '2nd Base'], catchRating: 3, throwRating: 1, notes: 'Great attitude. Needs reps.' },
+  { name: 'Avery N', number: '17', defRating: 2, canPitch: false, canCatch: false, prefPositions: ['Right Field'], catchRating: 2, throwRating: 2, notes: '' },
+  { name: 'Dakota D', number: '21', defRating: 1, canPitch: false, canCatch: false, prefPositions: [], catchRating: 1, throwRating: 1, notes: 'Brand new to the sport. Be patient.' },
 ];
 
 // Outcomes weighted toward what a real youth game looks like
