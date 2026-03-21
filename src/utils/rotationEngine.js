@@ -196,16 +196,17 @@ function scoreFieldPlayer(p, pos, ing, gameInnings, positionHistory, settings, i
     if (infieldCount >= (settings.infieldCapValue || 2)) return -9999;
   }
 
-  const jitter = (Math.random() - 0.5) * 2;
+  const jitter = (Math.random() - 0.5) * 0.5;
   const prevPos = getPrevInningPos(gameInnings, ing, p.id);
   const posCount = countPosInGame(gameInnings, ing, pos, p.id);
 
+  const histCount = positionHistory[p.id]?.[pos] || 0;
   return p.defRating * 10
     + jitter
     - (posCount >= 2 ? 999 : posCount === 1 ? 20 : 0)
     - (prevPos === pos ? 8 : 0)
-    - (positionHistory[p.id]?.[pos] || 0) * 3
-    + (Math.max(0, 3 - (positionHistory[p.id]?.[pos] || 0)) * 2)
+    - histCount * 5
+    + (Math.max(0, 3 - histCount) * 3)
     + ((p.prefPositions || []).includes(pos) ? 5 : 0)
     + (ing > 1 && (prevPos === 'Bench 1' || prevPos === 'Bench 2' || prevPos === 'Bench 3') ? 4 : 0);
 }
