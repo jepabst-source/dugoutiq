@@ -87,22 +87,24 @@ export default function GameDayTab() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-lime">⚾ Play Ball</h2>
-        <button
-          onClick={async () => {
-            setGeneratingScorer(true);
-            const code = await generateScorerLink(gameNum);
-            if (code) {
-              const base = window.location.origin + window.location.pathname.replace(/\/$/, '');
-              setScorerLink(`${base}/score/${code}`);
-            }
-            setGeneratingScorer(false);
-          }}
-          disabled={generatingScorer}
-          className="px-3 py-2 rounded-lg bg-border text-chalk-dim font-bold text-xs
-                     hover:bg-border-light active:scale-[0.97] transition-all disabled:opacity-50">
-          {generatingScorer ? '...' : '📤 Invite Log Assistant'}
-        </button>
-        <InfoTip text="Generate a link to share with a parent or helper in the stands. They can log at-bats from their phone — no account needed. The link expires after 12 hours." />
+        <div className="flex items-center">
+          <button
+            onClick={async () => {
+              setGeneratingScorer(true);
+              const code = await generateScorerLink(gameNum);
+              if (code) {
+                const base = window.location.origin + window.location.pathname.replace(/\/$/, '');
+                setScorerLink(`${base}/score/${code}`);
+              }
+              setGeneratingScorer(false);
+            }}
+            disabled={generatingScorer}
+            className="px-3 py-2 rounded-lg bg-border text-chalk-dim font-bold text-xs
+                       hover:bg-border-light active:scale-[0.97] transition-all disabled:opacity-50">
+            {generatingScorer ? '...' : '📤 Invite Log Assistant'}
+          </button>
+          <InfoTip text="Generate a link to share with a parent or helper in the stands. They can log at-bats from their phone — no account needed. The link expires after 12 hours." />
+        </div>
       </div>
 
       {/* Scorer link */}
