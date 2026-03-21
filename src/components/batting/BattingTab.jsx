@@ -166,12 +166,6 @@ export default function BattingTab() {
         </div>
       </div>
 
-      {/* Description + legend */}
-      <p className="text-[11px] text-chalk-muted mb-3">
-        {sortMode === 'points'
-          ? `Ranked by rolling avg (last ${rollingWindow} ABs)`
-          : 'Ranked by on-base percentage'}
-      </p>
 
       {/* Attendance */}
       <div className="bg-panel border border-border rounded-xl shadow-sm p-4 mb-4">
