@@ -99,7 +99,13 @@ export function buildFullRotation({ players, standardInnings, settings, position
       const upperQuota = avgLowerBench / 3;
 
       const benchSort = (a, b) => {
-            // Primary: rating tier (lower rated sit first)
+            if (isDevInning) {
+              // Dev innings: higher rated sit first — give developing players field time
+              const tier = b.defRating - a.defRating;
+              if (tier !== 0) return tier;
+              return benchHistory(a) - benchHistory(b);
+            }
+            // Competitive: lower rated sit first
             const nudge = avgLowerBench >= 3;
             const aEff = (nudge && a.defRating >= 4 && benchHistory(a) < upperQuota) ? a.defRating - 1.5 : a.defRating;
             const bEff = (nudge && b.defRating >= 4 && benchHistory(b) < upperQuota) ? b.defRating - 1.5 : b.defRating;
