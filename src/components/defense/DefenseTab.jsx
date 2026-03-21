@@ -424,41 +424,41 @@ function InningCard({ inning, assignment, isDevInning, mode, players, benchCount
   }
 
   return (
-    <div className="bg-panel border border-border rounded-xl shadow-sm overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-white border-b border-border">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-bold text-lime tracking-wider">INNING {inning}</span>
-          {/* Mode toggle */}
-          <button onClick={onToggleMode}
-            className={`px-2 py-0.5 text-[9px] font-bold uppercase rounded border tracking-wider transition-all
-              ${isDevInning
-                ? 'bg-gold/15 text-gold border-gold/25 hover:bg-gold/25'
-                : 'bg-lime/10 text-lime border-lime/25 hover:bg-lime/20'
-              }`}>
-            {isDevInning ? '🔄 Development' : '⚔️ Competitive'}
-          </button>
-        </div>
-        <div className="flex gap-1.5">
-          {inning > 1 && (
-            <button onClick={onRepeatPrevious}
-              className="px-2.5 py-1 text-xs font-semibold bg-border/50 text-chalk-dim rounded-md hover:bg-border transition-colors"
-              title="Copy lineup from previous inning">
-              📋 Repeat
+    <DndContext sensors={sensors} collisionDetection={closestCenter}
+      onDragStart={(e) => setActiveId(e.active.id)}
+      onDragEnd={handleDragEnd}
+      onDragCancel={() => setActiveId(null)}>
+      <div className="bg-panel border border-border rounded-xl shadow-sm">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-2.5 bg-white border-b border-border rounded-t-xl">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold text-lime tracking-wider">INNING {inning}</span>
+            {/* Mode toggle */}
+            <button onClick={onToggleMode}
+              className={`px-2 py-0.5 text-[9px] font-bold uppercase rounded border tracking-wider transition-all
+                ${isDevInning
+                  ? 'bg-gold/15 text-gold border-gold/25 hover:bg-gold/25'
+                  : 'bg-lime/10 text-lime border-lime/25 hover:bg-lime/20'
+                }`}>
+              {isDevInning ? '🔄 Development' : '⚔️ Competitive'}
             </button>
-          )}
-          <button onClick={onReshuffle}
-            className="px-2.5 py-1 text-xs font-semibold bg-border/50 text-chalk-dim rounded-md hover:bg-border transition-colors">
-            🔀 Reshuffle
-          </button>
+          </div>
+          <div className="flex gap-1.5">
+            {inning > 1 && (
+              <button onClick={onRepeatPrevious}
+                className="px-2.5 py-1 text-xs font-semibold bg-border/50 text-chalk-dim rounded-md hover:bg-border transition-colors"
+                title="Copy lineup from previous inning">
+                📋 Repeat
+              </button>
+            )}
+            <button onClick={onReshuffle}
+              className="px-2.5 py-1 text-xs font-semibold bg-border/50 text-chalk-dim rounded-md hover:bg-border transition-colors">
+              🔀 Reshuffle
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Positions grid */}
-      <DndContext sensors={sensors} collisionDetection={closestCenter}
-        onDragStart={(e) => setActiveId(e.active.id)}
-        onDragEnd={handleDragEnd}
-        onDragCancel={() => setActiveId(null)}>
+        {/* Positions grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border">
           {/* Infield */}
           <div className="p-3">
@@ -491,16 +491,16 @@ function InningCard({ inning, assignment, isDevInning, mode, players, benchCount
             )}
           </div>
         </div>
+      </div>
 
-        <DragOverlay dropAnimation={null}>
-          {activePlayer ? (
-            <div className="px-3 py-1.5 rounded-md bg-lime text-white text-xs font-bold shadow-lg">
-              {activePlayer.name}
-            </div>
-          ) : null}
-        </DragOverlay>
-      </DndContext>
-    </div>
+      <DragOverlay dropAnimation={null}>
+        {activePlayer ? (
+          <div className="px-4 py-2 rounded-lg bg-lime text-white text-sm font-bold shadow-xl whitespace-nowrap">
+            {activePlayer.name}
+          </div>
+        ) : null}
+      </DragOverlay>
+    </DndContext>
   );
 }
 
@@ -524,42 +524,42 @@ function PositionRow({ pos, playerId, players, onSwap, type, isBeingDragged }) {
   };
 
   return (
-    <div
-      ref={setDropRef}
-      className={`flex items-center gap-1.5 mb-1.5 rounded-md transition-colors
-        ${isOver ? 'bg-lime/10 ring-1 ring-lime/30' : ''}`}
-    >
+    <div ref={setDropRef} className="flex items-center gap-1.5 mb-1.5">
+      {/* Position label — never affected by drag */}
       <span className={`inline-block px-2 py-0.5 text-[9px] font-bold uppercase rounded border tracking-wide w-20 text-center shrink-0 ${typeColors[type]}`}>
         {pos.startsWith('Bench') ? 'Bench' : pos}
       </span>
 
-      {/* Drag handle + dropdown — this side greys out when dragging */}
-      <div
-        ref={setDragRef}
-        {...listeners}
-        {...attributes}
-        className={`flex items-center justify-center w-5 h-7 rounded shrink-0 select-none transition-opacity
-          ${playerId ? 'text-chalk-muted/30 cursor-grab hover:text-chalk-muted active:cursor-grabbing' : 'text-transparent'}
-          ${isBeingDragged ? 'opacity-30' : ''}`}
-        aria-label="Drag to swap"
-      >
-        ⠿
-      </div>
+      {/* Player area — this is what greys out and highlights */}
+      <div className={`flex items-center flex-1 min-w-0 rounded-md transition-all
+        ${isOver ? 'ring-2 ring-lime/40 bg-lime/10' : ''}
+        ${isBeingDragged ? 'opacity-25' : ''}`}>
+        {/* Drag handle */}
+        <div
+          ref={setDragRef}
+          {...listeners}
+          {...attributes}
+          className={`flex items-center justify-center w-6 h-8 shrink-0 select-none
+            ${playerId ? 'text-chalk-muted/30 cursor-grab hover:text-chalk-muted active:cursor-grabbing' : 'text-transparent'}`}
+          aria-label="Drag to swap"
+        >
+          ⠿
+        </div>
 
-      <select
-        value={playerId || ''}
-        onChange={e => onSwap(pos, e.target.value)}
-        className={`flex-1 px-2 py-1.5 rounded-md bg-field border border-border text-chalk text-xs
-                   focus:border-lime focus:outline-none min-w-0 transition-opacity
-                   ${isBeingDragged ? 'opacity-30' : ''}`}
-      >
-        <option value="">— —</option>
-        {players.map(p => (
-          <option key={p.id} value={p.id}>
-            {p.name}{isCatcher ? (p.canCatch ? ' 🎯' : ' ⚠') : ''}
-          </option>
-        ))}
-      </select>
+        <select
+          value={playerId || ''}
+          onChange={e => onSwap(pos, e.target.value)}
+          className="flex-1 px-2 py-1.5 rounded-md bg-field border border-border text-chalk text-xs
+                     focus:border-lime focus:outline-none min-w-0"
+        >
+          <option value="">— —</option>
+          {players.map(p => (
+            <option key={p.id} value={p.id}>
+              {p.name}{isCatcher ? (p.canCatch ? ' 🎯' : ' ⚠') : ''}
+            </option>
+          ))}
+        </select>
+      </div>
     </div>
   );
 }
@@ -591,25 +591,25 @@ function PocketCard({ label, sublabel, assignment, players, benchCount, accentCl
   };
 
   return (
-    <div className={`border rounded-xl overflow-hidden ${accentClass}`}>
-      <div className="flex items-center justify-between px-4 py-2.5 bg-white border-b border-border">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-bold tracking-wider">
-            {label === 'LFG' ? '⚡' : '🔄'} {label}
-          </span>
-          <span className="px-2 py-0.5 text-[9px] font-bold uppercase border rounded tracking-wider opacity-70">
-            {sublabel}
-          </span>
+    <DndContext sensors={sensors} collisionDetection={closestCenter}
+      onDragStart={(e) => setActiveId(e.active.id)}
+      onDragEnd={handleDragEnd}
+      onDragCancel={() => setActiveId(null)}>
+      <div className={`border rounded-xl ${accentClass}`}>
+        <div className="flex items-center justify-between px-4 py-2.5 bg-white border-b border-border rounded-t-xl">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold tracking-wider">
+              {label === 'LFG' ? '⚡' : '🔄'} {label}
+            </span>
+            <span className="px-2 py-0.5 text-[9px] font-bold uppercase border rounded tracking-wider opacity-70">
+              {sublabel}
+            </span>
+          </div>
+          <button onClick={onRegenerate}
+            className="px-2.5 py-1 text-xs font-semibold bg-border/50 text-chalk-dim rounded-md hover:bg-border transition-colors">
+            🔀
+          </button>
         </div>
-        <button onClick={onRegenerate}
-          className="px-2.5 py-1 text-xs font-semibold bg-border/50 text-chalk-dim rounded-md hover:bg-border transition-colors">
-          🔀
-        </button>
-      </div>
-      <DndContext sensors={sensors} collisionDetection={closestCenter}
-        onDragStart={(e) => setActiveId(e.active.id)}
-        onDragEnd={handleDragEnd}
-        onDragCancel={() => setActiveId(null)}>
         <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border">
           <div className="p-3">
             <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-2">Infield</div>
@@ -632,15 +632,16 @@ function PocketCard({ label, sublabel, assignment, players, benchCount, accentCl
             )}
           </div>
         </div>
-        <DragOverlay dropAnimation={null}>
-          {activePlayer ? (
-            <div className="px-3 py-1.5 rounded-md bg-lime text-white text-xs font-bold shadow-lg">
-              {activePlayer.name}
-            </div>
-          ) : null}
-        </DragOverlay>
-      </DndContext>
-    </div>
+      </div>
+
+      <DragOverlay dropAnimation={null}>
+        {activePlayer ? (
+          <div className="px-4 py-2 rounded-lg bg-lime text-white text-sm font-bold shadow-xl whitespace-nowrap">
+            {activePlayer.name}
+          </div>
+        ) : null}
+      </DragOverlay>
+    </DndContext>
   );
 }
 
