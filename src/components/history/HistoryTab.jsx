@@ -216,7 +216,7 @@ export default function HistoryTab() {
             No at-bats recorded yet
           </div>
         ) : (
-          <div className="divide-y divide-border/50">
+          <div className="divide-y divide-border/50 max-h-[28rem] overflow-y-auto">
             {gameGroups.map(([game, abs]) => (
               <GameLogGroup key={game} game={game} atBats={abs} players={players} onDeleteAtBat={deleteAtBat} />
             ))}
