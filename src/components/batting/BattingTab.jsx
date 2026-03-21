@@ -163,6 +163,7 @@ export default function BattingTab() {
             </button>
           ))}
         </div>
+        <span className="text-[10px] text-chalk-muted/50 hidden sm:inline ml-1">Lower = more shuffle</span>
       </div>
 
       {/* Scoring legend */}
