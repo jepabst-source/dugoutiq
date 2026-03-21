@@ -164,7 +164,7 @@ export default function SettingsTab() {
   };
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-lime">Settings</h2>
         {saved && <span className="text-xs text-lime animate-pulse">✓ {saved}</span>}

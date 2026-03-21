@@ -81,7 +81,7 @@ export default function GameDayTab() {
   };
 
   return (
-    <div className="max-w-lg mx-auto">
+    <div className="max-w-2xl mx-auto">
       {showUpgrade && <UpgradeModal onClose={() => setShowUpgrade(false)} lockReason={plan.lockReason} />}
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
