@@ -15,7 +15,7 @@ import {
   DragOverlay,
 } from '@dnd-kit/core';
 
-export default function DefenseTab() {
+export default function DefenseTab({ onNavigate }) {
   const {
     players, team, attendance,
     getActivePlayers, setAllAttendance, toggleAttendance,
@@ -242,7 +242,10 @@ export default function DefenseTab() {
             ` · ${pos} ${min}★+`
           ).join('')}
         </span>
-        <span className="text-chalk-muted/60 shrink-0 ml-3">Edit rules in Settings</span>
+        <button onClick={() => onNavigate('settings')}
+          className="text-sky text-[11px] font-semibold shrink-0 ml-3 hover:underline">
+          Edit
+        </button>
       </div>
 
       {/* Attendance */}

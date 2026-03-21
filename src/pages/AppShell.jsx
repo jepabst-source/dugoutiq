@@ -207,7 +207,7 @@ export default function AppShell() {
         )}
         {activeTab === 'roster' && <RosterTab />}
         {activeTab === 'batting' && <BattingTab />}
-        {activeTab === 'defense' && <DefenseTab />}
+        {activeTab === 'defense' && <DefenseTab onNavigate={setActiveTab} />}
         {activeTab === 'gameday' && <GameDayTab />}
         {activeTab === 'history' && <HistoryTab />}
         {activeTab === 'print' && <PrintTab />}
