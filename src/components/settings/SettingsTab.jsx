@@ -406,11 +406,11 @@ export default function SettingsTab() {
         <p className="text-xs text-chalk-muted mb-4">
           Set a preferred minimum rating for each position. The rotation engine uses these as guidelines when auto-generating lineups. You can always manually override any assignment.
         </p>
-        <div className="space-y-2">
+        <div className="space-y-0.5">
           {ALL_POSITIONS.filter(p => p !== 'Pitcher').map(pos => {
             const currentMin = (settings.positionMinRatings || {})[pos] || 0;
             return (
-              <div key={pos} className="flex items-center gap-3 py-1.5">
+              <div key={pos} className="flex items-center gap-3 py-0.5">
                 <span className="text-sm text-chalk w-24 font-semibold">{pos}</span>
                 <div className="flex gap-0.5">
                   {[1, 2, 3, 4, 5].map(star => (
