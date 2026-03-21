@@ -196,7 +196,7 @@ function scoreFieldPlayer(p, pos, ing, gameInnings, positionHistory, settings, i
     if (infieldCount >= (settings.infieldCapValue || 2)) return -9999;
   }
 
-  const jitter = (Math.random() - 0.5) * 0.4;
+  const jitter = (Math.random() - 0.5) * 2;
   const prevPos = getPrevInningPos(gameInnings, ing, p.id);
   const posCount = countPosInGame(gameInnings, ing, pos, p.id);
 
@@ -235,8 +235,9 @@ function assignFieldPositions(fieldPlayers, fieldPositions, ing, gameInnings, po
     const allPos = [...infield, ...outfield].sort(() => Math.random() - 0.5);
     bestFit(allPos, fieldPlayers);
   } else {
-    bestFit(infield, fieldPlayers);
-    bestFit(outfield, fieldPlayers);
+    // Shuffle within infield/outfield so no position always gets first pick
+    bestFit(infield.sort(() => Math.random() - 0.5), fieldPlayers);
+    bestFit(outfield.sort(() => Math.random() - 0.5), fieldPlayers);
   }
 
   // Fallback for unfilled
