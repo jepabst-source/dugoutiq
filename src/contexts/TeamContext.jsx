@@ -23,6 +23,13 @@ const DEFAULT_SETTINGS = {
   benchRatioTier2: 1.5,  // How often 4-5★ players bench relative to 1-3★ (e.g. 1.5 = half as often)
   assistantFullAccess: false,
   trackingMode: 'simple', // 'simple' or 'advanced' — default for Game Day and Scorer
+  // Parent Portal display settings
+  portalShowGames: true,        // Show games played count
+  portalOBPScope: 'total',      // 'total' | '3' | '5' | '10' — how many games OBP is based on
+  portalShowTotalABs: true,     // Show total at-bats
+  portalShowPoints: true,       // Show batting points
+  portalShowForm: true,         // Show rolling form average
+  portalFormWindow: 5,          // How many at-bats form is based on (3, 5, 10)
 };
 
 // Scoring system — advanced outcomes map to same points as simple

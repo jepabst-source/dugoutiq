@@ -76,14 +76,35 @@ export default function PortalPage({ teamId }) {
     return () => unsubs.forEach(u => u());
   }, [authed, teamId]);
 
+  // Portal display settings
+  const portalSettings = team?.settings || {};
+  const showPoints = portalSettings.portalShowPoints !== false;
+  const showForm = portalSettings.portalShowForm !== false;
+  const showTotalABs = portalSettings.portalShowTotalABs !== false;
+  const showGames = portalSettings.portalShowGames !== false;
+  const formWindow = portalSettings.portalFormWindow || 5;
+  const obpScope = portalSettings.portalOBPScope || 'total';
+
   // Stats helpers
   const getPlayerStats = (playerId) => {
     const pAbs = atBats.filter(a => a.playerId === playerId);
     const pts = pAbs.reduce((s, a) => s + (PTS[a.outcome] ?? 0), 0);
     const gamesPlayed = [...new Set(pAbs.map(a => a.game))].length;
-    const onBase = pAbs.filter(a => IS_ON_BASE[a.outcome]).length;
-    const obpAbs = pAbs.filter(a => a.outcome !== 'sac').length;
+
+    // OBP — scoped by game count if configured
+    let obpPool = pAbs;
+    if (obpScope !== 'total') {
+      const scopeGames = Number(obpScope);
+      // Get the most recent N game IDs
+      const gameIds = [...new Set(
+        [...pAbs].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).map(a => a.game)
+      )].slice(0, scopeGames);
+      obpPool = pAbs.filter(a => gameIds.includes(a.game));
+    }
+    const onBase = obpPool.filter(a => IS_ON_BASE[a.outcome]).length;
+    const obpAbs = obpPool.filter(a => a.outcome !== 'sac').length;
     const obp = obpAbs ? onBase / obpAbs : null;
+
     return { totalAbs: pAbs.length, pts, gamesPlayed, obp };
   };
 
@@ -91,7 +112,7 @@ export default function PortalPage({ teamId }) {
     const pAbs = [...atBats]
       .filter(a => a.playerId === playerId)
       .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
-      .slice(0, 5);
+      .slice(0, formWindow);
     if (!pAbs.length) return { avg: null, count: 0 };
     const pts = pAbs.reduce((s, a) => s + (PTS[a.outcome] ?? 0), 0);
     return { avg: pts / pAbs.length, count: pAbs.length };
@@ -216,9 +237,9 @@ export default function PortalPage({ teamId }) {
       {/* Legend */}
       <div className="max-w-2xl mx-auto px-4 pt-4 pb-2">
         <div className="flex gap-3 flex-wrap text-[10px] text-gray-400">
-          <span><strong className="text-gray-600">Form</strong> = last 5 at-bats</span>
-          <span><strong className="text-gray-600">Pts</strong> = total batting points</span>
-          <span><strong className="text-gray-600">OBP</strong> = on-base %</span>
+          {showForm && <span><strong className="text-gray-600">Form</strong> = last {formWindow} at-bats</span>}
+          {showPoints && <span><strong className="text-gray-600">Pts</strong> = total batting points</span>}
+          <span><strong className="text-gray-600">OBP</strong> = on-base %{obpScope !== 'total' ? ` (last ${obpScope} games)` : ''}</span>
         </div>
       </div>
 
@@ -256,16 +277,20 @@ export default function PortalPage({ teamId }) {
                     </div>
                     {/* Stat blocks */}
                     <div className="flex items-end gap-3 text-center">
-                      <div>
-                        <div className="text-sm font-semibold text-gray-400">{stats.pts ?? '—'}</div>
-                        <div className="text-[8px] text-gray-300 uppercase">Pts</div>
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold text-gray-400">
-                          {rolling.avg !== null ? rolling.avg.toFixed(2) : '—'}
+                      {showPoints && (
+                        <div>
+                          <div className="text-sm font-semibold text-gray-400">{stats.pts ?? '—'}</div>
+                          <div className="text-[8px] text-gray-300 uppercase">Pts</div>
                         </div>
-                        <div className="text-[8px] text-gray-300 uppercase">Form</div>
-                      </div>
+                      )}
+                      {showForm && (
+                        <div>
+                          <div className="text-sm font-semibold text-gray-400">
+                            {rolling.avg !== null ? rolling.avg.toFixed(2) : '—'}
+                          </div>
+                          <div className="text-[8px] text-gray-300 uppercase">Form</div>
+                        </div>
+                      )}
                       <div>
                         <div className="text-2xl font-bold text-blue-500">
                           {stats.obp !== null ? (stats.obp >= 1 ? '1.00' : stats.obp.toFixed(3).replace(/^0/, '')) : '—'}
@@ -290,7 +315,11 @@ export default function PortalPage({ teamId }) {
                       <span className="text-[10px] text-gray-300">No games recorded yet</span>
                     )}
                     <span className="flex-1" />
-                    <span className="text-[10px] text-gray-300">{stats.totalAbs} ABs · {stats.gamesPlayed} games</span>
+                    <span className="text-[10px] text-gray-300">
+                      {showTotalABs && `${stats.totalAbs} ABs`}
+                      {showTotalABs && showGames && ' · '}
+                      {showGames && `${stats.gamesPlayed} games`}
+                    </span>
                   </div>
                 </div>
               );
