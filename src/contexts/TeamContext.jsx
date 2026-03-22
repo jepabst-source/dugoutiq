@@ -26,7 +26,16 @@ const DEFAULT_SETTINGS = {
 };
 
 // Scoring system — advanced outcomes map to same points as simple
-const PTS = { K: 0, out: 1, walk: 1, hit: 2, single: 2, double: 2, triple: 2, hr: 2, hbp: 1, sac: 1 };
+// K = swinging strikeout (0.5 pts — credit for swinging the bat)
+// Kl = called/looking strikeout (0 pts — backwards K)
+const PTS = { Kl: 0, K: 0.5, out: 1, walk: 1, hit: 2, single: 2, double: 2, triple: 2, hr: 2, hbp: 1, sac: 1 };
+
+// Centralized outcome labels
+const OUTCOME_LABELS = { Kl: 'Called K', K: 'Strikeout', out: 'Hit into Out', walk: 'Walk', hit: 'Hit', single: 'Single', double: 'Double', triple: 'Triple', hr: 'Home Run', hbp: 'HBP', sac: 'Sacrifice' };
+const OUTCOME_SHORT  = { Kl: 'Ꝁ', K: 'K', out: 'Out', walk: 'BB', hit: 'Hit', single: '1B', double: '2B', triple: '3B', hr: 'HR', hbp: 'HBP', sac: 'SAC' };
+
+// Helper: is this outcome a strikeout?
+const IS_K = { K: true, Kl: true };
 
 // Helper: is this outcome a hit?
 const IS_HIT = { hit: true, single: true, double: true, triple: true, hr: true };
@@ -476,4 +485,4 @@ export function useTeam() {
   return ctx;
 }
 
-export { DEFAULT_SETTINGS, PTS };
+export { DEFAULT_SETTINGS, PTS, OUTCOME_LABELS, OUTCOME_SHORT, IS_K };
