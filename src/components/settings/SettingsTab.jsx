@@ -412,14 +412,14 @@ export default function SettingsTab() {
             <div className="bg-field/50 border border-border rounded-lg p-3">
               <div className="text-sm text-chalk font-semibold mb-1">OBP Scope</div>
               <p className="text-[10px] text-chalk-muted mb-3">
-                Calculate on-base percentage from all games or just the most recent games.
+                Calculate on-base percentage from all at-bats or just the most recent.
               </p>
               <div className="flex gap-1">
                 {[
                   { value: 'total', label: 'Total' },
-                  { value: '3', label: 'Last 3' },
-                  { value: '5', label: 'Last 5' },
-                  { value: '10', label: 'Last 10' },
+                  { value: '3', label: 'Last 3 ABs' },
+                  { value: '5', label: 'Last 5 ABs' },
+                  { value: '10', label: 'Last 10 ABs' },
                 ].map(opt => (
                   <button key={opt.value}
                     onClick={() => setRuleValue('portalOBPScope', opt.value)}
@@ -435,7 +435,7 @@ export default function SettingsTab() {
               <p className="text-[10px] text-chalk-muted mt-2">
                 {(settings.portalOBPScope || 'total') === 'total'
                   ? 'OBP uses all at-bats from the entire season.'
-                  : `OBP uses at-bats from the last ${settings.portalOBPScope} games only.`}
+                  : `OBP uses the last ${settings.portalOBPScope} at-bats only.`}
               </p>
             </div>
           </div>

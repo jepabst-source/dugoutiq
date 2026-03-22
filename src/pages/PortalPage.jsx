@@ -91,15 +91,13 @@ export default function PortalPage({ teamId }) {
     const pts = pAbs.reduce((s, a) => s + (PTS[a.outcome] ?? 0), 0);
     const gamesPlayed = [...new Set(pAbs.map(a => a.game))].length;
 
-    // OBP — scoped by game count if configured
+    // OBP — scoped by at-bat count if configured
     let obpPool = pAbs;
     if (obpScope !== 'total') {
-      const scopeGames = Number(obpScope);
-      // Get the most recent N game IDs
-      const gameIds = [...new Set(
-        [...pAbs].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).map(a => a.game)
-      )].slice(0, scopeGames);
-      obpPool = pAbs.filter(a => gameIds.includes(a.game));
+      const scopeABs = Number(obpScope);
+      obpPool = [...pAbs]
+        .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+        .slice(0, scopeABs);
     }
     const onBase = obpPool.filter(a => IS_ON_BASE[a.outcome]).length;
     const obpAbs = obpPool.filter(a => a.outcome !== 'sac').length;
@@ -239,7 +237,7 @@ export default function PortalPage({ teamId }) {
         <div className="flex gap-3 flex-wrap text-[10px] text-gray-400">
           {showForm && <span><strong className="text-gray-600">Form</strong> = last {formWindow} at-bats</span>}
           {showPoints && <span><strong className="text-gray-600">Pts</strong> = total batting points</span>}
-          <span><strong className="text-gray-600">OBP</strong> = on-base %{obpScope !== 'total' ? ` (last ${obpScope} games)` : ''}</span>
+          <span><strong className="text-gray-600">OBP</strong> = on-base %{obpScope !== 'total' ? ` (last ${obpScope} ABs)` : ''}</span>
         </div>
       </div>
 
