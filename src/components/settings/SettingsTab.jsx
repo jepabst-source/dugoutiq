@@ -345,7 +345,7 @@ export default function SettingsTab() {
         )}
 
         {/* PIN */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 mb-4">
           <div>
             <p className="text-[10px] text-chalk-muted uppercase tracking-wider mb-1">Access Code</p>
             <input type="tel" inputMode="numeric" maxLength={4} value={portalCode}
@@ -358,6 +358,87 @@ export default function SettingsTab() {
             className="px-3 py-2 rounded-lg bg-lime text-field font-bold text-sm hover:bg-lime-bright transition-all mt-4">
             Save
           </button>
+        </div>
+
+        {/* Portal Display Settings */}
+        <div className="border-t border-border pt-4">
+          <p className="text-[10px] font-semibold text-chalk-muted uppercase tracking-wider mb-3">What Parents See</p>
+          <div className="space-y-3">
+            <RuleToggle
+              label="Show Points"
+              description="Display total batting points for each player"
+              enabled={settings.portalShowPoints !== false}
+              onChange={() => setRuleValue('portalShowPoints', settings.portalShowPoints === false)}
+            />
+            <RuleToggle
+              label="Show Form"
+              description="Display rolling batting average (pts per AB)"
+              enabled={settings.portalShowForm !== false}
+              onChange={() => setRuleValue('portalShowForm', settings.portalShowForm === false)}
+            />
+            {settings.portalShowForm !== false && (
+              <div className="ml-6 flex items-center gap-2">
+                <span className="text-xs text-chalk-muted">Form based on last</span>
+                <div className="flex gap-1">
+                  {[3, 5, 10].map(n => (
+                    <button key={n}
+                      onClick={() => setRuleValue('portalFormWindow', n)}
+                      className={`w-8 h-8 rounded-md text-xs font-bold transition-all
+                        ${(settings.portalFormWindow || 5) === n
+                          ? 'bg-lime/20 border-lime text-lime border'
+                          : 'border border-border text-chalk-muted hover:border-border-light'
+                        }`}>
+                      {n}
+                    </button>
+                  ))}
+                </div>
+                <span className="text-xs text-chalk-muted">at-bats</span>
+              </div>
+            )}
+            <RuleToggle
+              label="Show Total At-Bats"
+              description="Display total AB count for each player"
+              enabled={settings.portalShowTotalABs !== false}
+              onChange={() => setRuleValue('portalShowTotalABs', settings.portalShowTotalABs === false)}
+            />
+            <RuleToggle
+              label="Show Games Played"
+              description="Display number of games for each player"
+              enabled={settings.portalShowGames !== false}
+              onChange={() => setRuleValue('portalShowGames', settings.portalShowGames === false)}
+            />
+
+            {/* OBP Scope */}
+            <div className="bg-field/50 border border-border rounded-lg p-3">
+              <div className="text-sm text-chalk font-semibold mb-1">OBP Scope</div>
+              <p className="text-[10px] text-chalk-muted mb-3">
+                Calculate on-base percentage from all games or just the most recent games.
+              </p>
+              <div className="flex gap-1">
+                {[
+                  { value: 'total', label: 'Total' },
+                  { value: '3', label: 'Last 3' },
+                  { value: '5', label: 'Last 5' },
+                  { value: '10', label: 'Last 10' },
+                ].map(opt => (
+                  <button key={opt.value}
+                    onClick={() => setRuleValue('portalOBPScope', opt.value)}
+                    className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all
+                      ${(settings.portalOBPScope || 'total') === opt.value
+                        ? 'bg-lime/20 border-lime text-lime border'
+                        : 'border border-border text-chalk-muted hover:border-border-light'
+                      }`}>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[10px] text-chalk-muted mt-2">
+                {(settings.portalOBPScope || 'total') === 'total'
+                  ? 'OBP uses all at-bats from the entire season.'
+                  : `OBP uses at-bats from the last ${settings.portalOBPScope} games only.`}
+              </p>
+            </div>
+          </div>
         </div>
       </Section>
 
