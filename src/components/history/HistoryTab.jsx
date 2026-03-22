@@ -1,8 +1,7 @@
 import { useState, useMemo } from 'react';
-import { useTeam, PTS } from '../../contexts/TeamContext';
+import { useTeam, PTS, OUTCOME_SHORT, IS_K } from '../../contexts/TeamContext';
 import { POSITIONS } from '../../utils/rotationEngine';
 
-const OUTCOME_LABELS = { K: 'K', out: 'Out', walk: 'BB', hit: 'Hit', single: '1B', double: '2B', triple: '3B', hr: 'HR', hbp: 'HBP', sac: 'SAC' };
 const POS_ORDER = [...POSITIONS.infield, ...POSITIONS.outfield, 'Bench'];
 
 export default function HistoryTab() {
@@ -230,7 +229,7 @@ export default function HistoryTab() {
 function GameLogGroup({ game, atBats, players, onDeleteAtBat }) {
   const hits = atBats.filter(ab => ab.outcome === 'hit').length;
   const walks = atBats.filter(ab => ab.outcome === 'walk').length;
-  const ks = atBats.filter(ab => ab.outcome === 'K').length;
+  const ks = atBats.filter(ab => IS_K[ab.outcome]).length;
 
   return (
     <div className="px-4 py-3">
@@ -244,6 +243,7 @@ function GameLogGroup({ game, atBats, players, onDeleteAtBat }) {
         {atBats.map(ab => {
           const p = players.find(x => x.id === ab.playerId);
           const outcomeClass = {
+            Kl: 'bg-red/20 text-red border-red/30',
             K: 'bg-red/15 text-red border-red/25',
             out: 'bg-dirt/15 text-dirt border-dirt/25',
             walk: 'bg-sky/15 text-sky border-sky/25',
@@ -262,7 +262,7 @@ function GameLogGroup({ game, atBats, players, onDeleteAtBat }) {
               </span>
               <div className="flex items-center gap-2">
                 <span className={`px-1.5 py-0.5 text-[9px] font-bold uppercase rounded border ${outcomeClass}`}>
-                  {OUTCOME_LABELS[ab.outcome]}
+                  {OUTCOME_SHORT[ab.outcome]}
                 </span>
                 <button
                   onClick={() => {

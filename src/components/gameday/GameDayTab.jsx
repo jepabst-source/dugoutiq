@@ -1,10 +1,9 @@
 import { useState, useMemo, useCallback } from 'react';
-import { useTeam, PTS } from '../../contexts/TeamContext';
+import { useTeam, PTS, OUTCOME_LABELS, IS_K } from '../../contexts/TeamContext';
 import { usePlan } from '../../hooks/usePlan';
 import UpgradeModal from '../shared/UpgradeModal';
 import InfoTip from '../shared/InfoTip';
 
-const OUTCOME_LABELS = { K: 'Strikeout', out: 'Hit into Out', walk: 'Walk', hit: 'Hit' };
 
 export default function GameDayTab() {
   const {
@@ -227,42 +226,58 @@ export default function GameDayTab() {
           {/* Outcome buttons */}
           {!advancedMode ? (
             /* Simple mode */
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <button onClick={() => handleRecord('K')}
-                className="py-5 sm:py-4 rounded-xl bg-red-50 border-2 border-red-200 text-red-600 font-bold text-xl sm:text-lg
-                           hover:bg-red-100 active:scale-95 transition-all flex flex-col items-center gap-1">
-                K
-                <span className="text-[10px] font-normal opacity-70">strikeout · 0 pts</span>
-              </button>
-              <button onClick={() => handleRecord('hit')}
-                className="py-5 sm:py-4 rounded-xl bg-green-100 border-2 border-green-300 text-green-600 font-bold text-xl sm:text-lg
-                           hover:bg-green-200 active:scale-95 transition-all flex flex-col items-center gap-1">
-                HIT
-                <span className="text-[10px] font-normal opacity-70">2 pts</span>
-              </button>
-              <button onClick={() => handleRecord('walk')}
-                className="py-5 sm:py-4 rounded-xl bg-blue-50 border-2 border-blue-200 text-blue-600 font-bold text-xl sm:text-lg
-                           hover:bg-blue-100 active:scale-95 transition-all flex flex-col items-center gap-1">
-                WALK
-                <span className="text-[10px] font-normal opacity-70">1 pt</span>
-              </button>
-              <button onClick={() => handleRecord('out')}
-                className="py-5 sm:py-4 rounded-xl bg-amber-50 border-2 border-amber-200 text-amber-600 font-bold text-xl sm:text-lg
-                           hover:bg-amber-100 active:scale-95 transition-all flex flex-col items-center gap-1">
-                HIT-OUT
-                <span className="text-[10px] font-normal opacity-70">fielded · 1 pt</span>
-              </button>
+            <div className="space-y-2 mb-3">
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={() => handleRecord('Kl')}
+                  className="py-4 sm:py-3 rounded-xl bg-red-100 border-2 border-red-300 text-red-700 font-bold text-xl sm:text-lg
+                             hover:bg-red-200 active:scale-95 transition-all flex flex-col items-center gap-1">
+                  <span className="rotate-180 inline-block">K</span>
+                  <span className="text-[10px] font-normal opacity-70">looking · 0 pts</span>
+                </button>
+                <button onClick={() => handleRecord('K')}
+                  className="py-4 sm:py-3 rounded-xl bg-red-50 border-2 border-red-200 text-red-600 font-bold text-xl sm:text-lg
+                             hover:bg-red-100 active:scale-95 transition-all flex flex-col items-center gap-1">
+                  K
+                  <span className="text-[10px] font-normal opacity-70">swinging · ½ pt</span>
+                </button>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <button onClick={() => handleRecord('hit')}
+                  className="py-4 sm:py-3 rounded-xl bg-green-100 border-2 border-green-300 text-green-600 font-bold text-xl sm:text-lg
+                             hover:bg-green-200 active:scale-95 transition-all flex flex-col items-center gap-1">
+                  HIT
+                  <span className="text-[10px] font-normal opacity-70">2 pts</span>
+                </button>
+                <button onClick={() => handleRecord('walk')}
+                  className="py-4 sm:py-3 rounded-xl bg-blue-50 border-2 border-blue-200 text-blue-600 font-bold text-xl sm:text-lg
+                             hover:bg-blue-100 active:scale-95 transition-all flex flex-col items-center gap-1">
+                  WALK
+                  <span className="text-[10px] font-normal opacity-70">1 pt</span>
+                </button>
+                <button onClick={() => handleRecord('out')}
+                  className="py-4 sm:py-3 rounded-xl bg-amber-50 border-2 border-amber-200 text-amber-600 font-bold text-xl sm:text-lg
+                             hover:bg-amber-100 active:scale-95 transition-all flex flex-col items-center gap-1">
+                  HIT-OUT
+                  <span className="text-[10px] font-normal opacity-70">1 pt</span>
+                </button>
+              </div>
             </div>
           ) : (
             /* Advanced mode */
             <div className="space-y-2 mb-3">
               {/* Outs row */}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-2">
+                <button onClick={() => handleRecord('Kl')}
+                  className="py-3 rounded-xl bg-red-100 border-2 border-red-300 text-red-700 font-bold text-base
+                             active:scale-95 transition-all flex flex-col items-center">
+                  <span className="rotate-180 inline-block">K</span>
+                  <span className="text-[9px] font-normal opacity-70">looking</span>
+                </button>
                 <button onClick={() => handleRecord('K')}
                   className="py-3 rounded-xl bg-red-50 border-2 border-red-200 text-red-600 font-bold text-base
                              active:scale-95 transition-all flex flex-col items-center">
                   K
-                  <span className="text-[9px] font-normal opacity-70">strikeout</span>
+                  <span className="text-[9px] font-normal opacity-70">swinging</span>
                 </button>
                 <button onClick={() => handleRecord('out')}
                   className="py-3 rounded-xl bg-amber-50 border-2 border-amber-200 text-amber-600 font-bold text-base
@@ -380,6 +395,7 @@ export default function GameDayTab() {
             inningAtBats.map(ab => {
               const p = players.find(x => x.id === ab.playerId);
               const outcomeClass = {
+                Kl: 'bg-red-100 text-red-700 border-red-300',
                 K: 'bg-red-50 text-red-600 border-red-200',
                 out: 'bg-amber-50 text-amber-600 border-amber-200',
                 walk: 'bg-blue-50 text-blue-600 border-blue-200',
@@ -412,7 +428,7 @@ export default function GameDayTab() {
               <div className="text-chalk-muted">Hits</div>
             </div>
             <div>
-              <div className="text-lg font-bold text-red">{gameAtBats.filter(ab => ab.outcome === 'K').length}</div>
+              <div className="text-lg font-bold text-red">{gameAtBats.filter(ab => IS_K[ab.outcome]).length}</div>
               <div className="text-chalk-muted">Strikeouts</div>
             </div>
           </div>
