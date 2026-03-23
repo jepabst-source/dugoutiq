@@ -475,6 +475,13 @@ export default function SettingsTab() {
             </div>
           )}
 
+          <RuleToggle
+            label="Sticky key positions"
+            description="Players in 3-4★ mandated positions (e.g. 1st Base, Shortstop) stay at least two innings in a row"
+            enabled={settings.stickyPositions}
+            onChange={() => toggleRule('stickyPositions')}
+          />
+
           {/* All-Star Bench Ratio */}
           <div className="bg-field/50 border border-border rounded-lg p-3">
             <div className="text-sm text-chalk font-semibold mb-1">All-Star Bench Ratio</div>

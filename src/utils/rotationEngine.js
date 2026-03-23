@@ -38,6 +38,9 @@
  *   - New position bonus: +3 per slot below 3 (max +9).
  *   - Preferred position: +5.
  *   - Coming off bench: +4.
+ *   - Sticky positions: +15 if player was at this same position last inning
+ *     AND the position has a min-rating >= 3. Keeps key players (1B, SS, etc.)
+ *     in place for at least 2 consecutive innings.
  *   - Infield cap enforced in competitive only.
  *
  * POSITION ASSIGNMENT ORDER:
@@ -87,6 +90,7 @@ const SCORE_CROSS_GAME_HISTORY  = -5;
 const SCORE_NEW_POSITION_BONUS  = 3;    // per slot below 3 history count (max +9)
 const SCORE_PREFERRED_POSITION  = 5;
 const SCORE_COMING_OFF_BENCH    = 4;
+const SCORE_STICKY_POSITION     = 15;   // bonus to keep player in a high-min-rating position
 const SCORE_JITTER_RANGE        = 0.5;  // total range; applied as (random - 0.5) * 0.5
 
 const RATING_WEIGHT_COMPETITIVE_INFIELD  = 10;
@@ -255,10 +259,16 @@ function scoreFieldPlayer(p, pos, ing, gameInnings, positionHistory, settings, i
 
   const comingOffBench = prevPos && prevPos.startsWith('Bench');
 
+  // Sticky positions: strong bonus to keep a player in a high-min-rating position
+  // for at least two consecutive innings (e.g. don't rotate 1st baseman every inning)
+  const stickyBonus = (settings.stickyPositions && prevPos === pos && minRating >= 3)
+    ? SCORE_STICKY_POSITION : 0;
+
   return p.defRating * ratingWeight
     + jitter
     + (posCount >= 2 ? SCORE_THIRD_REPEAT : posCount === 1 ? SCORE_SECOND_REPEAT : 0)
     + (prevPos === pos ? SCORE_SAME_AS_LAST_INNING : 0)
+    + stickyBonus
     + histCount * SCORE_CROSS_GAME_HISTORY
     + Math.max(0, 3 - histCount) * SCORE_NEW_POSITION_BONUS
     + ((p.prefPositions || []).includes(pos) ? SCORE_PREFERRED_POSITION : 0)
