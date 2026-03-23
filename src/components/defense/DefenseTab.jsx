@@ -204,6 +204,25 @@ export default function DefenseTab({ onNavigate }) {
     setInnings(prev => ({ ...prev, [ing]: result.innings[ing] || prev[ing] }));
   };
 
+  const handleMoveInning = useCallback((from, to) => {
+    if (to < 1 || to > standardInnings) return;
+    setInnings(prev => {
+      const updated = { ...prev };
+      updated[from] = prev[to];
+      updated[to] = prev[from];
+      return updated;
+    });
+    // Also swap inning modes
+    setInningModes(prev => {
+      const updated = { ...prev };
+      const fromMode = prev[from] || 'competitive';
+      const toMode = prev[to] || 'competitive';
+      updated[from] = toMode;
+      updated[to] = fromMode;
+      return updated;
+    });
+  }, [standardInnings]);
+
   const handleCommitGame = useCallback(async () => {
     if (!generated) return;
     if (!plan.canCommitGame) { setShowUpgrade(true); return; }
@@ -373,6 +392,8 @@ export default function DefenseTab({ onNavigate }) {
                 onToggleMode={() => toggleInningMode(ing)}
                 allInnings={innings}
                 noBackToBack={settings.noBackToBackBench}
+                onMoveUp={ing > 1 ? () => handleMoveInning(ing, ing - 1) : null}
+                onMoveDown={ing < standardInnings ? () => handleMoveInning(ing, ing + 1) : null}
               />
             );
           })}
@@ -413,7 +434,7 @@ export default function DefenseTab({ onNavigate }) {
 
 // ── Inning Card Component ──
 
-function InningCard({ inning, assignment, isDevInning, mode, players, benchCount, onSwap, onReshuffle, onRepeatPrevious, onToggleMode, allInnings, noBackToBack }) {
+function InningCard({ inning, assignment, isDevInning, mode, players, benchCount, onSwap, onReshuffle, onRepeatPrevious, onToggleMode, allInnings, noBackToBack, onMoveUp, onMoveDown }) {
   const benchPositions = POSITIONS.bench.slice(0, benchCount);
   const [activeId, setActiveId] = useState(null);
 
@@ -463,6 +484,19 @@ function InningCard({ inning, assignment, isDevInning, mode, players, benchCount
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-2.5 bg-white border-b border-border rounded-t-xl">
           <div className="flex items-center gap-2">
+            {/* Move inning up/down */}
+            <div className="flex flex-col -my-1">
+              <button onClick={onMoveUp} disabled={!onMoveUp}
+                className="text-[10px] leading-none px-0.5 text-chalk-muted hover:text-lime disabled:opacity-20 disabled:cursor-default transition-colors"
+                title="Move inning up">
+                ▲
+              </button>
+              <button onClick={onMoveDown} disabled={!onMoveDown}
+                className="text-[10px] leading-none px-0.5 text-chalk-muted hover:text-lime disabled:opacity-20 disabled:cursor-default transition-colors"
+                title="Move inning down">
+                ▼
+              </button>
+            </div>
             <span className="text-sm font-bold text-lime tracking-wider">INNING {inning}</span>
             {/* Mode toggle */}
             <button onClick={onToggleMode}
