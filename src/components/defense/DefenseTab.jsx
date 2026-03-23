@@ -589,8 +589,8 @@ function PositionRow({ pos, playerId, players, onSwap, type, isBeingDragged }) {
         <select
           value={playerId || ''}
           onChange={e => onSwap(pos, e.target.value)}
-          className="flex-1 px-2 py-1.5 rounded-md bg-field border border-border text-chalk text-xs
-                     focus:border-lime focus:outline-none min-w-0"
+          className="flex-1 px-2 py-1 rounded-md bg-field border border-border text-chalk text-xs
+                     focus:border-lime focus:outline-none min-w-0 !min-h-7"
         >
           <option value="">— —</option>
           {players.map(p => (
