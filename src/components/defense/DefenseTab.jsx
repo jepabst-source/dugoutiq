@@ -352,7 +352,7 @@ export default function DefenseTab({ onNavigate }) {
           <p className="text-chalk-muted">Set attendance and innings, then click <strong className="text-chalk">Generate</strong></p>
         </div>
       ) : (
-        <div className="space-y-5">
+        <div className="space-y-3">
           {/* Standard innings */}
           {Array.from({ length: standardInnings }, (_, i) => i + 1).map(ing => {
             const mode = inningModes[ing] || 'competitive';
@@ -462,7 +462,7 @@ function InningCard({ inning, assignment, isDevInning, mode, players, benchCount
       onDragCancel={() => setActiveId(null)}>
       <div className="bg-panel border border-border rounded-xl shadow-sm">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-2.5 bg-white border-b border-border rounded-t-xl">
+        <div className="flex items-center justify-between px-3 py-1.5 bg-white border-b border-border rounded-t-xl">
           <div className="flex items-center gap-2">
             <span className="text-sm font-bold text-lime tracking-wider">INNING {inning}</span>
             {/* Mode toggle */}
@@ -493,23 +493,23 @@ function InningCard({ inning, assignment, isDevInning, mode, players, benchCount
         {/* Positions grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border">
           {/* Infield */}
-          <div className="p-3">
-            <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-2">Infield</div>
+          <div className="px-3 py-2">
+            <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-1">Infield</div>
             {POSITIONS.infield.map(pos => (
               <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="infield" isBeingDragged={activeId === pos} />
             ))}
           </div>
 
           {/* Outfield + Bench */}
-          <div className="p-3">
-            <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-2">Outfield</div>
+          <div className="px-3 py-2">
+            <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-1">Outfield</div>
             {POSITIONS.outfield.map(pos => (
               <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="outfield" isBeingDragged={activeId === pos} />
             ))}
 
             {benchPositions.length > 0 && (
               <>
-                <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mt-3 mb-2">Bench</div>
+                <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mt-2 mb-1">Bench</div>
                 {benchPositions.map(pos => (
                   <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="bench" isBeingDragged={activeId === pos} />
                 ))}
@@ -564,7 +564,7 @@ function PositionRow({ pos, playerId, players, onSwap, type, isBeingDragged }) {
   };
 
   return (
-    <div ref={setDropRef} className="flex items-center gap-1.5 mb-1.5">
+    <div ref={setDropRef} className="flex items-center gap-1.5 mb-0.5">
       {/* Position label — never affected by drag */}
       <span className={`inline-block px-2 py-0.5 text-[9px] font-bold uppercase rounded border tracking-wide w-20 text-center shrink-0 ${typeColors[type]}`}>
         {displayPos}
@@ -579,7 +579,7 @@ function PositionRow({ pos, playerId, players, onSwap, type, isBeingDragged }) {
           ref={setDragRef}
           {...listeners}
           {...attributes}
-          className={`flex items-center justify-center w-6 h-8 shrink-0 select-none
+          className={`flex items-center justify-center w-5 h-6 shrink-0 select-none text-[10px]
             ${playerId ? 'text-chalk-muted/30 cursor-grab hover:text-chalk-muted active:cursor-grabbing' : 'text-transparent'}`}
           aria-label="Drag to swap"
         >
@@ -636,7 +636,7 @@ function PocketCard({ label, sublabel, assignment, players, benchCount, accentCl
       onDragEnd={handleDragEnd}
       onDragCancel={() => setActiveId(null)}>
       <div className={`border rounded-xl ${accentClass}`}>
-        <div className="flex items-center justify-between px-4 py-2.5 bg-white border-b border-border rounded-t-xl">
+        <div className="flex items-center justify-between px-3 py-1.5 bg-white border-b border-border rounded-t-xl">
           <div className="flex items-center gap-2">
             <span className="text-sm font-bold tracking-wider">
               {label === 'LFG' ? '⚡' : '🔄'} {label}
@@ -651,20 +651,20 @@ function PocketCard({ label, sublabel, assignment, players, benchCount, accentCl
           </button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border">
-          <div className="p-3">
-            <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-2">Infield</div>
+          <div className="px-3 py-2">
+            <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-1">Infield</div>
             {POSITIONS.infield.map(pos => (
               <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="infield" isBeingDragged={activeId === pos} />
             ))}
           </div>
-          <div className="p-3">
-            <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-2">Outfield</div>
+          <div className="px-3 py-2">
+            <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-1">Outfield</div>
             {POSITIONS.outfield.map(pos => (
               <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="outfield" isBeingDragged={activeId === pos} />
             ))}
             {benchPositions.length > 0 && (
               <>
-                <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mt-3 mb-2">Bench</div>
+                <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mt-2 mb-1">Bench</div>
                 {benchPositions.map(pos => (
                   <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="bench" isBeingDragged={activeId === pos} />
                 ))}
