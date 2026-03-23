@@ -579,8 +579,8 @@ function PositionRow({ pos, playerId, players, onSwap, type, isBeingDragged }) {
           ref={setDragRef}
           {...listeners}
           {...attributes}
-          className={`flex items-center justify-center w-5 h-6 shrink-0 select-none text-[10px]
-            ${playerId ? 'text-chalk-muted/30 cursor-grab hover:text-chalk-muted active:cursor-grabbing' : 'text-transparent'}`}
+          className={`flex items-center justify-center w-5 h-6 shrink-0 select-none text-[14px]
+            ${playerId ? 'text-chalk-muted/50 cursor-grab hover:text-chalk-muted active:cursor-grabbing' : 'text-transparent'}`}
           aria-label="Drag to swap"
         >
           ⠿

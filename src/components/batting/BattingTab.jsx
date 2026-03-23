@@ -265,10 +265,10 @@ function SortableBattingSlot({ player, index }) {
       {/* Drag handle */}
       <div {...attributes} {...listeners}
         className="cursor-grab active:cursor-grabbing text-chalk-muted hover:text-chalk-dim touch-none select-none">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
-          <circle cx="4" cy="3" r="1.5"/><circle cx="10" cy="3" r="1.5"/>
-          <circle cx="4" cy="7" r="1.5"/><circle cx="10" cy="7" r="1.5"/>
-          <circle cx="4" cy="11" r="1.5"/><circle cx="10" cy="11" r="1.5"/>
+        <svg width="18" height="18" viewBox="0 0 14 14" fill="currentColor">
+          <circle cx="4" cy="3" r="2"/><circle cx="10" cy="3" r="2"/>
+          <circle cx="4" cy="7" r="2"/><circle cx="10" cy="7" r="2"/>
+          <circle cx="4" cy="11" r="2"/><circle cx="10" cy="11" r="2"/>
         </svg>
       </div>
 
