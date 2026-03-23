@@ -258,22 +258,6 @@ export default function DefenseTab({ onNavigate }) {
         </div>
       </div>
 
-      {/* Rules info */}
-      <div className="flex items-start justify-between text-xs text-chalk-muted bg-lime/5 border-l-2 border-lime/30 px-3 py-2 rounded-r-lg mb-4">
-        <span>
-          {settings.noBackToBackBench && '✓ No back-to-back bench'}
-          {settings.infieldCapEnabled && ` · ✓ Max ${settings.infieldCapValue} infield innings`}
-          {` · Toggle ⚔️ Competitive / 🔄 Development per inning`}
-          {Object.entries(settings.positionMinRatings || {}).map(([pos, min]) =>
-            ` · ${pos} ${min}★+`
-          ).join('')}
-        </span>
-        <button onClick={() => onNavigate('settings')}
-          className="text-sky text-[11px] font-semibold shrink-0 ml-3 hover:underline">
-          Edit
-        </button>
-      </div>
-
       {/* Attendance */}
       <div className="bg-panel border border-border rounded-xl shadow-sm p-4 mb-4">
         <div className="flex items-center justify-between mb-3">
@@ -408,6 +392,22 @@ export default function DefenseTab({ onNavigate }) {
           </div>
         </div>
       )}
+
+      {/* Active settings summary */}
+      <div className="flex items-start justify-between text-xs text-chalk-muted bg-lime/5 border-l-2 border-lime/30 px-3 py-2 rounded-r-lg mt-6">
+        <span>
+          {settings.noBackToBackBench && '✓ No back-to-back bench'}
+          {settings.infieldCapEnabled && ` · ✓ Max ${settings.infieldCapValue} infield innings`}
+          {` · Toggle ⚔️ Competitive / 🔄 Development per inning`}
+          {Object.entries(settings.positionMinRatings || {}).map(([pos, min]) =>
+            ` · ${pos} ${min}★+`
+          ).join('')}
+        </span>
+        <button onClick={() => onNavigate('settings')}
+          className="text-sky text-[11px] font-semibold shrink-0 ml-3 hover:underline">
+          Edit
+        </button>
+      </div>
     </div>
   );
 }
