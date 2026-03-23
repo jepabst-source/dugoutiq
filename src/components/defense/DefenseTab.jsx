@@ -564,7 +564,7 @@ function PositionRow({ pos, playerId, players, onSwap, type, isBeingDragged }) {
   };
 
   return (
-    <div ref={setDropRef} className="flex items-center gap-1.5 mb-1">
+    <div ref={setDropRef} className="flex items-center gap-1.5 mb-1.5">
       {/* Position label — never affected by drag */}
       <span className={`inline-block px-2 py-0.5 text-[9px] font-bold uppercase rounded border tracking-wide w-20 text-center shrink-0 ${typeColors[type]}`}>
         {displayPos}
@@ -579,7 +579,7 @@ function PositionRow({ pos, playerId, players, onSwap, type, isBeingDragged }) {
           ref={setDragRef}
           {...listeners}
           {...attributes}
-          className={`flex items-center justify-center w-6 h-7 shrink-0 select-none
+          className={`flex items-center justify-center w-6 h-8 shrink-0 select-none
             ${playerId ? 'text-chalk-muted/30 cursor-grab hover:text-chalk-muted active:cursor-grabbing' : 'text-transparent'}`}
           aria-label="Drag to swap"
         >
@@ -590,7 +590,7 @@ function PositionRow({ pos, playerId, players, onSwap, type, isBeingDragged }) {
           value={playerId || ''}
           onChange={e => onSwap(pos, e.target.value)}
           className="flex-1 px-2 py-1 rounded-md bg-field border border-border text-chalk text-xs
-                     focus:border-lime focus:outline-none min-w-0"
+                     focus:border-lime focus:outline-none min-w-0 !min-h-7"
         >
           <option value="">— —</option>
           {players.map(p => (
