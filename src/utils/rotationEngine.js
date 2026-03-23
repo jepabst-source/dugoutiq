@@ -259,15 +259,21 @@ function scoreFieldPlayer(p, pos, ing, gameInnings, positionHistory, settings, i
 
   const comingOffBench = prevPos && prevPos.startsWith('Bench');
 
-  // Sticky positions: strong bonus to keep a player in a high-min-rating position
-  // for at least two consecutive innings (e.g. don't rotate 1st baseman every inning)
-  const stickyBonus = (settings.stickyPositions && prevPos === pos && minRating >= 3)
-    ? SCORE_STICKY_POSITION : 0;
+  // Sticky positions: when enabled and position has min-rating >= 3,
+  // cancel the repeat/same-as-last penalties and add a bonus instead.
+  // Without this, the +15 bonus gets wiped by -8 (same-as-last) + -20 (2nd repeat) = net -13.
+  const isSticky = settings.stickyPositions && prevPos === pos && minRating >= 3;
+
+  const repeatPenalty = isSticky ? 0
+    : (posCount >= 2 ? SCORE_THIRD_REPEAT : posCount === 1 ? SCORE_SECOND_REPEAT : 0);
+  const sameAsLastPenalty = isSticky ? 0
+    : (prevPos === pos ? SCORE_SAME_AS_LAST_INNING : 0);
+  const stickyBonus = isSticky ? SCORE_STICKY_POSITION : 0;
 
   return p.defRating * ratingWeight
     + jitter
-    + (posCount >= 2 ? SCORE_THIRD_REPEAT : posCount === 1 ? SCORE_SECOND_REPEAT : 0)
-    + (prevPos === pos ? SCORE_SAME_AS_LAST_INNING : 0)
+    + repeatPenalty
+    + sameAsLastPenalty
     + stickyBonus
     + histCount * SCORE_CROSS_GAME_HISTORY
     + Math.max(0, 3 - histCount) * SCORE_NEW_POSITION_BONUS
