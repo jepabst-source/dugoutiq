@@ -90,7 +90,8 @@ const SCORE_CROSS_GAME_HISTORY  = -5;
 const SCORE_NEW_POSITION_BONUS  = 3;    // per slot below 3 history count (max +9)
 const SCORE_PREFERRED_POSITION  = 5;
 const SCORE_COMING_OFF_BENCH    = 4;
-const SCORE_STICKY_POSITION     = 15;   // bonus to keep player in a high-min-rating position
+// Sticky position bonus by level (0 = off, 1–5 = increasing stickiness)
+const STICKY_BONUS_BY_LEVEL     = [0, 5, 10, 15, 20, 25];
 const SCORE_JITTER_RANGE        = 0.5;  // total range; applied as (random - 0.5) * 0.5
 
 const RATING_WEIGHT_COMPETITIVE_INFIELD  = 10;
@@ -259,16 +260,21 @@ function scoreFieldPlayer(p, pos, ing, gameInnings, positionHistory, settings, i
 
   const comingOffBench = prevPos && prevPos.startsWith('Bench');
 
-  // Sticky positions: when enabled and position has min-rating >= 3,
-  // cancel the repeat/same-as-last penalties and add a bonus instead.
-  // Without this, the +15 bonus gets wiped by -8 (same-as-last) + -20 (2nd repeat) = net -13.
-  const isSticky = settings.stickyPositions && prevPos === pos && minRating >= 3;
+  // Sticky positions: level 1-5 controls how strongly players stick to
+  // high-min-rating positions. Level 3 matches the old boolean behavior (+15).
+  // Levels 1-2 only cancel same-as-last penalty; levels 3-5 cancel both.
+  const rawSticky = settings.stickyPositions;
+  const stickyLevel = rawSticky === true ? 3 : (Number(rawSticky) || 0);
+  const isSticky = stickyLevel > 0 && prevPos === pos && minRating >= 3;
 
-  const repeatPenalty = isSticky ? 0
+  const cancelRepeat = isSticky && stickyLevel >= 3;
+  const cancelSameAsLast = isSticky;
+
+  const repeatPenalty = cancelRepeat ? 0
     : (posCount >= 2 ? SCORE_THIRD_REPEAT : posCount === 1 ? SCORE_SECOND_REPEAT : 0);
-  const sameAsLastPenalty = isSticky ? 0
+  const sameAsLastPenalty = cancelSameAsLast ? 0
     : (prevPos === pos ? SCORE_SAME_AS_LAST_INNING : 0);
-  const stickyBonus = isSticky ? SCORE_STICKY_POSITION : 0;
+  const stickyBonus = isSticky ? STICKY_BONUS_BY_LEVEL[stickyLevel] : 0;
 
   return p.defRating * ratingWeight
     + jitter

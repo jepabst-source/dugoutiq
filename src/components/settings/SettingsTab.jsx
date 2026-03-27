@@ -475,12 +475,35 @@ export default function SettingsTab() {
             </div>
           )}
 
-          <RuleToggle
-            label="Sticky key positions"
-            description="Players in 3-4★ mandated positions (e.g. 1st Base, Shortstop) stay at least two innings in a row"
-            enabled={settings.stickyPositions}
-            onChange={() => toggleRule('stickyPositions')}
-          />
+          {/* Sticky Key Positions */}
+          <div className="bg-field/50 border border-border rounded-lg p-3">
+            <div className="text-sm text-chalk font-semibold mb-1">Sticky Key Positions</div>
+            <p className="text-[10px] text-chalk-muted mb-3">
+              How strongly players stick to 3-4★ mandated positions (e.g. 1st Base, Shortstop). Higher = harder to move.
+            </p>
+            <div className="flex items-center gap-3">
+              <input
+                type="range"
+                min="0"
+                max="5"
+                step="1"
+                value={settings.stickyPositions ?? 0}
+                onChange={e => setRuleValue('stickyPositions', Number(e.target.value))}
+                className="flex-1 accent-lime"
+              />
+              <span className="text-sm font-bold text-lime w-12 text-right">
+                {(settings.stickyPositions ?? 0) === 0 ? 'Off' : settings.stickyPositions}
+              </span>
+            </div>
+            <div className="flex justify-between text-[10px] text-chalk-muted mt-1">
+              <span>Off</span>
+              <span>1</span>
+              <span>2</span>
+              <span>3</span>
+              <span>4</span>
+              <span>5</span>
+            </div>
+          </div>
 
           {/* All-Star Bench Ratio */}
           <div className="bg-field/50 border border-border rounded-lg p-3">
