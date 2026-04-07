@@ -155,7 +155,7 @@ export default function HistoryTab() {
                 <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">Form</th>
                 <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">ABs</th>
                 <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">Pts</th>
-                <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">OBP</th>
+                <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">Season OBP</th>
                 <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">Games</th>
               </tr>
             </thead>
