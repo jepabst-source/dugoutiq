@@ -160,7 +160,7 @@ export default function HistoryTab() {
               </tr>
             </thead>
             <tbody>
-              {playerStats.map(p => (
+              {[...playerStats].sort((a, b) => (b.obp ?? -1) - (a.obp ?? -1)).map(p => (
                 <tr key={p.id} className="border-b border-border/30 hover:bg-panel-hover transition-colors">
                   <td className="px-3 py-2 font-semibold text-chalk">
                     {p.name}
