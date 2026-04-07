@@ -164,7 +164,6 @@ export default function HistoryTab() {
                 <tr key={p.id} className="border-b border-border/30 hover:bg-panel-hover transition-colors">
                   <td className="px-3 py-2 font-semibold text-chalk">
                     {p.name}
-                    <span className="ml-1.5 text-gold text-xs">{p.defRating}★</span>
                   </td>
                   <td className="text-center px-2 py-2 font-bold text-lime">
                     {p.avgAbs > 0 ? p.avg.toFixed(2) : '—'}
