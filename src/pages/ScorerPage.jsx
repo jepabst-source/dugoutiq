@@ -33,7 +33,7 @@ export default function ScorerPage({ scorerCode }) {
       const ref = doc(collection(db, 'teams', scorerData.teamId, 'atBats'));
       await setDoc(ref, {
         playerId: selectedPlayer.id,
-        game: scorerData.gameId || `gd-${new Date().toISOString().split('T')[0]}`,
+        game: scorerData.gameId || `G-${new Date().toISOString().split('T')[0]}`,
         inning: 1, outcome, timestamp: Date.now(), scoredBy: 'scorer',
       });
       setRecentLog(prev => [{ name: selectedPlayer.name, number: selectedPlayer.number, outcome, time: Date.now() }, ...prev].slice(0, 20));

@@ -15,7 +15,7 @@ export default function GameDayTab() {
 
   const [selectedPlayerId, setSelectedPlayerId] = useState(null);
   const [currentInning, setCurrentInning] = useState(1);
-  const [gameNum, setGameNum] = useState(() => `gd-${new Date().toISOString().split('T')[0]}`);
+  const [gameNum, setGameNum] = useState(() => `G-${new Date().toISOString().split('T')[0]}`);
   const [ourScore, setOurScore] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0]);
   const [theirScore, setTheirScore] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0]);
   const [scorerLink, setScorerLink] = useState('');
