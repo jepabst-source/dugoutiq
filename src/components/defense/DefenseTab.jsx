@@ -17,7 +17,7 @@ import {
 
 export default function DefenseTab({ onNavigate }) {
   const {
-    players, team, attendance,
+    players, team, attendance, savedGames,
     getActivePlayers, setAllAttendance, toggleAttendance,
     commitGame, getPositionHistory, generateBattingOrder,
   } = useTeam();
@@ -35,6 +35,7 @@ export default function DefenseTab({ onNavigate }) {
   const [committed, setCommitted] = useState(false);
   const [inningModes, setInningModes] = useState(() => settings.defaultInningModes || {});
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [showLoadMenu, setShowLoadMenu] = useState(false);
   const plan = usePlan(); // { 1: 'competitive', 2: 'development', ... }
 
   const activePlayers = getActivePlayers();
@@ -268,6 +269,18 @@ export default function DefenseTab({ onNavigate }) {
     setCommitting(false);
   }, [generated, gameNum, gameDate, totalInnings, opponent, innings, commitGame, generateBattingOrder]);
 
+  const handleLoadGame = (game) => {
+    setInnings(game.lineups || {});
+    setGameNum(game.gameNumber != null ? String(game.gameNumber) : '');
+    setGameDate(game.date || new Date().toISOString().split('T')[0]);
+    setOpponent(game.opponent || '');
+    setTotalInnings(game.innings || 3);
+    setLfg(null);
+    setOor(null);
+    setGenerated(true);
+    setShowLoadMenu(false);
+  };
+
   return (
     <div>
       {showUpgrade && <UpgradeModal onClose={() => setShowUpgrade(false)} lockReason={plan.lockReason} />}
@@ -280,6 +293,33 @@ export default function DefenseTab({ onNavigate }) {
           </p>
         </div>
         <div className="flex gap-2">
+          {savedGames?.length > 0 && (
+            <div className="relative">
+              <button onClick={() => setShowLoadMenu(!showLoadMenu)}
+                className="px-4 py-2 rounded-lg bg-border text-chalk font-bold text-sm
+                           hover:bg-border-light active:scale-[0.97] transition-all">
+                📂 Load
+              </button>
+              {showLoadMenu && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowLoadMenu(false)} />
+                  <div className="absolute right-0 top-full mt-1 w-64 bg-panel border border-border rounded-xl shadow-xl z-50 overflow-hidden max-h-72 overflow-y-auto">
+                    {savedGames.map(g => (
+                      <button key={g.id} onClick={() => handleLoadGame(g)}
+                        className="w-full text-left px-4 py-2.5 hover:bg-panel-hover transition-colors border-b border-border last:border-b-0">
+                        <div className="text-sm font-semibold text-chalk">
+                          Game {g.gameNumber}{g.opponent ? ` vs ${g.opponent}` : ''}
+                        </div>
+                        <div className="text-[10px] text-chalk-muted">
+                          {g.date} · {g.innings} innings
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
           <button onClick={handleGenerate}
             className="px-4 py-2 rounded-lg bg-border text-chalk font-bold text-sm
                        hover:bg-border-light active:scale-[0.97] transition-all">
