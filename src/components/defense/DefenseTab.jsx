@@ -142,26 +142,66 @@ export default function DefenseTab({ onNavigate }) {
       
       updated[inning] = inningAssignment;
 
-      // Cascade: regenerate all innings after the changed one
-      if (inning < standardInnings) {
-        const result = buildFullRotation({
-          players: activePlayers,
-          standardInnings,
-          settings,
-          positionHistory,
-          inningModes,
-        });
-        // Keep innings 1 through current inning locked, replace the rest
-        for (let i = inning + 1; i <= standardInnings; i++) {
-          if (result.innings[i]) {
-            updated[i] = result.innings[i];
-          }
-        }
-      }
-
       return updated;
     });
   }, [activePlayers, standardInnings, settings, positionHistory, inningModes]);
+
+  // ── Fairness warnings (advisory only) ──
+  const fairnessWarnings = useMemo(() => {
+    if (!generated || standardInnings < 1) return [];
+    const warns = [];
+    const playerMap = Object.fromEntries(activePlayers.map(p => [p.id, p]));
+
+    // Count benches and infield appearances per player
+    const benchCounts = {};   // playerId → number of innings benched
+    const infieldCounts = {}; // playerId → number of infield innings
+    const benchByInning = {}; // playerId → [inning numbers where benched]
+
+    for (let i = 1; i <= standardInnings; i++) {
+      const asgn = innings[i] || {};
+      for (const [pos, pid] of Object.entries(asgn)) {
+        if (!pid) continue;
+        if (pos.startsWith('Bench')) {
+          benchCounts[pid] = (benchCounts[pid] || 0) + 1;
+          if (!benchByInning[pid]) benchByInning[pid] = [];
+          benchByInning[pid].push(i);
+        }
+        if (INFIELD_POSITIONS.includes(pos)) {
+          infieldCounts[pid] = (infieldCounts[pid] || 0) + 1;
+        }
+      }
+    }
+
+    // Warn: benched 2+ times
+    for (const [pid, count] of Object.entries(benchCounts)) {
+      if (count >= 2 && playerMap[pid]) {
+        warns.push(`${playerMap[pid].name} is benched ${count} times this game`);
+      }
+    }
+
+    // Warn: back-to-back bench
+    for (const [pid, inningsList] of Object.entries(benchByInning)) {
+      if (!playerMap[pid]) continue;
+      for (let j = 0; j < inningsList.length - 1; j++) {
+        if (inningsList[j + 1] === inningsList[j] + 1) {
+          warns.push(`${playerMap[pid].name} has back-to-back bench (innings ${inningsList[j]}-${inningsList[j + 1]})`);
+          break; // one warning per player is enough
+        }
+      }
+    }
+
+    // Warn: infield cap exceeded (only if setting enabled)
+    if (settings.infieldCapEnabled && settings.infieldCapValue) {
+      const cap = settings.infieldCapValue;
+      for (const [pid, count] of Object.entries(infieldCounts)) {
+        if (count > cap && playerMap[pid]) {
+          warns.push(`${playerMap[pid].name} plays infield ${count} innings (cap is ${cap})`);
+        }
+      }
+    }
+
+    return warns;
+  }, [innings, standardInnings, generated, activePlayers, settings]);
 
   const handleRegenerateLFG = () => {
     const result = buildFullRotation({ players: activePlayers, standardInnings: 0, settings, positionHistory });
@@ -337,6 +377,17 @@ export default function DefenseTab({ onNavigate }) {
         </div>
       ) : (
         <div className="space-y-3">
+          {/* Fairness warnings */}
+          {fairnessWarnings.length > 0 && (
+            <div className="space-y-1">
+              {fairnessWarnings.map((w, i) => (
+                <div key={i} className="text-xs text-gold px-3 py-1.5 bg-gold/10 border border-gold/20 rounded-lg">
+                  🟡 {w}
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Standard innings */}
           {Array.from({ length: standardInnings }, (_, i) => i + 1).map(ing => {
             const mode = inningModes[ing] || 'competitive';
