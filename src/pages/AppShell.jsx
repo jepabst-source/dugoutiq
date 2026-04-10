@@ -235,7 +235,7 @@ export default function AppShell() {
             Free tier: {plan.gamesRemaining} game{plan.gamesRemaining !== 1 ? 's' : ''} · {plan.atBatsRemaining} at-bats remaining
           </div>
         )}
-        <div className="text-[10px] text-chalk-muted/50">v4.4</div>
+        <div className="text-[10px] text-chalk-muted/50">v4.5</div>
       </footer>
     </div>
   );
