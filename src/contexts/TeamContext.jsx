@@ -330,7 +330,7 @@ export function TeamProvider({ children }) {
 
   // ── GAME COMMIT / HISTORY ──
 
-  const commitGame = useCallback(async ({ gameNumber, date, innings, opponent, lineups, battingOrder, score }) => {
+  const commitGame = useCallback(async ({ gameNumber, date, innings, opponent, lineups, lfg, oor, battingOrder, score }) => {
     if (!activeTeamId) return;
     const gameRef = doc(collection(db, 'teams', activeTeamId, 'games'));
     await setDoc(gameRef, {
@@ -339,6 +339,8 @@ export function TeamProvider({ children }) {
       innings: innings || 3,
       opponent: opponent || '',
       lineups: lineups || {},       // { 1: {pos: playerId}, 2: {...}, ... }
+      lfg: lfg || null,             // Final-inning win-mode pocket card
+      oor: oor || null,             // Final-inning shuffle pocket card
       battingOrder: battingOrder || [],
       score: score || { ours: [], theirs: [] },
       committedAt: serverTimestamp(),

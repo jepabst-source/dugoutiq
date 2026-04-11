@@ -258,6 +258,8 @@ export default function DefenseTab({ onNavigate }) {
         innings: totalInnings,
         opponent,
         lineups: innings,
+        lfg,
+        oor,
         battingOrder: order.map(p => p.id),
         score: { ours: [], theirs: [] },
       });
@@ -267,7 +269,7 @@ export default function DefenseTab({ onNavigate }) {
       console.error('Failed to commit game:', err);
     }
     setCommitting(false);
-  }, [generated, gameNum, gameDate, totalInnings, opponent, innings, commitGame, generateBattingOrder]);
+  }, [generated, gameNum, gameDate, totalInnings, opponent, innings, lfg, oor, commitGame, generateBattingOrder]);
 
   const handleLoadGame = (game) => {
     setInnings(game.lineups || {});
@@ -275,10 +277,15 @@ export default function DefenseTab({ onNavigate }) {
     setGameDate(game.date || new Date().toISOString().split('T')[0]);
     setOpponent(game.opponent || '');
     setTotalInnings(game.innings || 3);
-    // Pocket cards aren't saved with the game — regenerate fresh ones from current attendance
-    const pocket = buildFullRotation({ players: activePlayers, standardInnings: 0, settings, positionHistory });
-    setLfg(pocket.lfg);
-    setOor(pocket.oor);
+    // Restore saved pocket cards if present (newer games), otherwise regenerate
+    if (game.lfg || game.oor) {
+      setLfg(game.lfg || null);
+      setOor(game.oor || null);
+    } else {
+      const pocket = buildFullRotation({ players: activePlayers, standardInnings: 0, settings, positionHistory });
+      setLfg(pocket.lfg);
+      setOor(pocket.oor);
+    }
     setGenerated(true);
     setShowLoadMenu(false);
   };
