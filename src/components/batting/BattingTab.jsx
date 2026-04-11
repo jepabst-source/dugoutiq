@@ -33,13 +33,19 @@ export default function BattingTab() {
 
   const rollingWindow = team?.settings?.rollingWindow || 5;
 
+  // Rehydrate manual batting order from localStorage on mount
+  const cachedOrderIds = (() => {
+    try { return JSON.parse(localStorage.getItem('dugoutiq_battingOrder') || 'null'); }
+    catch { return null; }
+  })();
+
   const [order, setOrder] = useState([]);
   const [generated, setGenerated] = useState(false);
   const [gameNum, setGameNum] = useState('1');
   const [selectedInning, setSelectedInning] = useState(1);
   const [showLog, setShowLog] = useState(false);
   const [sortMode, setSortMode] = useState('obp');
-  const [manuallyReordered, setManuallyReordered] = useState(false);
+  const [manuallyReordered, setManuallyReordered] = useState(!!cachedOrderIds?.length);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const plan = usePlan(); // 'points' | 'obp'
 
@@ -83,16 +89,34 @@ export default function BattingTab() {
 
   // Update order when autoOrder changes (new at-bats logged, attendance changed)
   useEffect(() => {
-    if (!manuallyReordered && autoOrder.length) {
+    if (!autoOrder.length) return;
+    if (manuallyReordered && cachedOrderIds?.length) {
+      // Rehydrate saved manual order — keep cached sequence, refresh stats from autoOrder
+      const byId = Object.fromEntries(autoOrder.map(p => [p.id, p]));
+      const reordered = cachedOrderIds.map(id => byId[id]).filter(Boolean);
+      // Append any active players not in the cached order (e.g. attendance added since)
+      const seen = new Set(cachedOrderIds);
+      for (const p of autoOrder) if (!seen.has(p.id)) reordered.push(p);
+      setOrder(reordered);
+      setGenerated(true);
+    } else if (!manuallyReordered) {
       setOrder(autoOrder);
       setGenerated(true);
     }
   }, [autoOrder]);
 
+  // Persist manual order to localStorage so Print/Defense tabs can pick it up
+  useEffect(() => {
+    if (manuallyReordered && order.length) {
+      localStorage.setItem('dugoutiq_battingOrder', JSON.stringify(order.map(p => p.id)));
+    }
+  }, [order, manuallyReordered]);
+
   const handleGenerate = () => {
     setOrder(autoOrder);
     setGenerated(true);
     setManuallyReordered(false);
+    localStorage.removeItem('dugoutiq_battingOrder');
   };
 
   const handleDragEnd = (event) => {

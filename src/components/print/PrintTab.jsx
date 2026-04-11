@@ -24,7 +24,15 @@ export default function PrintTab() {
   const totalInnings = savedLineup?.totalInnings || 3;
   const standardInnings = Object.keys(innings).length;
 
-  const battingOrder = generateBattingOrder();
+  // Use manual batting order from BattingTab if present, else auto-generate
+  const manualOrderIds = (() => {
+    try { return JSON.parse(localStorage.getItem('dugoutiq_battingOrder') || 'null'); }
+    catch { return null; }
+  })();
+  const autoOrder = generateBattingOrder();
+  const battingOrder = manualOrderIds?.length
+    ? manualOrderIds.map(id => autoOrder.find(p => p.id === id) || players.find(p => p.id === id)).filter(Boolean)
+    : autoOrder;
   const activePlayers = getActivePlayers();
   const benchCount = Math.max(0, activePlayers.length - 9);
 

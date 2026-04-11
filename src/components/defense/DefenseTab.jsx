@@ -258,7 +258,13 @@ export default function DefenseTab({ onNavigate }) {
     if (!plan.canCommitGame) { setShowUpgrade(true); return; }
     setCommitting(true);
     try {
-      const order = generateBattingOrder();
+      // Honor manual batting order from BattingTab if the coach set one
+      let manualIds = null;
+      try { manualIds = JSON.parse(localStorage.getItem('dugoutiq_battingOrder') || 'null'); } catch {}
+      const auto = generateBattingOrder();
+      const orderIds = manualIds?.length
+        ? manualIds.filter(id => auto.find(p => p.id === id))
+        : auto.map(p => p.id);
       await commitGame({
         gameNumber: gameNum ? parseInt(gameNum) : undefined,
         date: gameDate,
@@ -267,7 +273,7 @@ export default function DefenseTab({ onNavigate }) {
         lineups: innings,
         lfg,
         oor,
-        battingOrder: order.map(p => p.id),
+        battingOrder: orderIds,
         score: { ours: [], theirs: [] },
       });
       setCommitted(true);
