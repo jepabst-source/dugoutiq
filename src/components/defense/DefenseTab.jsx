@@ -23,14 +23,21 @@ export default function DefenseTab({ onNavigate }) {
   } = useTeam();
 
   const settings = team?.settings || {};
-  const [innings, setInnings] = useState({});
-  const [lfg, setLfg] = useState(null);
-  const [oor, setOor] = useState(null);
-  const [gameNum, setGameNum] = useState('');
-  const [gameDate, setGameDate] = useState(new Date().toISOString().split('T')[0]);
-  const [opponent, setOpponent] = useState('');
-  const [totalInnings, setTotalInnings] = useState(settings.defaultInnings || 3);
-  const [generated, setGenerated] = useState(false);
+
+  // Rehydrate from localStorage so switching tabs doesn't lose the loaded/edited lineup
+  const cached = (() => {
+    try { return JSON.parse(localStorage.getItem('dugoutiq_currentLineup')) || null; }
+    catch { return null; }
+  })();
+
+  const [innings, setInnings] = useState(cached?.innings || {});
+  const [lfg, setLfg] = useState(cached?.lfg || null);
+  const [oor, setOor] = useState(cached?.oor || null);
+  const [gameNum, setGameNum] = useState(cached?.gameNum || '');
+  const [gameDate, setGameDate] = useState(cached?.gameDate || new Date().toISOString().split('T')[0]);
+  const [opponent, setOpponent] = useState(cached?.opponent || '');
+  const [totalInnings, setTotalInnings] = useState(cached?.totalInnings || settings.defaultInnings || 3);
+  const [generated, setGenerated] = useState(!!(cached?.innings && Object.keys(cached.innings).length > 0));
   const [committing, setCommitting] = useState(false);
   const [committed, setCommitted] = useState(false);
   const [inningModes, setInningModes] = useState(() => settings.defaultInningModes || {});
