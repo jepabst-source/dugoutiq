@@ -86,11 +86,12 @@ export default function PrintTab() {
               <div className="text-xs font-bold uppercase tracking-[0.15em] text-[#1a4332] border-b-[1.5px] border-[#1a4332] pb-1 mb-2">
                 Batting Order
               </div>
+              {/* old sizes: text-sm row, w-5 num col, text-xs player# */}
               {battingOrder.map((p, i) => (
-                <div key={p.id} className="flex items-baseline gap-2 py-[3px] border-b border-dotted border-gray-300 text-sm">
-                  <span className="text-gray-400 font-bold w-5 text-right flex-shrink-0" style={{ fontVariantNumeric: 'tabular-nums' }}>{i + 1}</span>
+                <div key={p.id} className="flex items-baseline gap-2 py-[5px] border-b border-dotted border-gray-300 text-[17px]">
+                  <span className="text-gray-400 font-bold w-6 text-right flex-shrink-0" style={{ fontVariantNumeric: 'tabular-nums' }}>{i + 1}</span>
                   <span className="font-semibold flex-1">{p.name}</span>
-                  {p.number && <span className="text-xs text-gray-400">#{p.number}</span>}
+                  {p.number && <span className="text-sm text-gray-400">#{p.number}</span>}
                 </div>
               ))}
 
