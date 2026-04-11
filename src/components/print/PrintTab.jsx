@@ -78,7 +78,8 @@ export default function PrintTab() {
           </div>
 
           {/* Grid: Batting (left) + Defense (right) */}
-          <div className="grid grid-cols-[1fr_2fr] gap-5 print:gap-4">
+          {/* old: grid-cols-[1fr_2fr] — gave batting 1/3, defense 2/3 */}
+          <div className="grid grid-cols-[1fr_3fr] gap-5 print:gap-4">
 
             {/* Left column — Batting Order + Score */}
             <div>
@@ -121,18 +122,20 @@ export default function PrintTab() {
                   const asgn = innings[ing] || {};
                   return (
                     <div key={ing}>
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-[#1a4332] mb-1">
+                      {/* old: text-[10px] */}
+                      <div className="text-[12px] font-bold uppercase tracking-wider text-[#1a4332] mb-1">
                         Inning {ing}
                       </div>
+                      {/* old sizes: text-[11px] row, text-[10px] label, w-[70px] label */}
                       {ALL_POS.filter(pos => !(pos.startsWith('Bench') && !asgn[pos])).map(pos => {
                         const pid = asgn[pos];
                         const isBench = pos.startsWith('Bench');
                         const isFirstBench = pos === 'Bench 1' && pid;
                         return (
-                          <div key={pos} className={`flex gap-1 text-[11px] py-[2px] border-b border-dotted border-gray-200
+                          <div key={pos} className={`flex gap-1 text-[13px] py-[3px] border-b border-dotted border-gray-200
                             ${isBench ? 'text-gray-400' : ''}
                             ${isFirstBench ? 'border-t-2 border-t-gray-400 mt-1 pt-1' : ''}`}>
-                            <span className="text-gray-500 w-[70px] flex-shrink-0 text-[10px]">{isBench ? 'Bench' : pos}</span>
+                            <span className="text-gray-500 w-[78px] flex-shrink-0 text-[11px]">{isBench ? 'Bench' : pos}</span>
                             <span className="font-semibold">{pid ? getPlayerName(pid) : '—'}</span>
                           </div>
                         );
