@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useTeam, PTS } from '../../contexts/TeamContext';
 import { usePlan } from '../../hooks/usePlan';
 import UpgradeModal from '../shared/UpgradeModal';
@@ -87,19 +87,26 @@ export default function BattingTab() {
     }
   });
 
-  // Update order when autoOrder changes (new at-bats logged, attendance changed)
+  // Rehydrate cached manual order ONCE on first mount; otherwise drags would
+  // get clobbered every time autoOrder recomputes.
+  const hasRehydratedRef = useRef(false);
+
   useEffect(() => {
     if (!autoOrder.length) return;
-    if (manuallyReordered && cachedOrderIds?.length) {
-      // Rehydrate saved manual order — keep cached sequence, refresh stats from autoOrder
+
+    if (!hasRehydratedRef.current && manuallyReordered && cachedOrderIds?.length) {
+      hasRehydratedRef.current = true;
       const byId = Object.fromEntries(autoOrder.map(p => [p.id, p]));
       const reordered = cachedOrderIds.map(id => byId[id]).filter(Boolean);
-      // Append any active players not in the cached order (e.g. attendance added since)
       const seen = new Set(cachedOrderIds);
       for (const p of autoOrder) if (!seen.has(p.id)) reordered.push(p);
       setOrder(reordered);
       setGenerated(true);
-    } else if (!manuallyReordered) {
+      return;
+    }
+
+    // Auto-update only when the user hasn't manually reordered
+    if (!manuallyReordered) {
       setOrder(autoOrder);
       setGenerated(true);
     }
