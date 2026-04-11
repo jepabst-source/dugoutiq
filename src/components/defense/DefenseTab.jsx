@@ -275,8 +275,10 @@ export default function DefenseTab({ onNavigate }) {
     setGameDate(game.date || new Date().toISOString().split('T')[0]);
     setOpponent(game.opponent || '');
     setTotalInnings(game.innings || 3);
-    setLfg(null);
-    setOor(null);
+    // Pocket cards aren't saved with the game — regenerate fresh ones from current attendance
+    const pocket = buildFullRotation({ players: activePlayers, standardInnings: 0, settings, positionHistory });
+    setLfg(pocket.lfg);
+    setOor(pocket.oor);
     setGenerated(true);
     setShowLoadMenu(false);
   };
