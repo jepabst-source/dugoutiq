@@ -299,6 +299,10 @@ export default function DefenseTab({ onNavigate }) {
       setLfg(pocket.lfg);
       setOor(pocket.oor);
     }
+    // Restore saved batting order so BattingTab and PrintTab pick it up
+    if (game.battingOrder?.length) {
+      localStorage.setItem('dugoutiq_battingOrder', JSON.stringify(game.battingOrder));
+    }
     setGenerated(true);
     setShowLoadMenu(false);
   };
