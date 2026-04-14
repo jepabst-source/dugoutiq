@@ -354,17 +354,13 @@ export function TeamProvider({ children }) {
   }, [activeTeamId]);
 
   // Build position history from all saved games.
-  // A player is only counted for a game if they're in that game's batting order —
-  // otherwise their ID is stale (e.g. loaded-from-previous lineup, then marked absent).
   const getPositionHistory = useCallback(() => {
     const hist = {};
     for (const game of savedGames) {
       const lineups = game.lineups || {};
-      const attended = game.battingOrder?.length ? new Set(game.battingOrder) : null;
       for (const [, assignment] of Object.entries(lineups)) {
         for (const [pos, playerId] of Object.entries(assignment)) {
           if (!playerId) continue;
-          if (attended && !attended.has(playerId)) continue;
           if (!hist[playerId]) hist[playerId] = {};
           hist[playerId][pos] = (hist[playerId][pos] || 0) + 1;
         }

@@ -265,12 +265,23 @@ export default function DefenseTab({ onNavigate }) {
       const orderIds = manualIds?.length
         ? manualIds.filter(id => auto.find(p => p.id === id))
         : auto.map(p => p.id);
+      // Strip stale IDs from lineups — only keep assignments for players
+      // currently in attendance. Handles cases like loading a previous game
+      // then toggling attendance without regenerating.
+      const activeIds = new Set(activePlayers.map(p => p.id));
+      const cleanLineups = {};
+      for (const [inning, assignment] of Object.entries(innings)) {
+        cleanLineups[inning] = {};
+        for (const [pos, pid] of Object.entries(assignment)) {
+          if (pid && activeIds.has(pid)) cleanLineups[inning][pos] = pid;
+        }
+      }
       await commitGame({
         gameNumber: gameNum ? parseInt(gameNum) : undefined,
         date: gameDate,
         innings: totalInnings,
         opponent,
-        lineups: innings,
+        lineups: cleanLineups,
         lfg,
         oor,
         battingOrder: orderIds,
@@ -282,7 +293,7 @@ export default function DefenseTab({ onNavigate }) {
       console.error('Failed to commit game:', err);
     }
     setCommitting(false);
-  }, [generated, gameNum, gameDate, totalInnings, opponent, innings, lfg, oor, commitGame, generateBattingOrder]);
+  }, [generated, gameNum, gameDate, totalInnings, opponent, innings, lfg, oor, activePlayers, commitGame, generateBattingOrder]);
 
   const handleLoadGame = (game) => {
     setInnings(game.lineups || {});
