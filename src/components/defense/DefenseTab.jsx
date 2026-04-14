@@ -68,14 +68,29 @@ export default function DefenseTab({ onNavigate }) {
     }
   }, [activePlayers.length]);
 
-  // Sync lineup to localStorage so Print tab can read it
+  // Sync lineup to localStorage so Print tab can read it.
+  // Strip any IDs not in current attendance (e.g. loaded-previous-game carryover).
   useEffect(() => {
     if (generated) {
+      const activeIds = new Set(activePlayers.map(p => p.id));
+      const cleanAssignment = (obj) => {
+        if (!obj) return obj;
+        const out = {};
+        for (const [pos, pid] of Object.entries(obj)) {
+          if (pid && activeIds.has(pid)) out[pos] = pid;
+        }
+        return out;
+      };
+      const cleanInnings = {};
+      for (const [ing, a] of Object.entries(innings)) cleanInnings[ing] = cleanAssignment(a);
       localStorage.setItem('dugoutiq_currentLineup', JSON.stringify({
-        innings, lfg, oor, gameNum, gameDate, opponent, totalInnings,
+        innings: cleanInnings,
+        lfg: cleanAssignment(lfg),
+        oor: cleanAssignment(oor),
+        gameNum, gameDate, opponent, totalInnings,
       }));
     }
-  }, [innings, lfg, oor, gameNum, gameDate, opponent, totalInnings, generated]);
+  }, [innings, lfg, oor, gameNum, gameDate, opponent, totalInnings, generated, activePlayers]);
 
   const toggleInningMode = (ing) => {
     setInningModes(prev => ({
