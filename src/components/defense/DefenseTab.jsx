@@ -486,7 +486,7 @@ export default function DefenseTab({ onNavigate }) {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <PocketCard
-                label="LFG"
+                label="Competitive"
                 sublabel="WIN MODE"
                 assignment={lfg}
                 players={activePlayers}
@@ -496,7 +496,7 @@ export default function DefenseTab({ onNavigate }) {
                 onSwap={handleLfgSwap}
               />
               <PocketCard
-                label="OOR"
+                label="Developmental"
                 sublabel="SHUFFLE"
                 assignment={oor}
                 players={activePlayers}
@@ -756,7 +756,7 @@ function PocketCard({ label, sublabel, assignment, players, benchCount, accentCl
         <div className="flex items-center justify-between px-3 py-1.5 bg-white border-b border-border rounded-t-xl">
           <div className="flex items-center gap-2">
             <span className="text-sm font-bold tracking-wider">
-              {label === 'LFG' ? '⚡' : '🔄'} {label}
+              {label === 'Competitive' ? '⚡' : '🔄'} {label}
             </span>
             <span className="px-2 py-0.5 text-[9px] font-bold uppercase border rounded tracking-wider opacity-70">
               {sublabel}

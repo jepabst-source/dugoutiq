@@ -55,7 +55,7 @@ export default function PrintTab() {
           ↻ Refresh
         </button>
         <span className="text-xs text-chalk-muted hidden sm:inline">
-          Page 1: dugout card · Page 2: pocket card (LFG / OOR)
+          Page 1: dugout card · Page 2: pocket card (Competitive / Developmental)
         </span>
       </div>
 
@@ -156,10 +156,10 @@ export default function PrintTab() {
             </div>
 
             <div className="grid grid-cols-2 gap-6">
-              {/* LFG */}
+              {/* Competitive */}
               <div>
                 <div className="inline-block px-3 py-1 text-sm font-bold tracking-wider rounded bg-[#1a4332] text-white mb-3">
-                  LFG
+                  Competitive
                 </div>
                 {lfg ? (
                   ALL_POS.filter(pos => lfg[pos]).map(pos => {
@@ -177,10 +177,10 @@ export default function PrintTab() {
                 ) : <div className="text-xs text-gray-400">Generate lineup first</div>}
               </div>
 
-              {/* OOR */}
+              {/* Developmental */}
               <div>
                 <div className="inline-block px-3 py-1 text-sm font-bold tracking-wider rounded bg-gray-500 text-white mb-3">
-                  OOR
+                  Developmental
                 </div>
                 {oor ? (
                   ALL_POS.filter(pos => oor[pos]).map(pos => {

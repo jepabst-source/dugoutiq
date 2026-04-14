@@ -538,7 +538,7 @@ export default function SettingsTab() {
 
             <div className="text-xs font-semibold text-chalk-muted uppercase tracking-wider mb-2">Default Inning Modes</div>
             <p className="text-[10px] text-chalk-muted mb-3">
-              Set each inning's default mode. The last inning is always the LFG/OOR pocket card.
+              Set each inning's default mode. The last inning is always the Competitive/Developmental pocket card.
               You can override per game on the Defense tab.
             </p>
             <div className="flex gap-2 flex-wrap">
