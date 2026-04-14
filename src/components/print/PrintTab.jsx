@@ -72,8 +72,11 @@ export default function PrintTab() {
           {/* Header */}
           <div className="flex items-center justify-between border-b-[3px] border-[#1a4332] pb-2 mb-4">
             <div className="text-2xl font-bold text-[#1a4332] tracking-tight flex items-center gap-2"><img src="/logo-square.jpg" className="w-8 h-8 rounded" /> {team?.name || 'Dugout IQ'}</div>
-            <div className="text-sm text-gray-500">
-              Game {gameNum}{opponent ? ` vs ${opponent}` : ''} · {gameDate}
+            <div className="text-right">
+              <div className="text-sm text-gray-500">
+                Game {gameNum}{opponent ? ` vs ${opponent}` : ''} · {gameDate}
+              </div>
+              <div className="text-[10px] text-gray-400 mt-0.5">www.lineupman.com</div>
             </div>
           </div>
 
