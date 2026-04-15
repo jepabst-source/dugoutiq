@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTeam } from '../../contexts/TeamContext';
-import { buildFullRotation, POSITIONS, INFIELD_POSITIONS, OUTFIELD_POSITIONS } from '../../utils/rotationEngine';
+import { buildFullRotation, POSITIONS, INFIELD_POSITIONS, OUTFIELD_POSITIONS, getPositions } from '../../utils/rotationEngine';
 import { usePlan } from '../../hooks/usePlan';
 import UpgradeModal from '../shared/UpgradeModal';
 import {
@@ -495,6 +495,7 @@ export default function DefenseTab({ onNavigate }) {
                 mode={mode}
                 players={activePlayers}
                 benchCount={benchCount}
+                outfield={getPositions(settings).outfield}
                 onSwap={(pos, pid) => handleSwap(ing, pos, pid)}
                 onReshuffle={() => handleReshuffleInning(ing)}
                 onRepeatPrevious={() => handleRepeatPrevious(ing)}
@@ -517,6 +518,7 @@ export default function DefenseTab({ onNavigate }) {
                 assignment={lfg}
                 players={activePlayers}
                 benchCount={benchCount}
+                outfield={getPositions(settings).outfield}
                 accentClass="text-lime border-lime bg-white"
                 onRegenerate={handleRegenerateLFG}
                 onSwap={handleLfgSwap}
@@ -527,6 +529,7 @@ export default function DefenseTab({ onNavigate }) {
                 assignment={oor}
                 players={activePlayers}
                 benchCount={benchCount}
+                outfield={getPositions(settings).outfield}
                 accentClass="text-chalk-dim border-lime bg-white"
                 onRegenerate={handleRegenerateOOR}
                 onSwap={handleOorSwap}
@@ -557,7 +560,7 @@ export default function DefenseTab({ onNavigate }) {
 
 // ── Inning Card Component ──
 
-function InningCard({ inning, assignment, isDevInning, mode, players, benchCount, onSwap, onReshuffle, onRepeatPrevious, onToggleMode, allInnings, noBackToBack }) {
+function InningCard({ inning, assignment, isDevInning, mode, players, benchCount, outfield, onSwap, onReshuffle, onRepeatPrevious, onToggleMode, allInnings, noBackToBack }) {
   const benchPositions = POSITIONS.bench.slice(0, benchCount);
   const [activeId, setActiveId] = useState(null);
 
@@ -646,7 +649,7 @@ function InningCard({ inning, assignment, isDevInning, mode, players, benchCount
           {/* Outfield + Bench */}
           <div className="px-3 py-2">
             <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-1">Outfield</div>
-            {POSITIONS.outfield.map(pos => (
+            {outfield.map(pos => (
               <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="outfield" isBeingDragged={activeId === pos} />
             ))}
 
@@ -685,6 +688,8 @@ const SHORT_POS = {
   'Left Field': 'Left Fld',
   'Center Field': 'Center Fld',
   'Right Field': 'Right Fld',
+  'Left Center': 'L Center',
+  'Right Center': 'R Center',
 };
 
 function PositionRow({ pos, playerId, players, onSwap, type, isBeingDragged }) {
@@ -749,7 +754,7 @@ function PositionRow({ pos, playerId, players, onSwap, type, isBeingDragged }) {
 
 // ── Pocket Card (LFG / OOR) ──
 
-function PocketCard({ label, sublabel, assignment, players, benchCount, accentClass, onRegenerate, onSwap }) {
+function PocketCard({ label, sublabel, assignment, players, benchCount, outfield, accentClass, onRegenerate, onSwap }) {
   if (!assignment) return null;
 
   const benchPositions = POSITIONS.bench.slice(0, benchCount);
@@ -802,7 +807,7 @@ function PocketCard({ label, sublabel, assignment, players, benchCount, accentCl
           </div>
           <div className="px-3 py-2">
             <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-1">Outfield</div>
-            {POSITIONS.outfield.map(pos => (
+            {outfield.map(pos => (
               <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="outfield" isBeingDragged={activeId === pos} />
             ))}
             {benchPositions.length > 0 && (

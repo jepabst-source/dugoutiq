@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useTeam } from '../../contexts/TeamContext';
+import { getPositions } from '../../utils/rotationEngine';
 import StarRating from '../shared/StarRating';
-
-const POSITIONS = ['Pitcher', 'Catcher', '1st Base', '2nd Base', 'Shortstop', '3rd Base', 'Left Field', 'Center Field', 'Right Field'];
 
 export default function RosterTab() {
   const { players, team, addPlayer, updatePlayer, removePlayer, getPlayerStats } = useTeam();
+  const POSITIONS = getPositions(team?.settings).all;
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
@@ -48,7 +48,8 @@ export default function RosterTab() {
       if (opts.obp) row += `<td class="stat">${stats.obp !== null ? stats.obp.toFixed(3).replace(/^0/, '') : '\u2014'}</td>`;
       if (opts.positions) {
         const prefs = (p.prefPositions || []).map(pos =>
-          pos.replace('Center Field', 'CF').replace('Left Field', 'LF').replace('Right Field', 'RF')
+          pos.replace('Left Center', 'LC').replace('Right Center', 'RC')
+             .replace('Center Field', 'CF').replace('Left Field', 'LF').replace('Right Field', 'RF')
              .replace('1st Base', '1B').replace('2nd Base', '2B').replace('3rd Base', '3B')
              .replace('Shortstop', 'SS').replace('Pitcher', 'P').replace('Catcher', 'C')
         ).join(', ');
@@ -295,6 +296,8 @@ function PlayerCard({ player, onEdit, onRemove, onRatingChange, onCatcherToggle,
 }
 
 function PlayerForm({ onSave, onCancel, initial }) {
+  const { team } = useTeam();
+  const POSITIONS = getPositions(team?.settings).all;
   const [name, setName] = useState(initial?.name || '');
   const [number, setNumber] = useState(initial?.number || '');
   const [defRating, setDefRating] = useState(initial?.defRating || 3);

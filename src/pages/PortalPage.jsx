@@ -304,7 +304,8 @@ export default function PortalPage({ teamId }) {
                     {positions.length > 0 ? (
                       positions.map((pos, i) => (
                         <span key={i} className="px-2 py-0.5 text-[10px] font-semibold bg-gray-100 text-gray-600 rounded">
-                          {pos.replace('Center Field', 'CF').replace('Left Field', 'LF').replace('Right Field', 'RF')
+                          {pos.replace('Left Center', 'LC').replace('Right Center', 'RC')
+                              .replace('Center Field', 'CF').replace('Left Field', 'LF').replace('Right Field', 'RF')
                               .replace('1st Base', '1B').replace('2nd Base', '2B').replace('3rd Base', '3B')
                               .replace('Shortstop', 'SS').replace('Pitcher', 'P').replace('Catcher', 'C')}
                         </span>

@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useTeam } from '../../contexts/TeamContext';
-import { POSITIONS } from '../../utils/rotationEngine';
-
-const ALL_POS = [...POSITIONS.infield, ...POSITIONS.outfield, 'Bench 1', 'Bench 2', 'Bench 3'];
+import { getPositions } from '../../utils/rotationEngine';
 
 export default function PrintTab() {
   const { team, players, generateBattingOrder, getActivePlayers } = useTeam();
+  const positions = getPositions(team?.settings);
+  const ALL_POS = [...positions.infield, ...positions.outfield, 'Bench 1', 'Bench 2', 'Bench 3'];
 
   // We need to read lineups from a shared state. For now, store in localStorage
   // when defense tab generates/commits, and read here.

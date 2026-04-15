@@ -22,6 +22,7 @@ const DEFAULT_SETTINGS = {
   },
   benchRatioTier2: 1.5,  // How often 4-5★ players bench relative to 1-3★ (e.g. 1.5 = half as often)
   stickyPositions: false, // Keep kids in 3-4★ mandated positions at least 2 innings in a row
+  fourOutfielders: false, // Younger leagues: LF/LC/RC/RF instead of LF/CF/RF (10 field slots)
   assistantFullAccess: false,
   trackingMode: 'simple', // 'simple' or 'advanced' — default for Game Day and Scorer
   // Parent Portal display settings

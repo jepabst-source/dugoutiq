@@ -1,18 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTeam } from '../../contexts/TeamContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { getPositions } from '../../utils/rotationEngine';
 import StarRating from '../shared/StarRating';
 import { useToast } from '../shared/Toast';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-
-const ALL_POSITIONS = ['Pitcher', 'Catcher', '1st Base', '2nd Base', 'Shortstop', '3rd Base', 'Left Field', 'Center Field', 'Right Field'];
 
 export default function SettingsTab() {
   const { team, updateTeam, updateSettings, generateInviteCode, removeAssistant, deleteTeam, getActivePlayers, battingOrder: savedOrder } = useTeam();
   const { user } = useAuth();
   const toast = useToast();
   const settings = team?.settings || {};
+  const ALL_POSITIONS = getPositions(settings).all;
 
   const [teamName, setTeamName] = useState(team?.name || '');
   const [portalCode, setPortalCode] = useState(team?.portalCode || '');
@@ -480,6 +480,13 @@ export default function SettingsTab() {
             description="Players in 3-4★ mandated positions (e.g. 1st Base, Shortstop) stay at least two innings in a row"
             enabled={settings.stickyPositions}
             onChange={() => toggleRule('stickyPositions')}
+          />
+
+          <RuleToggle
+            label="Four outfielders (younger leagues)"
+            description="Use Left Field, Left Center, Right Center, Right Field instead of LF/CF/RF. 10 field slots per inning."
+            enabled={settings.fourOutfielders}
+            onChange={() => toggleRule('fourOutfielders')}
           />
 
           {/* All-Star Bench Ratio */}

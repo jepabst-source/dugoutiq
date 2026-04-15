@@ -1,12 +1,12 @@
 import { useState, useMemo } from 'react';
 import { useTeam, PTS, OUTCOME_SHORT, IS_K } from '../../contexts/TeamContext';
-import { POSITIONS } from '../../utils/rotationEngine';
-
-const POS_ORDER = [...POSITIONS.infield, ...POSITIONS.outfield, 'Bench'];
+import { POSITIONS, getPositions } from '../../utils/rotationEngine';
 
 export default function HistoryTab() {
-  const { players, atBats, savedGames, getPlayerStats, getRollingAvg, getPositionHistory, deleteGame, deleteAtBat, clearAllAtBats } = useTeam();
+  const { team, players, atBats, savedGames, getPlayerStats, getRollingAvg, getPositionHistory, deleteGame, deleteAtBat, clearAllAtBats } = useTeam();
   const [clearing, setClearing] = useState(false);
+  const positions = getPositions(team?.settings);
+  const POS_ORDER = [...positions.infield, ...positions.outfield, 'Bench'];
 
   // Player stats summary
   const playerStats = useMemo(() => {
@@ -52,7 +52,8 @@ export default function HistoryTab() {
                   <th className="text-left px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider sticky left-0 bg-panel">Player</th>
                   {POS_ORDER.map(pos => (
                     <th key={pos} className="text-center px-1.5 py-2 text-[9px] font-bold text-chalk-muted uppercase tracking-wider whitespace-nowrap">
-                      {pos.replace('Left Field', 'LF').replace('Center Field', 'CF').replace('Right Field', 'RF')
+                      {pos.replace('Left Center', 'LC').replace('Right Center', 'RC')
+                        .replace('Left Field', 'LF').replace('Center Field', 'CF').replace('Right Field', 'RF')
                         .replace('1st Base', '1B').replace('2nd Base', '2B').replace('3rd Base', '3B')
                         .replace('Shortstop', 'SS').replace('Pitcher', 'P').replace('Catcher', 'C')
                         .replace('Bench', 'BN')}
@@ -128,7 +129,8 @@ export default function HistoryTab() {
                       <span className="font-bold text-chalk-dim">I{ing}:</span>{' '}
                       {Object.entries(asgn).filter(([pos]) => !pos.startsWith('Bench')).map(([pos, pid]) => {
                         const p = players.find(x => x.id === pid);
-                        const shortPos = pos.replace('Left Field', 'LF').replace('Center Field', 'CF').replace('Right Field', 'RF')
+                        const shortPos = pos.replace('Left Center', 'LC').replace('Right Center', 'RC')
+                          .replace('Left Field', 'LF').replace('Center Field', 'CF').replace('Right Field', 'RF')
                           .replace('1st Base', '1B').replace('2nd Base', '2B').replace('3rd Base', '3B')
                           .replace('Shortstop', 'SS').replace('Pitcher', 'P').replace('Catcher', 'C');
                         return `${shortPos}:${p?.name?.slice(0, 6) || '?'}`;

@@ -70,12 +70,23 @@
 const POSITIONS = {
   infield: ['Pitcher', 'Catcher', '1st Base', '2nd Base', 'Shortstop', '3rd Base'],
   outfield: ['Left Field', 'Center Field', 'Right Field'],
+  outfield4: ['Left Field', 'Left Center', 'Right Center', 'Right Field'],
   bench: ['Bench 1', 'Bench 2', 'Bench 3'],
 };
 
-const ALL_FIELD_POSITIONS = [...POSITIONS.infield, ...POSITIONS.outfield];
 const INFIELD_POSITIONS = ['1st Base', '2nd Base', '3rd Base', 'Shortstop'];
-const OUTFIELD_POSITIONS = ['Left Field', 'Center Field', 'Right Field'];
+// Superset: any league variant. Used for scoring classification.
+const OUTFIELD_POSITIONS = ['Left Field', 'Left Center', 'Center Field', 'Right Center', 'Right Field'];
+
+// Returns the active position set based on team settings.
+export function getPositions(settings) {
+  const outfield = settings?.fourOutfielders
+    ? POSITIONS.outfield4
+    : POSITIONS.outfield;
+  const infield = POSITIONS.infield;
+  const all = [...infield, ...outfield];
+  return { infield, outfield, all, fieldCount: all.length };
+}
 
 // ---------------------------------------------------------------------------
 // Scoring constants
@@ -411,11 +422,12 @@ function assignCatcher(catchers, used, gameInnings, ing, positionHistory) {
 export function buildFullRotation({ players, standardInnings, settings, positionHistory = {}, inningModes = {} }) {
   if (!players.length) return { innings: {}, lfg: {}, oor: {} };
 
+  const { all: ALL_FIELD_POSITIONS, fieldCount } = getPositions(settings);
   const sorted = [...players].sort((a, b) => b.defRating - a.defRating);
   const pitchers = players.filter(p => p.canPitch).sort((a, b) => b.defRating - a.defRating);
   const bestPitcher = pitchers[0] || null;
   const catchers = players.filter(p => p.canCatch);
-  const benchCount = Math.max(0, players.length - 9);
+  const benchCount = Math.max(0, players.length - fieldCount);
 
   const innings = {};
   let benchedLastInning = new Set();
@@ -460,8 +472,8 @@ export function buildFullRotation({ players, standardInnings, settings, position
   }
 
   // Pocket cards
-  const lfg = buildLFGLineup(players, positionHistory, innings, standardInnings);
-  const oor = buildOORLineup(players, positionHistory, innings, standardInnings);
+  const lfg = buildLFGLineup(players, positionHistory, innings, standardInnings, settings);
+  const oor = buildOORLineup(players, positionHistory, innings, standardInnings, settings);
 
   return { innings, lfg, oor };
 }
@@ -470,9 +482,10 @@ export function buildFullRotation({ players, standardInnings, settings, position
 // LFG (Win Mode) pocket card
 // ---------------------------------------------------------------------------
 
-function buildLFGLineup(players, positionHistory, gameInnings = {}, standardInnings = 0) {
+function buildLFGLineup(players, positionHistory, gameInnings = {}, standardInnings = 0, settings = {}) {
   if (!players.length) return null;
 
+  const { outfield } = getPositions(settings);
   const sorted = [...players].sort((a, b) => b.defRating - a.defRating);
   const assignment = {};
   const used = new Set();
@@ -499,7 +512,7 @@ function buildLFGLineup(players, positionHistory, gameInnings = {}, standardInni
   }
 
   // Field positions — by rating + preference
-  const fieldPositions = [...INFIELD_POSITIONS, ...OUTFIELD_POSITIONS];
+  const fieldPositions = [...INFIELD_POSITIONS, ...outfield];
   for (const pos of fieldPositions) {
     const avail = sorted.filter(p => !used.has(p.id));
     if (!avail.length) break;
@@ -525,9 +538,10 @@ function buildLFGLineup(players, positionHistory, gameInnings = {}, standardInni
 // OOR (Shuffle Mode) pocket card
 // ---------------------------------------------------------------------------
 
-function buildOORLineup(players, positionHistory, gameInnings = {}, standardInnings = 0) {
+function buildOORLineup(players, positionHistory, gameInnings = {}, standardInnings = 0, settings = {}) {
   if (!players.length) return null;
 
+  const { outfield, fieldCount } = getPositions(settings);
   const sorted = [...players].sort((a, b) => a.defRating - b.defRating + (Math.random() - 0.5));
   const assignment = {};
   const used = new Set();
@@ -557,7 +571,7 @@ function buildOORLineup(players, positionHistory, gameInnings = {}, standardInni
   }
 
   // Bench — strongest players who haven't been benched yet, then by rating
-  const benchCount = Math.max(0, players.length - 9);
+  const benchCount = Math.max(0, players.length - fieldCount);
   const strong = players.filter(p => !used.has(p.id)).sort((a, b) => {
     const aBenched = benchCounts[a.id] || 0;
     const bBenched = benchCounts[b.id] || 0;
@@ -574,7 +588,7 @@ function buildOORLineup(players, positionHistory, gameInnings = {}, standardInni
   benchedPlayers.forEach((p, i) => { assignment[`Bench ${i + 1}`] = p.id; });
 
   // Field positions — variety-driven
-  const fieldPositions = [...INFIELD_POSITIONS, ...OUTFIELD_POSITIONS];
+  const fieldPositions = [...INFIELD_POSITIONS, ...outfield];
   for (const pos of fieldPositions) {
     const avail = sorted.filter(p => !used.has(p.id));
     if (!avail.length) break;
@@ -593,4 +607,4 @@ function buildOORLineup(players, positionHistory, gameInnings = {}, standardInni
 // Exports
 // ---------------------------------------------------------------------------
 
-export { POSITIONS, ALL_FIELD_POSITIONS, INFIELD_POSITIONS, OUTFIELD_POSITIONS };
+export { POSITIONS, INFIELD_POSITIONS, OUTFIELD_POSITIONS };
