@@ -44,7 +44,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md text-center">
         {/* Logo */}
         <div className="mb-6">
-          <img src="/logo-square.jpg" alt="Dugout IQ" className="w-32 mx-auto rounded-2xl" />
+          <img src="/logo-square.jpg" alt="Dugout IQ" className="w-40 mx-auto rounded-2xl" />
         </div>
         <p className="text-gray-500 text-sm tracking-widest uppercase mb-8">
           Smart Lineup Manager
