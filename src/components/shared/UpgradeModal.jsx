@@ -1,9 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getFunctions, httpsCallable } from 'firebase/functions';
-import app from '../../lib/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
+import app, { db } from '../../lib/firebase';
+import { useAuth } from '../../contexts/AuthContext';
+import { isNative } from '../../services/platform';
+import { getOfferings, purchasePackage, restorePurchases } from '../../services/payments';
 import { useToast } from './Toast';
 
 export default function UpgradeModal({ onClose, lockReason }) {
+  const native = isNative();
+  return native
+    ? <NativeUpgrade onClose={onClose} lockReason={lockReason} />
+    : <WebUpgrade onClose={onClose} lockReason={lockReason} />;
+}
+
+// ── WEB: Stripe Checkout via Firebase Cloud Function ──
+function WebUpgrade({ onClose, lockReason }) {
   const [loading, setLoading] = useState('');
   const toast = useToast();
 
@@ -24,6 +36,145 @@ export default function UpgradeModal({ onClose, lockReason }) {
   };
 
   return (
+    <Shell onClose={onClose} lockReason={lockReason}>
+      <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+          <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">1 Season</div>
+          <div className="text-2xl font-bold text-gray-800">$11.99</div>
+          <div className="text-[10px] text-gray-400">3 months</div>
+          <button
+            onClick={() => handleUpgrade('monthly')}
+            disabled={!!loading}
+            className="w-full mt-3 py-2 rounded-lg bg-gray-200 text-gray-700 font-bold text-xs
+                       hover:bg-gray-300 active:scale-[0.97] transition-all disabled:opacity-50">
+            {loading === 'monthly' ? 'Loading...' : 'Choose Season'}
+          </button>
+        </div>
+
+        <div className="bg-sky/5 border-2 border-sky rounded-xl p-4 relative">
+          <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-sky text-white text-[9px] font-bold rounded-full uppercase tracking-wider">
+            Best Value
+          </div>
+          <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Full Year</div>
+          <div className="text-2xl font-bold text-sky">$19.99</div>
+          <div className="text-[10px] text-gray-400">12 months</div>
+          <button
+            onClick={() => handleUpgrade('annual')}
+            disabled={!!loading}
+            className="w-full mt-3 py-2 rounded-lg bg-sky text-white font-bold text-xs
+                       hover:bg-sky-dim active:scale-[0.97] transition-all disabled:opacity-50">
+            {loading === 'annual' ? 'Loading...' : 'Choose Year'}
+          </button>
+        </div>
+      </div>
+      <button onClick={onClose}
+        className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+        Maybe later
+      </button>
+    </Shell>
+  );
+}
+
+// ── NATIVE (iOS / Android): RevenueCat → store IAP ──
+function NativeUpgrade({ onClose, lockReason }) {
+  const { user, refreshUserDoc } = useAuth();
+  const [pkg, setPkg] = useState(null);
+  const [loadingPkgs, setLoadingPkgs] = useState(true);
+  const [busy, setBusy] = useState('');
+  const toast = useToast();
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const offerings = await getOfferings();
+      if (cancelled) return;
+      // Single-package model: take the first (or look for identifier "lifetime")
+      const lifetime = offerings.find(p => p.identifier === 'lifetime') || offerings[0] || null;
+      setPkg(lifetime);
+      setLoadingPkgs(false);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const markPro = async () => {
+    if (!user) return;
+    try {
+      await updateDoc(doc(db, 'users', user.uid), { plan: 'pro' });
+      await refreshUserDoc();
+    } catch (err) {
+      console.error('Failed to write plan:pro', err);
+    }
+  };
+
+  const handleBuy = async () => {
+    if (!pkg) return;
+    setBusy('buy');
+    const result = await purchasePackage(pkg);
+    if (result.success) {
+      await markPro();
+      toast('You\'re Pro! Enjoy.', 'success');
+      onClose();
+    } else if (result.error === 'cancelled') {
+      // user dismissed — silent
+    } else {
+      toast(result.error || 'Purchase failed. Please try again.', 'error');
+    }
+    setBusy('');
+  };
+
+  const handleRestore = async () => {
+    setBusy('restore');
+    const restored = await restorePurchases();
+    if (restored) {
+      await markPro();
+      toast('Pro restored. Welcome back!', 'success');
+      onClose();
+    } else {
+      toast('No previous purchase found on this account.', 'info');
+    }
+    setBusy('');
+  };
+
+  const priceString = pkg?.product?.priceString || '$5.99';
+
+  return (
+    <Shell onClose={onClose} lockReason={lockReason}>
+      <div className="bg-sky/5 border-2 border-sky rounded-xl p-5 mb-4 relative">
+        <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-sky text-white text-[9px] font-bold rounded-full uppercase tracking-wider">
+          One-Time
+        </div>
+        <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Lifetime Pro</div>
+        <div className="text-3xl font-bold text-sky mb-1">{priceString}</div>
+        <div className="text-[11px] text-gray-500 mb-4">Pay once, never again</div>
+        <button
+          onClick={handleBuy}
+          disabled={!pkg || !!busy || loadingPkgs}
+          className="w-full py-2.5 rounded-lg bg-sky text-white font-bold text-sm
+                     hover:bg-sky-dim active:scale-[0.97] transition-all disabled:opacity-50">
+          {busy === 'buy' ? 'Processing…' : loadingPkgs ? 'Loading…' : 'Unlock Pro'}
+        </button>
+      </div>
+
+      <button
+        onClick={handleRestore}
+        disabled={!!busy}
+        className="text-xs text-gray-500 hover:text-gray-700 underline mb-3 disabled:opacity-50">
+        {busy === 'restore' ? 'Checking…' : 'Restore Purchases'}
+      </button>
+
+      <div>
+        <button onClick={onClose}
+          className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+          Maybe later
+        </button>
+      </div>
+    </Shell>
+  );
+}
+
+// ── Shared modal chrome ──
+function Shell({ onClose, lockReason, children }) {
+  return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40" onClick={onClose}>
       <div className="bg-white border border-gray-200 rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl text-center"
            onClick={e => e.stopPropagation()}>
@@ -40,42 +191,7 @@ export default function UpgradeModal({ onClose, lockReason }) {
           Your roster, stats, and history are all still here — just upgrade to keep going.
         </p>
 
-        {/* Pricing cards */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-            <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">1 Season</div>
-            <div className="text-2xl font-bold text-gray-800">$11.99</div>
-            <div className="text-[10px] text-gray-400">3 months</div>
-            <button
-              onClick={() => handleUpgrade('monthly')}
-              disabled={!!loading}
-              className="w-full mt-3 py-2 rounded-lg bg-gray-200 text-gray-700 font-bold text-xs
-                         hover:bg-gray-300 active:scale-[0.97] transition-all disabled:opacity-50">
-              {loading === 'monthly' ? 'Loading...' : 'Choose Season'}
-            </button>
-          </div>
-
-          <div className="bg-sky/5 border-2 border-sky rounded-xl p-4 relative">
-            <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-sky text-white text-[9px] font-bold rounded-full uppercase tracking-wider">
-              Best Value
-            </div>
-            <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Full Year</div>
-            <div className="text-2xl font-bold text-sky">$19.99</div>
-            <div className="text-[10px] text-gray-400">12 months</div>
-            <button
-              onClick={() => handleUpgrade('annual')}
-              disabled={!!loading}
-              className="w-full mt-3 py-2 rounded-lg bg-sky text-white font-bold text-xs
-                         hover:bg-sky-dim active:scale-[0.97] transition-all disabled:opacity-50">
-              {loading === 'annual' ? 'Loading...' : 'Choose Year'}
-            </button>
-          </div>
-        </div>
-
-        <button onClick={onClose}
-          className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
-          Maybe later
-        </button>
+        {children}
       </div>
     </div>
   );

@@ -8,10 +8,13 @@
 
 import { isNative } from './platform';
 
-// ── CONFIGURATION (update these after RevenueCat setup) ──
-const REVENUECAT_IOS_KEY = 'YOUR_REVENUECAT_IOS_API_KEY';
-const REVENUECAT_ANDROID_KEY = 'YOUR_REVENUECAT_ANDROID_API_KEY';
-const ENTITLEMENT_ID = 'pro'; // The entitlement identifier in RevenueCat
+// ── CONFIGURATION ──
+// Public SDK keys live in Vite env vars (.env.local, git-ignored).
+// These are PUBLIC keys — safe to ship in the bundle. They identify the app
+// to RevenueCat but cannot be used to grant entitlements without a real receipt.
+const REVENUECAT_IOS_KEY = import.meta.env.VITE_REVENUECAT_IOS_KEY || '';
+const REVENUECAT_ANDROID_KEY = import.meta.env.VITE_REVENUECAT_ANDROID_KEY || '';
+const ENTITLEMENT_ID = 'pro';
 
 let Purchases = null;
 let LOG_LEVEL = null;
