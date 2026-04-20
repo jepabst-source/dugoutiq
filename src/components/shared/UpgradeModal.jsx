@@ -40,7 +40,7 @@ function WebUpgrade({ onClose, lockReason }) {
       <div className="grid grid-cols-2 gap-3 mb-6">
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
           <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">1 Season</div>
-          <div className="text-2xl font-bold text-gray-800">$11.99</div>
+          <div className="text-2xl font-bold text-gray-800">$1.99</div>
           <div className="text-[10px] text-gray-400">3 months</div>
           <button
             onClick={() => handleUpgrade('monthly')}
@@ -56,7 +56,7 @@ function WebUpgrade({ onClose, lockReason }) {
             Best Value
           </div>
           <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Full Year</div>
-          <div className="text-2xl font-bold text-sky">$19.99</div>
+          <div className="text-2xl font-bold text-sky">$5.99</div>
           <div className="text-[10px] text-gray-400">12 months</div>
           <button
             onClick={() => handleUpgrade('annual')}
