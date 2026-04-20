@@ -137,6 +137,10 @@ export default function LoginPage() {
                 <button onClick={() => { setMode('reset'); setError(''); setMessage(''); }}
                   className="text-gray-400 hover:text-gray-600 hover:underline">Forgot password?</button>
               </p>
+              <p className="pt-1">
+                <a href="/about.html"
+                  className="text-gray-400 hover:text-gray-600 hover:underline">Learn more about Dugout IQ →</a>
+              </p>
             </>
           )}
           {mode === 'signup' && (
