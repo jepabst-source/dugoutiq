@@ -7,7 +7,7 @@ import {
 import { doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, serverTimestamp } from 'firebase/firestore';
 import { auth, db, googleProvider } from '../lib/firebase';
 import { initPushNotifications, cleanupPushNotifications } from '../services/notifications';
-import { initPurchases } from '../services/payments';
+import { initRevenueCat, logoutRevenueCat } from '../services/payments';
 import { enableBiometricLogin, disableBiometricLogin } from '../services/biometric';
 import { isNative } from '../services/platform';
 import { createDemoTeam } from '../utils/demoTeam';
@@ -145,8 +145,8 @@ export function AuthProvider({ children }) {
         } catch {}
       },
     });
-    // Init Google Play Billing on native
-    initPurchases();
+    // Init RevenueCat with Firebase UID on native
+    initRevenueCat(user.uid);
     // Enable biometric login for next app launch on native
     if (isNative()) enableBiometricLogin();
     return () => { cleanupPushNotifications(); };
@@ -206,6 +206,7 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     disableBiometricLogin();
+    await logoutRevenueCat();
     return signOut(auth);
   };
 
