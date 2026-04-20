@@ -22,6 +22,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@revenuecat/purchases-capacitor": "^13.0.0",
+    "cordova-plugin-purchase": "^13.15.3",
     "firebase": "^12.10.0",
     "html2canvas": "^1.4.1",
     "react": "^19.2.0",

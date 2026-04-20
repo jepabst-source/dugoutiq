@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { getFunctions, httpsCallable } from 'firebase/functions';
-import { doc, updateDoc } from 'firebase/firestore';
-import app, { db } from '../../lib/firebase';
+import app from '../../lib/firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { isNative } from '../../services/platform';
-import { getOfferings, purchasePackage, restorePurchases } from '../../services/payments';
+import { getLifetimeProduct, purchaseLifetime, restorePurchases } from '../../services/payments';
 import { useToast } from './Toast';
 
 export default function UpgradeModal({ onClose, lockReason }) {
@@ -75,46 +74,32 @@ function WebUpgrade({ onClose, lockReason }) {
   );
 }
 
-// ── NATIVE (iOS / Android): RevenueCat → store IAP ──
+// ── NATIVE (Android): Google Play Billing via CdvPurchase, client-trust validation ──
 function NativeUpgrade({ onClose, lockReason }) {
-  const { user, refreshUserDoc } = useAuth();
-  const [pkg, setPkg] = useState(null);
-  const [loadingPkgs, setLoadingPkgs] = useState(true);
+  const { refreshUserDoc } = useAuth();
+  const [product, setProduct] = useState(null);
   const [busy, setBusy] = useState('');
   const toast = useToast();
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const offerings = await getOfferings();
-      if (cancelled) return;
-      // Single-package model: take the first (or look for identifier "lifetime")
-      const lifetime = offerings.find(p => p.identifier === 'lifetime') || offerings[0] || null;
-      setPkg(lifetime);
-      setLoadingPkgs(false);
-    })();
-    return () => { cancelled = true; };
+    // Poll briefly for the product to load (store init happens in AuthContext after login).
+    let attempts = 0;
+    const tick = () => {
+      const p = getLifetimeProduct();
+      if (p) { setProduct(p); return; }
+      if (attempts++ < 20) setTimeout(tick, 250);
+    };
+    tick();
   }, []);
 
-  const markPro = async () => {
-    if (!user) return;
-    try {
-      await updateDoc(doc(db, 'users', user.uid), { plan: 'pro' });
-      await refreshUserDoc();
-    } catch (err) {
-      console.error('Failed to write plan:pro', err);
-    }
-  };
-
   const handleBuy = async () => {
-    if (!pkg) return;
     setBusy('buy');
-    const result = await purchasePackage(pkg);
+    const result = await purchaseLifetime();
     if (result.success) {
-      await markPro();
+      await refreshUserDoc();
       toast('You\'re Pro! Enjoy.', 'success');
       onClose();
-    } else if (result.error === 'cancelled') {
+    } else if (/cancel/i.test(result.error || '')) {
       // user dismissed — silent
     } else {
       toast(result.error || 'Purchase failed. Please try again.', 'error');
@@ -124,9 +109,9 @@ function NativeUpgrade({ onClose, lockReason }) {
 
   const handleRestore = async () => {
     setBusy('restore');
-    const restored = await restorePurchases();
-    if (restored) {
-      await markPro();
+    const result = await restorePurchases();
+    if (result.success) {
+      await refreshUserDoc();
       toast('Pro restored. Welcome back!', 'success');
       onClose();
     } else {
@@ -135,7 +120,7 @@ function NativeUpgrade({ onClose, lockReason }) {
     setBusy('');
   };
 
-  const priceString = pkg?.product?.priceString || '$5.99';
+  const priceString = product?.priceString || '$5.99';
 
   return (
     <Shell onClose={onClose} lockReason={lockReason}>
@@ -148,10 +133,10 @@ function NativeUpgrade({ onClose, lockReason }) {
         <div className="text-[11px] text-gray-500 mb-4">Pay once, never again</div>
         <button
           onClick={handleBuy}
-          disabled={!pkg || !!busy || loadingPkgs}
+          disabled={!!busy}
           className="w-full py-2.5 rounded-lg bg-sky text-white font-bold text-sm
                      hover:bg-sky-dim active:scale-[0.97] transition-all disabled:opacity-50">
-          {busy === 'buy' ? 'Processing…' : loadingPkgs ? 'Loading…' : 'Unlock Pro'}
+          {busy === 'buy' ? 'Processing…' : 'Unlock Pro'}
         </button>
       </div>
 

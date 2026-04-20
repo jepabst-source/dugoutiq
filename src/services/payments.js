@@ -1,154 +1,144 @@
-// RevenueCat payment service for Dugout IQ
+// Google Play Billing via cordova-plugin-purchase (CdvPurchase).
 //
-// On native (iOS/Android): uses RevenueCat to manage Apple IAP / Google Play Billing
-// On web: falls back to existing Stripe Checkout flow
+// v1 model: client-trust. When the plugin reports an approved purchase,
+// we mark the user as Pro in Firestore directly — no server-side receipt
+// validation. Acceptable for a $5.99 one-time lifetime unlock; abuse risk
+// is minimal relative to the engineering cost of proper validation.
 //
-// RevenueCat API keys and entitlement IDs are configured here.
-// These will need to be updated once you create the RevenueCat project.
+// Web is a no-op: loadPlugin returns null off native, so initPurchases,
+// getLifetimeProduct, purchaseLifetime, and restorePurchases all safely
+// early-return without touching the CdvPurchase globals.
 
+import { doc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { db, auth } from '../lib/firebase';
 import { isNative } from './platform';
 
-// ── CONFIGURATION ──
-// Public SDK keys live in Vite env vars (.env.local, git-ignored).
-// These are PUBLIC keys — safe to ship in the bundle. They identify the app
-// to RevenueCat but cannot be used to grant entitlements without a real receipt.
-const REVENUECAT_IOS_KEY = import.meta.env.VITE_REVENUECAT_IOS_KEY || '';
-const REVENUECAT_ANDROID_KEY = import.meta.env.VITE_REVENUECAT_ANDROID_KEY || '';
-const ENTITLEMENT_ID = 'pro';
+const PRODUCT_ID = 'dugoutiq_pro_lifetime';
 
-let Purchases = null;
-let LOG_LEVEL = null;
+let store = null;
 let initialized = false;
+let pendingPurchaseResolver = null;
 
-// Lazy-load RevenueCat SDK only on native
-async function getPurchases() {
-  if (Purchases) return Purchases;
+function getCdvStore() {
+  if (typeof window === 'undefined') return null;
+  return window.CdvPurchase?.store || null;
+}
+
+async function loadPlugin() {
   if (!isNative()) return null;
+  if (getCdvStore()) return window.CdvPurchase;
   try {
-    const mod = await import('@revenuecat/purchases-capacitor');
-    Purchases = mod.Purchases;
-    LOG_LEVEL = mod.LOG_LEVEL;
-    return Purchases;
-  } catch {
-    console.warn('RevenueCat SDK not available');
-    return null;
+    await import('cordova-plugin-purchase');
+  } catch (err) {
+    console.warn('CdvPurchase import failed:', err);
   }
+  return window.CdvPurchase || null;
 }
 
-/**
- * Initialize RevenueCat. Call once after user logs in.
- * @param {string} userId - Firebase user UID (used as RevenueCat app user ID)
- */
-export async function initRevenueCat(userId) {
-  const purchases = await getPurchases();
-  if (!purchases || initialized) return;
+async function markProInFirestore(purchaseToken, productId) {
+  const user = auth.currentUser;
+  if (!user) return;
+  await updateDoc(doc(db, 'users', user.uid), {
+    plan: 'pro',
+    googlePurchaseToken: purchaseToken || null,
+    googleProductId: productId || PRODUCT_ID,
+    upgradedAt: serverTimestamp(),
+  });
+}
 
-  try {
-    const { Capacitor } = await import('@capacitor/core');
-    const platform = Capacitor.getPlatform();
-    const apiKey = platform === 'ios' ? REVENUECAT_IOS_KEY : REVENUECAT_ANDROID_KEY;
+export async function initPurchases() {
+  if (initialized) return;
+  const cdv = await loadPlugin();
+  if (!cdv) return;
 
-    await purchases.setLogLevel({ level: LOG_LEVEL.DEBUG });
-    await purchases.configure({
-      apiKey,
-      appUserID: userId,
+  const { Platform, ProductType, LogLevel } = cdv;
+  store = cdv.store;
+  store.verbosity = LogLevel.ERROR;
+
+  store.register([{
+    id: PRODUCT_ID,
+    type: ProductType.NON_CONSUMABLE,
+    platform: Platform.GOOGLE_PLAY,
+  }]);
+
+  store.when()
+    .approved(async (transaction) => {
+      try {
+        const token = transaction.nativePurchase?.purchaseToken || transaction.purchaseId || null;
+        const productId = transaction.products?.[0]?.id || PRODUCT_ID;
+        await markProInFirestore(token, productId);
+        await transaction.finish();
+        pendingPurchaseResolver?.({ success: true });
+      } catch (err) {
+        console.error('Approved-handler error:', err);
+        pendingPurchaseResolver?.({ success: false, error: err?.message || 'Upgrade failed' });
+      } finally {
+        pendingPurchaseResolver = null;
+      }
     });
+
+  try {
+    await store.initialize([Platform.GOOGLE_PLAY]);
     initialized = true;
-    console.log('RevenueCat initialized for', platform);
   } catch (err) {
-    console.error('RevenueCat init error:', err);
+    console.error('Store initialize error:', err);
   }
 }
 
+export function getLifetimeProduct() {
+  if (!store) return null;
+  const product = store.get(PRODUCT_ID);
+  if (!product) return null;
+  const offer = product.getOffer();
+  return {
+    priceString: offer?.pricingPhases?.[0]?.price || '$5.99',
+    title: product.title,
+    description: product.description,
+    owned: product.owned,
+  };
+}
+
 /**
- * Check if user has active Pro entitlement via RevenueCat.
- * @returns {Promise<boolean>} true if user has active pro subscription
+ * Trigger the Google Play Billing purchase sheet.
+ * Resolves when the purchase is approved+acknowledged, user cancels, or an error occurs.
+ * @returns {Promise<{success: boolean, error?: string}>}
  */
-export async function checkProEntitlement() {
-  const purchases = await getPurchases();
-  if (!purchases || !initialized) return false;
+export async function purchaseLifetime() {
+  if (!store) return { success: false, error: 'Store not initialized' };
+  const product = store.get(PRODUCT_ID);
+  if (!product) return { success: false, error: 'Product not found' };
+  const offer = product.getOffer();
+  if (!offer) return { success: false, error: 'No offer available' };
 
-  try {
-    const { customerInfo } = await purchases.getCustomerInfo();
-    const entitlement = customerInfo.entitlements.active[ENTITLEMENT_ID];
-    return !!entitlement;
-  } catch (err) {
-    console.error('RevenueCat entitlement check error:', err);
-    return false;
-  }
+  return new Promise((resolve) => {
+    pendingPurchaseResolver = resolve;
+    store.order(offer).catch((err) => {
+      if (pendingPurchaseResolver) {
+        pendingPurchaseResolver({ success: false, error: err?.message || 'Order failed' });
+        pendingPurchaseResolver = null;
+      }
+    });
+  });
 }
 
 /**
- * Get available subscription packages from RevenueCat.
- * @returns {Promise<Array>} available packages (seasonal, annual, etc.)
- */
-export async function getOfferings() {
-  const purchases = await getPurchases();
-  if (!purchases || !initialized) return [];
-
-  try {
-    const { offerings } = await purchases.getOfferings();
-    if (offerings.current) {
-      return offerings.current.availablePackages;
-    }
-    return [];
-  } catch (err) {
-    console.error('RevenueCat offerings error:', err);
-    return [];
-  }
-}
-
-/**
- * Purchase a subscription package via native IAP.
- * @param {Object} pkg - A RevenueCat package object from getOfferings()
- * @returns {Promise<{success: boolean, customerInfo?: Object, error?: string}>}
- */
-export async function purchasePackage(pkg) {
-  const purchases = await getPurchases();
-  if (!purchases || !initialized) {
-    return { success: false, error: 'RevenueCat not initialized' };
-  }
-
-  try {
-    const { customerInfo } = await purchases.purchasePackage({ aPackage: pkg });
-    const isPro = !!customerInfo.entitlements.active[ENTITLEMENT_ID];
-    return { success: isPro, customerInfo };
-  } catch (err) {
-    // User cancelled purchase
-    if (err?.code === 'PURCHASE_CANCELLED_ERROR' || err?.userCancelled) {
-      return { success: false, error: 'cancelled' };
-    }
-    console.error('RevenueCat purchase error:', err);
-    return { success: false, error: err?.message || 'Purchase failed' };
-  }
-}
-
-/**
- * Restore previous purchases (e.g., user reinstalled the app).
- * @returns {Promise<boolean>} true if pro entitlement was restored
+ * Restore prior purchases for the signed-in Google account.
+ * Useful after reinstall or sign-in on a new device.
  */
 export async function restorePurchases() {
-  const purchases = await getPurchases();
-  if (!purchases || !initialized) return false;
-
+  if (!store) return { success: false };
   try {
-    const { customerInfo } = await purchases.restorePurchases();
-    return !!customerInfo.entitlements.active[ENTITLEMENT_ID];
+    await store.restorePurchases();
+    const product = store.get(PRODUCT_ID);
+    if (product?.owned) {
+      const tx = product.transactions?.[0];
+      const token = tx?.nativePurchase?.purchaseToken;
+      await markProInFirestore(token, PRODUCT_ID);
+      return { success: true };
+    }
+    return { success: false };
   } catch (err) {
-    console.error('RevenueCat restore error:', err);
-    return false;
+    console.error('Restore error:', err);
+    return { success: false, error: err?.message };
   }
-}
-
-/**
- * Log out from RevenueCat. Call when user signs out.
- */
-export async function logoutRevenueCat() {
-  const purchases = await getPurchases();
-  if (!purchases || !initialized) return;
-
-  try {
-    await purchases.logOut();
-    initialized = false;
-  } catch {}
 }
