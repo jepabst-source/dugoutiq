@@ -62,6 +62,7 @@ export function AuthProvider({ children }) {
               console.error('Demo reset error:', err);
             }
             setCreatingDemo(false);
+            setUser(firebaseUser);
             setLoading(false);
             return; // skip normal team loading
           }
