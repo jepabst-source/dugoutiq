@@ -28,7 +28,11 @@
     <meta name="twitter:image" content="https://lineupman.com/og-image.jpg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap" rel="stylesheet" />
+    <!-- Non-blocking font load (swap to stylesheet once downloaded) -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap" rel="stylesheet" /></noscript>
+    <!-- Preload the hero logo so FCP/LCP have it ready -->
+    <link rel="preload" as="image" href="/logo-square.jpg" />
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-1032290089"></script>
     <script>
@@ -40,7 +44,14 @@
     <title>Dugout IQ — Free Lineup Manager for Youth Baseball & Softball Coaches | lineupman.com</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#fff;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif">
+        <div style="text-align:center;padding:1rem">
+          <img src="/logo-square.jpg" alt="Dugout IQ" width="160" height="160" style="border-radius:1rem;display:block;margin:0 auto 1.5rem;max-width:40vw;height:auto" />
+          <p style="color:#6b7280;font-size:0.8125rem;letter-spacing:0.2em;text-transform:uppercase;margin:0">Smart Lineup Manager</p>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
     <script>
       if ('serviceWorker' in navigator) {
