@@ -14,12 +14,12 @@ const googlePlayServiceAccount = defineSecret('GOOGLE_PLAY_SERVICE_ACCOUNT');
 
 const ANDROID_PACKAGE_NAME = 'com.dugoutiq.app';
 
-// Stripe price IDs — both are recurring subscriptions on Stripe.
-// season   = $1.99 / 3 months recurring (displayed as "1 Season")
-// lifetime = $5.99 / year recurring     (displayed as "Lifetime" in the web modal — semantic mismatch, tracked separately)
+// Stripe price IDs — create these in the Stripe Dashboard and paste their IDs here.
+// season  = $1.99 / 3 months recurring subscription
+// lifetime = $5.99 one-time payment
 const PRICES = {
-  season: 'price_1TBZTMHbpYF4shFMitP14xYU',
-  lifetime: 'price_1TBZTPHbpYF4shFMLKjmyU8E',
+  season: 'REPLACE_WITH_NEW_SEASON_PRICE_ID',
+  lifetime: 'REPLACE_WITH_NEW_LIFETIME_PRICE_ID',
 };
 
 // Create a Stripe Checkout session
@@ -33,23 +33,25 @@ exports.createCheckoutSession = onCall({
 
   const { plan, origin } = request.data;
   const priceId = PRICES[plan];
-  if (!priceId) {
-    throw new Error('Invalid plan');
+  if (!priceId || priceId.startsWith('REPLACE_WITH')) {
+    throw new Error('Invalid or unconfigured plan');
   }
 
   const stripeClient = stripe(stripeSecretKey.value());
   const uid = request.auth.uid;
   const email = request.auth.token.email || '';
 
+  const isLifetime = plan === 'lifetime';
+
   const session = await stripeClient.checkout.sessions.create({
-    mode: 'subscription',
+    mode: isLifetime ? 'payment' : 'subscription',
     payment_method_types: ['card'],
     customer_email: email,
     line_items: [{ price: priceId, quantity: 1 }],
     success_url: `${origin || 'https://lineupman.com'}/?upgraded=true`,
     cancel_url: `${origin || 'https://lineupman.com'}/?upgraded=false`,
     metadata: { firebaseUID: uid, plan },
-    subscription_data: { metadata: { firebaseUID: uid } },
+    ...(isLifetime ? {} : { subscription_data: { metadata: { firebaseUID: uid } } }),
   });
 
   return { sessionId: session.id, url: session.url };
