@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { getFunctions, httpsCallable } from 'firebase/functions';
-import { doc, updateDoc } from 'firebase/firestore';
-import app, { db } from '../../lib/firebase';
+import app from '../../lib/firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { isNative } from '../../services/platform';
-import { getOfferings, purchasePackage, restorePurchases } from '../../services/payments';
+import { getLifetimeProduct, purchaseLifetime, restorePurchases } from '../../services/payments';
 import { useToast } from './Toast';
 
 export default function UpgradeModal({ onClose, lockReason }) {
@@ -40,14 +39,14 @@ function WebUpgrade({ onClose, lockReason }) {
       <div className="grid grid-cols-2 gap-3 mb-6">
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
           <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">1 Season</div>
-          <div className="text-2xl font-bold text-gray-800">$11.99</div>
+          <div className="text-2xl font-bold text-gray-800">$1.99</div>
           <div className="text-[10px] text-gray-400">3 months</div>
           <button
-            onClick={() => handleUpgrade('monthly')}
+            onClick={() => handleUpgrade('season')}
             disabled={!!loading}
             className="w-full mt-3 py-2 rounded-lg bg-gray-200 text-gray-700 font-bold text-xs
                        hover:bg-gray-300 active:scale-[0.97] transition-all disabled:opacity-50">
-            {loading === 'monthly' ? 'Loading...' : 'Choose Season'}
+            {loading === 'season' ? 'Loading...' : 'Choose Season'}
           </button>
         </div>
 
@@ -55,15 +54,15 @@ function WebUpgrade({ onClose, lockReason }) {
           <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-sky text-white text-[9px] font-bold rounded-full uppercase tracking-wider">
             Best Value
           </div>
-          <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Full Year</div>
-          <div className="text-2xl font-bold text-sky">$19.99</div>
-          <div className="text-[10px] text-gray-400">12 months</div>
+          <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Lifetime</div>
+          <div className="text-2xl font-bold text-sky">$5.99</div>
+          <div className="text-[10px] text-gray-400">One-time</div>
           <button
-            onClick={() => handleUpgrade('annual')}
+            onClick={() => handleUpgrade('lifetime')}
             disabled={!!loading}
             className="w-full mt-3 py-2 rounded-lg bg-sky text-white font-bold text-xs
                        hover:bg-sky-dim active:scale-[0.97] transition-all disabled:opacity-50">
-            {loading === 'annual' ? 'Loading...' : 'Choose Year'}
+            {loading === 'lifetime' ? 'Loading...' : 'Choose Lifetime'}
           </button>
         </div>
       </div>
@@ -75,46 +74,32 @@ function WebUpgrade({ onClose, lockReason }) {
   );
 }
 
-// ── NATIVE (iOS / Android): RevenueCat → store IAP ──
+// ── NATIVE (Android): Google Play Billing via CdvPurchase + server-side validation ──
 function NativeUpgrade({ onClose, lockReason }) {
-  const { user, refreshUserDoc } = useAuth();
-  const [pkg, setPkg] = useState(null);
-  const [loadingPkgs, setLoadingPkgs] = useState(true);
+  const { refreshUserDoc } = useAuth();
+  const [product, setProduct] = useState(null);
   const [busy, setBusy] = useState('');
   const toast = useToast();
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const offerings = await getOfferings();
-      if (cancelled) return;
-      // Single-package model: take the first (or look for identifier "lifetime")
-      const lifetime = offerings.find(p => p.identifier === 'lifetime') || offerings[0] || null;
-      setPkg(lifetime);
-      setLoadingPkgs(false);
-    })();
-    return () => { cancelled = true; };
+    // Poll briefly for the product to load (store init happens in AuthContext).
+    let attempts = 0;
+    const tick = () => {
+      const p = getLifetimeProduct();
+      if (p) { setProduct(p); return; }
+      if (attempts++ < 20) setTimeout(tick, 250);
+    };
+    tick();
   }, []);
 
-  const markPro = async () => {
-    if (!user) return;
-    try {
-      await updateDoc(doc(db, 'users', user.uid), { plan: 'pro' });
-      await refreshUserDoc();
-    } catch (err) {
-      console.error('Failed to write plan:pro', err);
-    }
-  };
-
   const handleBuy = async () => {
-    if (!pkg) return;
     setBusy('buy');
-    const result = await purchasePackage(pkg);
+    const result = await purchaseLifetime();
     if (result.success) {
-      await markPro();
+      await refreshUserDoc();
       toast('You\'re Pro! Enjoy.', 'success');
       onClose();
-    } else if (result.error === 'cancelled') {
+    } else if (result.error === 'cancelled' || /cancel/i.test(result.error || '')) {
       // user dismissed — silent
     } else {
       toast(result.error || 'Purchase failed. Please try again.', 'error');
@@ -124,9 +109,9 @@ function NativeUpgrade({ onClose, lockReason }) {
 
   const handleRestore = async () => {
     setBusy('restore');
-    const restored = await restorePurchases();
-    if (restored) {
-      await markPro();
+    const result = await restorePurchases();
+    if (result.success) {
+      await refreshUserDoc();
       toast('Pro restored. Welcome back!', 'success');
       onClose();
     } else {
@@ -135,7 +120,7 @@ function NativeUpgrade({ onClose, lockReason }) {
     setBusy('');
   };
 
-  const priceString = pkg?.product?.priceString || '$5.99';
+  const priceString = product?.priceString || '$5.99';
 
   return (
     <Shell onClose={onClose} lockReason={lockReason}>
@@ -148,10 +133,10 @@ function NativeUpgrade({ onClose, lockReason }) {
         <div className="text-[11px] text-gray-500 mb-4">Pay once, never again</div>
         <button
           onClick={handleBuy}
-          disabled={!pkg || !!busy || loadingPkgs}
+          disabled={!!busy}
           className="w-full py-2.5 rounded-lg bg-sky text-white font-bold text-sm
                      hover:bg-sky-dim active:scale-[0.97] transition-all disabled:opacity-50">
-          {busy === 'buy' ? 'Processing…' : loadingPkgs ? 'Loading…' : 'Unlock Pro'}
+          {busy === 'buy' ? 'Processing…' : 'Unlock Pro'}
         </button>
       </div>
 
