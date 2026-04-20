@@ -13,7 +13,6 @@ export default function LoginPage() {
 
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
-    console.log('[LOGIN] submit start, mode=', mode, 'email=', email, 'pw length=', password.length);
     setError('');
     setMessage('');
     setSubmitting(true);
@@ -22,14 +21,12 @@ export default function LoginPage() {
         await signUpWithEmail(email, password, name.trim());
         setMessage('Account created! Check your email for a verification link.');
       } else if (mode === 'login') {
-        const result = await loginWithEmail(email, password);
-        console.log('[LOGIN] success, user=', result?.user?.email, 'uid=', result?.user?.uid);
+        await loginWithEmail(email, password);
       } else if (mode === 'reset') {
         await resetPassword(email);
         setMessage('Password reset email sent. Check your inbox.');
       }
     } catch (err) {
-      console.error('[LOGIN] error:', err, 'code=', err?.code, 'message=', err?.message);
       const code = err.code || '';
       if (code === 'auth/email-already-in-use') setError('An account with this email already exists.');
       else if (code === 'auth/invalid-email') setError('Invalid email address.');
@@ -38,7 +35,6 @@ export default function LoginPage() {
       else if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') setError('Incorrect email or password.');
       else setError(err.message || 'Something went wrong.');
     }
-    console.log('[LOGIN] submit end');
     setSubmitting(false);
   };
 
