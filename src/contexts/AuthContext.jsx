@@ -1,11 +1,13 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import {
-  onAuthStateChanged, signInWithPopup, signOut,
+  onAuthStateChanged, signInWithPopup, signOut, signInWithCredential,
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
   sendEmailVerification, sendPasswordResetEmail, updateProfile,
+  OAuthProvider,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, serverTimestamp } from 'firebase/firestore';
-import { auth, db, googleProvider } from '../lib/firebase';
+import { auth, db, googleProvider, appleProvider } from '../lib/firebase';
+import { Capacitor } from '@capacitor/core';
 import { initPushNotifications, cleanupPushNotifications } from '../services/notifications';
 import { initPurchases } from '../services/payments';
 import { enableBiometricLogin, disableBiometricLogin } from '../services/biometric';
@@ -186,6 +188,33 @@ export function AuthProvider({ children }) {
 
   const loginWithGoogle = () => signInWithPopup(auth, googleProvider);
 
+  const loginWithApple = async () => {
+    // On native iOS use the Capacitor plugin (system Sign In with Apple sheet)
+    // and bridge the identityToken to Firebase. On web/Android, use Firebase popup.
+    if (Capacitor.getPlatform() === 'ios') {
+      const { SignInWithApple } = await import('@capacitor-community/apple-sign-in');
+      // clientId must match the Service ID configured in Apple Developer + Firebase
+      const result = await SignInWithApple.authorize({
+        clientId: 'com.dugoutiq.app.signin',
+        redirectURI: 'https://dugoutiq-ade15.firebaseapp.com/__/auth/handler',
+        scopes: 'email name',
+        nonce: Math.random().toString(36).slice(2),
+      });
+      const { identityToken, givenName, familyName } = result.response || {};
+      if (!identityToken) throw new Error('Apple Sign In failed: no identity token');
+      const provider = new OAuthProvider('apple.com');
+      const credential = provider.credential({ idToken: identityToken });
+      const cred = await signInWithCredential(auth, credential);
+      // Apple returns name only on first sign-in — capture it then.
+      const fullName = [givenName, familyName].filter(Boolean).join(' ').trim();
+      if (fullName && !cred.user.displayName) {
+        try { await updateProfile(cred.user, { displayName: fullName }); } catch {}
+      }
+      return cred;
+    }
+    return signInWithPopup(auth, appleProvider);
+  };
+
   const signUpWithEmail = async (email, password, displayName) => {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     if (displayName) {
@@ -222,6 +251,7 @@ export function AuthProvider({ children }) {
       refreshTeams,
       refreshUserDoc,
       loginWithGoogle,
+      loginWithApple,
       signUpWithEmail,
       loginWithEmail,
       resetPassword,

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function LoginPage() {
-  const { loginWithGoogle, signUpWithEmail, loginWithEmail, resetPassword } = useAuth();
+  const { loginWithGoogle, loginWithApple, signUpWithEmail, loginWithEmail, resetPassword } = useAuth();
   const [mode, setMode] = useState('login'); // 'login' | 'signup' | 'reset'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -11,6 +11,16 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  const handleApple = async () => {
+    setError('');
+    try { await loginWithApple(); }
+    catch (err) {
+      const msg = err?.message || '';
+      if (/cancel/i.test(msg) || err?.code === 'auth/popup-closed-by-user') return;
+      setError(msg || 'Apple Sign In failed.');
+    }
+  };
 
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
@@ -50,6 +60,19 @@ export default function LoginPage() {
         <p className="text-gray-500 text-sm tracking-widest uppercase mb-8">
           Smart Lineup Manager
         </p>
+
+        {/* Apple button */}
+        <button
+          onClick={handleApple}
+          className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl
+                     bg-black text-white font-semibold text-sm border border-black
+                     hover:bg-gray-900 active:scale-[0.98] transition-all duration-150 shadow-sm mb-3"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M16.365 1.43c0 1.14-.466 2.272-1.225 3.082-.81.866-2.13 1.534-3.22 1.45-.135-1.097.41-2.247 1.158-3.044.84-.9 2.27-1.567 3.287-1.488zM20.5 17.13c-.555 1.282-.82 1.86-1.535 2.99-1 1.575-2.41 3.537-4.158 3.55-1.555.013-1.954-.99-4.062-.978-2.108.012-2.546 1-4.1.987-1.748-.013-3.085-1.79-4.085-3.365C-.297 16.045-.42 10.6 1.4 7.713c1.295-2.043 3.34-3.236 5.26-3.236 1.96 0 3.19.99 4.81.99 1.575 0 2.535-.991 4.802-.991 1.71 0 3.523.93 4.815 2.535-4.232 2.318-3.547 8.36.413 10.12z"/>
+          </svg>
+          Continue with Apple
+        </button>
 
         {/* Google button */}
         <button
