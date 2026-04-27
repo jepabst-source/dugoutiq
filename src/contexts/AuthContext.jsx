@@ -7,7 +7,7 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, serverTimestamp } from 'firebase/firestore';
 import { auth, db, googleProvider, appleProvider } from '../lib/firebase';
-import { Capacitor } from '@capacitor/core';
+import { getPlatform } from '../services/platform';
 import { initPushNotifications, cleanupPushNotifications } from '../services/notifications';
 import { initPurchases } from '../services/payments';
 import { enableBiometricLogin, disableBiometricLogin } from '../services/biometric';
@@ -191,7 +191,7 @@ export function AuthProvider({ children }) {
   const loginWithApple = async () => {
     // On native iOS use the Capacitor plugin (system Sign In with Apple sheet)
     // and bridge the identityToken to Firebase. On web/Android, use Firebase popup.
-    if (Capacitor.getPlatform() === 'ios') {
+    if (getPlatform() === 'ios') {
       const { SignInWithApple } = await import('@capacitor-community/apple-sign-in');
       // clientId must match the Service ID configured in Apple Developer + Firebase
       const result = await SignInWithApple.authorize({
