@@ -98,8 +98,9 @@ export default function GameDayTab() {
               setGeneratingScorer(false);
             }}
             disabled={generatingScorer}
-            className="px-3 py-2 rounded-lg bg-border text-chalk-dim font-bold text-xs
-                       hover:bg-border-light active:scale-[0.97] transition-all disabled:opacity-50">
+            className="px-4 py-2.5 rounded-lg bg-gold/15 text-gold-bright font-bold text-sm
+                       border border-gold/40 hover:bg-gold/25 active:scale-[0.97]
+                       transition-all disabled:opacity-50">
             {generatingScorer ? '...' : '📤 Invite Log Assistant'}
           </button>
           <InfoTip text="Generate a link to share with a parent or helper in the stands. They can log at-bats from their phone — no account needed. The link expires after 12 hours." />
