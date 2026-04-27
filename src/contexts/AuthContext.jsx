@@ -195,7 +195,7 @@ export function AuthProvider({ children }) {
       const { SignInWithApple } = await import('@capacitor-community/apple-sign-in');
       // clientId must match the Service ID configured in Apple Developer + Firebase
       const result = await SignInWithApple.authorize({
-        clientId: 'com.dugoutiq.app.signin',
+        clientId: 'com.studiopabst.dugoutiq.signin',
         redirectURI: 'https://dugoutiq-ade15.firebaseapp.com/__/auth/handler',
         scopes: 'email name',
         nonce: Math.random().toString(36).slice(2),
