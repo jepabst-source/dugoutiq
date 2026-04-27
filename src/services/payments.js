@@ -11,7 +11,7 @@
 
 import { doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
-import { isNative } from './platform';
+import { isNative, isIOS } from './platform';
 
 const PRODUCT_ID = 'dugoutiq_pro_lifetime';
 
@@ -38,10 +38,13 @@ async function loadPlugin() {
 async function markProInFirestore(purchaseToken, productId) {
   const user = auth.currentUser;
   if (!user) return;
+  const tokenField = isIOS() ? 'applePurchaseToken' : 'googlePurchaseToken';
+  const productField = isIOS() ? 'appleProductId' : 'googleProductId';
   await updateDoc(doc(db, 'users', user.uid), {
     plan: 'pro',
-    googlePurchaseToken: purchaseToken || null,
-    googleProductId: productId || PRODUCT_ID,
+    [tokenField]: purchaseToken || null,
+    [productField]: productId || PRODUCT_ID,
+    purchaseStore: isIOS() ? 'apple' : 'google',
     upgradedAt: serverTimestamp(),
   });
 }
@@ -55,10 +58,11 @@ export async function initPurchases() {
   store = cdv.store;
   store.verbosity = LogLevel.ERROR;
 
+  const platform = isIOS() ? Platform.APPLE_APPSTORE : Platform.GOOGLE_PLAY;
   store.register([{
     id: PRODUCT_ID,
     type: ProductType.NON_CONSUMABLE,
-    platform: Platform.GOOGLE_PLAY,
+    platform,
   }]);
 
   store.when()
@@ -78,7 +82,7 @@ export async function initPurchases() {
     });
 
   try {
-    await store.initialize([Platform.GOOGLE_PLAY]);
+    await store.initialize([platform]);
     initialized = true;
   } catch (err) {
     console.error('Store initialize error:', err);
