@@ -103,8 +103,8 @@ To test the app:
 - Go to the Defense tab to see the rotation engine
 - Go to the Game Day tab to log at-bats (tap a player, then tap an outcome)
 
-The free tier allows 2 committed games and 70 at-bats. Pro subscription
-unlocks unlimited usage.
+The free tier allows 2 committed games and 70 at-bats. A one-time Pro
+purchase ($1.99) unlocks unlimited usage — no subscription.
 
 Demo account (if needed):
 Email: [you can create a test account or provide one to Apple]

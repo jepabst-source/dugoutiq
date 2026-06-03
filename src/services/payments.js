@@ -2,7 +2,7 @@
 //
 // v1 model: client-trust. When the plugin reports an approved purchase,
 // we mark the user as Pro in Firestore directly — no server-side receipt
-// validation. Acceptable for a $5.99 one-time lifetime unlock; abuse risk
+// validation. Acceptable for a $1.99 one-time lifetime unlock; abuse risk
 // is minimal relative to the engineering cost of proper validation.
 //
 // Web is a no-op: loadPlugin returns null off native, so initPurchases,
@@ -95,7 +95,7 @@ export function getLifetimeProduct() {
   if (!product) return null;
   const offer = product.getOffer();
   return {
-    priceString: offer?.pricingPhases?.[0]?.price || '$5.99',
+    priceString: offer?.pricingPhases?.[0]?.price || '$1.99',
     title: product.title,
     description: product.description,
     owned: product.owned,

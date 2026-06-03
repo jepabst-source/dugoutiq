@@ -120,7 +120,7 @@ function NativeUpgrade({ onClose, lockReason }) {
     setBusy('');
   };
 
-  const priceString = product?.priceString || '$5.99';
+  const priceString = product?.priceString || '$1.99';
 
   return (
     <Shell onClose={onClose} lockReason={lockReason}>
