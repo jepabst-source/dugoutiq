@@ -172,7 +172,7 @@ function Shell({ onClose, lockReason, children }) {
         </p>
 
         <p className="text-gray-400 text-xs mb-6">
-          Lineup Man Pro unlocks unlimited games, at-bats, and full season tracking.
+          Dugout IQ Pro unlocks unlimited games, at-bats, and full season tracking.
           Your roster, stats, and history are all still here — just upgrade to keep going.
         </p>
 
