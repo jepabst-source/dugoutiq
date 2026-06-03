@@ -10,7 +10,11 @@ const db = admin.firestore();
 const stripeSecretKey = defineSecret('STRIPE_SECRET_KEY');
 const stripeWebhookSecret = defineSecret('STRIPE_WEBHOOK_SECRET');
 
+// 'lifetime' is the only purchasable plan: one-time $1.99, mirrors the
+// native IAP. monthly/annual are the legacy subscription prices, kept so
+// existing subscribers keep renewing/cancelling normally.
 const PRICES = {
+  lifetime: 'price_1TeJNCHbpYF4shFM7giagikc',
   monthly: 'price_1TBZTMHbpYF4shFMitP14xYU',
   annual: 'price_1TBZTPHbpYF4shFMLKjmyU8E',
 };
@@ -34,15 +38,16 @@ exports.createCheckoutSession = onCall({
   const uid = request.auth.uid;
   const email = request.auth.token.email || '';
 
+  const isLifetime = plan === 'lifetime';
   const session = await stripeClient.checkout.sessions.create({
-    mode: 'subscription',
+    mode: isLifetime ? 'payment' : 'subscription',
     payment_method_types: ['card'],
     customer_email: email,
     line_items: [{ price: priceId, quantity: 1 }],
     success_url: `${origin || 'https://lineupman.com'}/?upgraded=true`,
     cancel_url: `${origin || 'https://lineupman.com'}/?upgraded=false`,
     metadata: { firebaseUID: uid },
-    subscription_data: { metadata: { firebaseUID: uid } },
+    ...(isLifetime ? {} : { subscription_data: { metadata: { firebaseUID: uid } } }),
   });
 
   return { sessionId: session.id, url: session.url };
@@ -71,13 +76,20 @@ exports.stripeWebhook = onRequest({ secrets: [stripeSecretKey, stripeWebhookSecr
     const session = event.data.object;
     const uid = session.metadata?.firebaseUID;
     if (uid) {
-      await db.collection('users').doc(uid).update({
+      const update = {
         plan: 'pro',
-        stripeCustomerId: session.customer,
-        stripeSubscriptionId: session.subscription,
+        stripeCustomerId: session.customer || null,
         upgradedAt: admin.firestore.FieldValue.serverTimestamp(),
-      });
-      console.log(`User ${uid} upgraded to pro`);
+      };
+      if (session.mode === 'payment') {
+        // One-time lifetime purchase — mirrors the native purchaseStore field.
+        update.purchaseStore = 'stripe';
+        update.stripePaymentIntentId = session.payment_intent || null;
+      } else {
+        update.stripeSubscriptionId = session.subscription;
+      }
+      await db.collection('users').doc(uid).update(update);
+      console.log(`User ${uid} upgraded to pro (${session.mode})`);
     }
   }
 
@@ -85,11 +97,18 @@ exports.stripeWebhook = onRequest({ secrets: [stripeSecretKey, stripeWebhookSecr
     const subscription = event.data.object;
     const uid = subscription.metadata?.firebaseUID;
     if (uid) {
-      await db.collection('users').doc(uid).update({
-        plan: 'free',
-        downgradedAt: admin.firestore.FieldValue.serverTimestamp(),
-      });
-      console.log(`User ${uid} downgraded to free`);
+      // Legacy subscription lapsed. Don't downgrade users who own a
+      // lifetime unlock (stripe/apple/google) — purchaseStore marks those.
+      const snap = await db.collection('users').doc(uid).get();
+      if (snap.exists && snap.data().purchaseStore) {
+        console.log(`User ${uid} subscription ended but owns lifetime — keeping pro`);
+      } else {
+        await db.collection('users').doc(uid).update({
+          plan: 'free',
+          downgradedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+        console.log(`User ${uid} downgraded to free`);
+      }
     }
   }
 
