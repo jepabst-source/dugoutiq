@@ -28,8 +28,7 @@ TeamSnap is a team communication and scheduling platform (RSVPs, messaging, paym
 
 ## Pricing
 - Free tier: 2 committed games, 70 at-bats
-- Season: $11.99 for 3 months
-- Annual: $19.99/year
+- Pro: $1.99 one-time purchase, lifetime access
 
 ## Who made it?
 Built by Josh Pabst, a youth softball coach in Indianapolis, Indiana.

@@ -72,8 +72,7 @@ Rate players 1-5 stars for defense. Optionally break it down into Glove and Arm 
 ## Pricing
 
 - **Free:** 2 committed games, 70 at-bats — enough to try every feature
-- **Season:** $11.99 for 3 months
-- **Annual:** $19.99/year (best value)
+- **Pro:** $1.99 one-time purchase — lifetime access
 
 ## Links
 
