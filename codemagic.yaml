@@ -55,6 +55,13 @@ workflows:
           cd "$CM_BUILD_DIR/ios/App"
           # Keeps every upload's CFBundleVersion unique and increasing.
           agvtool new-version -all "$BUILD_NUMBER" || true
+      - name: Resolve Swift packages (raw output for diagnosis)
+        script: |
+          cd "$CM_BUILD_DIR/ios/App"
+          echo "=== Package.swift as seen on the build machine ==="
+          cat CapApp-SPM/Package.swift
+          echo "=== Resolving packages ==="
+          xcodebuild -resolvePackageDependencies -project App.xcodeproj -scheme App
       - name: Build signed .ipa
         script: |
           cd "$CM_BUILD_DIR"
