@@ -33,13 +33,21 @@
     <noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap" rel="stylesheet" /></noscript>
     <!-- Preload the hero logo so FCP/LCP have it ready -->
     <link rel="preload" as="image" href="/logo-square.jpg" />
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-1032290089"></script>
+    <!-- Google tag (gtag.js) — web only. This index.html also ships inside the
+         native iOS/Android bundles, where loading an ads tag would contradict
+         the App Store privacy label (no tracking / no advertising data).
+         window.Capacitor is injected before page scripts on native. -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'AW-1032290089');
+      if (!window.Capacitor) {
+        var gtagScript = document.createElement('script');
+        gtagScript.async = true;
+        gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=AW-1032290089';
+        document.head.appendChild(gtagScript);
+        gtag('js', new Date());
+        gtag('config', 'AW-1032290089');
+      }
     </script>
     <title>Dugout IQ — Free Lineup Manager for Youth Baseball & Softball Coaches | lineupman.com</title>
   </head>
