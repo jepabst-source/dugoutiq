@@ -107,8 +107,11 @@ The free tier allows 2 committed games and 70 at-bats. A one-time Pro
 purchase ($1.99) unlocks unlimited usage — no subscription.
 
 Demo account (if needed):
-Email: [you can create a test account or provide one to Apple]
-Password: [fill in before submission]
+Email: test@lineupman.com
+Password: test1234
+Note: This account auto-loads a fully populated "Demo Dolphins" team
+(roster, ratings, positions) on every login, so the app is ready to
+review immediately with no setup.
 
 
 ────────────────────────────────────────

@@ -71,6 +71,14 @@ function AppContent() {
     return <HomePlateLoader />;
   }
 
+  // Demo team being created: on login/signup, AuthContext sets creatingDemo
+  // before the context `user` state, so this MUST come before the !user branch
+  // below — otherwise the LoginPage stays on screen for the whole reset and
+  // looks frozen (Apple Guideline 2.1 rejection risk).
+  if (creatingDemo) {
+    return <HomePlateLoader message="Setting up your demo team..." />;
+  }
+
   // Invite link flow
   if (inviteCode) {
     return (
@@ -82,11 +90,6 @@ function AppContent() {
 
   // Not logged in
   if (!user) return <LoginPage />;
-
-  // Demo team being created — show loading, not CreateTeamPage
-  if (creatingDemo) {
-    return <HomePlateLoader message="Setting up your demo team..." />;
-  }
 
   // Logged in but no teams yet
   if (!userDoc?.teamIds?.length || !activeTeamId) {
