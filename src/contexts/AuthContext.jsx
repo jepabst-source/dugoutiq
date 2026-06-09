@@ -27,7 +27,13 @@ export function AuthProvider({ children }) {
   const [allTeams, setAllTeams] = useState([]); // [{id, name, sport, seasonLabel, seasonYear}]
 
   useEffect(() => {
+    // Safety net: if auth never resolves (e.g. a WebView quirk stalls Firebase
+    // init), don't trap the user on the launch loader forever. After 8s, fall
+    // through to the login page instead of an infinite spinner. onAuthStateChanged
+    // setting loading=false first is the normal path; this only fires if it never does.
+    const failsafe = setTimeout(() => setLoading(false), 8000);
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
+      clearTimeout(failsafe);
       if (firebaseUser) {
         const userRef = doc(db, 'users', firebaseUser.uid);
         const snap = await getDoc(userRef);
@@ -134,7 +140,7 @@ export function AuthProvider({ children }) {
       }
       setLoading(false);
     });
-    return unsub;
+    return () => { clearTimeout(failsafe); unsub(); };
   }, []);
 
   // Register push notifications and RevenueCat after login
