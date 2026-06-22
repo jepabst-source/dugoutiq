@@ -6,10 +6,14 @@ import StarRating from '../shared/StarRating';
 import { useToast } from '../shared/Toast';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { usePlan } from '../../hooks/usePlan';
+import UpgradeModal from '../shared/UpgradeModal';
 
 export default function SettingsTab() {
   const { team, updateTeam, updateSettings, generateInviteCode, removeAssistant, deleteTeam, getActivePlayers, battingOrder: savedOrder } = useTeam();
   const { user } = useAuth();
+  const plan = usePlan();
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const toast = useToast();
   const settings = team?.settings || {};
   const ALL_POSITIONS = getPositions(settings).all;
@@ -165,10 +169,42 @@ export default function SettingsTab() {
 
   return (
     <div className="max-w-2xl mx-auto">
+      {showUpgrade && (
+        <UpgradeModal
+          onClose={() => setShowUpgrade(false)}
+          lockReason="Unlock unlimited games, at-bats, and full season tracking with a one-time purchase."
+        />
+      )}
+
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-lime">Settings</h2>
         {saved && <span className="text-xs text-lime animate-pulse">✓ {saved}</span>}
       </div>
+
+      {/* Dugout IQ Pro — always-visible upgrade entry point so the purchase is
+          reachable without first hitting a usage limit (App Store 2.1(b)). */}
+      <Section title="⭐ Dugout IQ Pro">
+        {plan.isPro ? (
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold text-lime">Pro is active</span>
+            <span className="text-lg">✓</span>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <div className="text-sm font-bold text-chalk">Unlock Lifetime Pro</div>
+              <div className="text-[11px] text-chalk-muted">
+                One-time $1.99 — unlimited games, at-bats &amp; full season tracking. Pay once, never again.
+              </div>
+            </div>
+            <button onClick={() => setShowUpgrade(true)}
+              className="px-4 py-2 rounded-lg bg-lime text-field font-bold text-sm whitespace-nowrap
+                         hover:bg-lime-bright active:scale-[0.97] transition-all">
+              Upgrade
+            </button>
+          </div>
+        )}
+      </Section>
 
       {/* Export Lineup — mobile only */}
       <div className="sm:hidden bg-panel border border-border rounded-xl shadow-sm p-4 mb-4">
