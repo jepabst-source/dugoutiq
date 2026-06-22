@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { isNative } from '../services/platform';
 
 export default function LoginPage() {
   const { loginWithGoogle, loginWithApple, signUpWithEmail, loginWithEmail, resetPassword } = useAuth();
@@ -19,6 +20,16 @@ export default function LoginPage() {
       const msg = err?.message || '';
       if (/cancel/i.test(msg) || err?.code === 'auth/popup-closed-by-user') return;
       setError(msg || 'Apple Sign In failed.');
+    }
+  };
+
+  const handleGoogle = async () => {
+    setError('');
+    try { await loginWithGoogle(); }
+    catch (err) {
+      const msg = err?.message || '';
+      if (/cancel/i.test(msg) || err?.code === 'auth/popup-closed-by-user') return;
+      setError(msg || 'Google Sign In failed.');
     }
   };
 
@@ -74,9 +85,12 @@ export default function LoginPage() {
           Continue with Apple
         </button>
 
-        {/* Google button */}
+        {/* Google button — web only. signInWithPopup can't complete inside the
+            native iOS/Android WebView, so we hide it there and rely on Apple
+            Sign In + email/password. (Native Google needs a dedicated plugin.) */}
+        {!isNative() && (
         <button
-          onClick={loginWithGoogle}
+          onClick={handleGoogle}
           className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl
                      bg-white text-gray-800 font-semibold text-sm border border-gray-200
                      hover:bg-gray-50 active:scale-[0.98] transition-all duration-150 shadow-sm"
@@ -89,6 +103,7 @@ export default function LoginPage() {
           </svg>
           Continue with Google
         </button>
+        )}
 
         {/* Divider */}
         <div className="flex items-center gap-3 my-5">
