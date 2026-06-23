@@ -49,11 +49,26 @@ workflows:
         script: keychain initialize
       - name: Fetch or CREATE signing files (first build has no cert/profile yet)
         script: |
+          # Confirm the credentials are actually present (prints yes/NO, never the secret).
+          echo "BUNDLE_ID=$BUNDLE_ID"
+          echo "ISSUER_ID set:      $([ -n "$APP_STORE_CONNECT_ISSUER_ID" ] && echo yes || echo NO)"
+          echo "KEY_IDENTIFIER set: $([ -n "$APP_STORE_CONNECT_KEY_IDENTIFIER" ] && echo yes || echo NO)"
+          echo "ASC_PRIVATE_KEY set:$([ -n "$APP_STORE_CONNECT_PRIVATE_KEY" ] && echo yes || echo NO)"
+          echo "CERTIFICATE_KEY set:$([ -n "$CERTIFICATE_PRIVATE_KEY" ] && echo yes || echo NO)"
+          echo "--- existing distribution certificates on the account ---"
+          app-store-connect certificates list --type IOS_DISTRIBUTION || true
+          echo "--- fetching/creating signing files ---"
+          # Pass API auth explicitly (don't rely on env auto-detection) and be verbose
+          # so any Apple-side error (e.g. cert limit reached) is printed in full.
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
             --platform IOS \
+            --issuer-id "$APP_STORE_CONNECT_ISSUER_ID" \
+            --key-id "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
+            --private-key=@env:APP_STORE_CONNECT_PRIVATE_KEY \
             --certificate-key=@env:CERTIFICATE_PRIVATE_KEY \
-            --create
+            --create \
+            --verbose
       - name: Add certificates to keychain
         script: keychain add-certificates
       - name: Set up code signing settings on Xcode project
