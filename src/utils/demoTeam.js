@@ -2,7 +2,7 @@
 // Creates a "Demo Dolphins" team with 12 players, at-bats, and a committed game
 // so new coaches can explore every tab before entering their own roster.
 
-import { collection, doc, setDoc, serverTimestamp, arrayUnion, updateDoc } from 'firebase/firestore';
+import { collection, doc, serverTimestamp, arrayUnion, writeBatch } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 const DEMO_PLAYERS = [
@@ -29,11 +29,17 @@ const DEMO_OUTCOMES = ['K', 'out', 'out', 'hit', 'hit', 'walk', 'single', 'out',
  * @returns {Promise<string>} the demo team ID
  */
 export async function createDemoTeam(userId) {
+  // One batched write, not ~50 sequential ones. Beyond being much faster, it's
+  // atomic: on a flaky connection the seed either lands completely or not at
+  // all, so a half-populated demo team is no longer possible. (53 writes, well
+  // under Firestore's 500-per-batch limit.)
+  const batch = writeBatch(db);
+
   const teamRef = doc(collection(db, 'teams'));
   const teamId = teamRef.id;
 
   // Create team doc
-  await setDoc(teamRef, {
+  batch.set(teamRef, {
     name: 'Demo Dolphins',
     coachId: userId,
     assistantIds: [],
@@ -60,7 +66,7 @@ export async function createDemoTeam(userId) {
   const playerIds = [];
   for (const p of DEMO_PLAYERS) {
     const playerRef = doc(collection(db, 'teams', teamId, 'players'));
-    await setDoc(playerRef, { ...p, active: true });
+    batch.set(playerRef, { ...p, active: true });
     playerIds.push(playerRef.id);
   }
 
@@ -78,7 +84,7 @@ export async function createDemoTeam(userId) {
       const inning = (i % 3) + 1;
       const outcome = DEMO_OUTCOMES[Math.floor(Math.random() * DEMO_OUTCOMES.length)];
       const abRef = doc(collection(db, 'teams', teamId, 'atBats'));
-      await setDoc(abRef, {
+      batch.set(abRef, {
         playerId: playerIds[i],
         game: gameId,
         inning,
@@ -103,7 +109,7 @@ export async function createDemoTeam(userId) {
     }
 
     const gameDate = new Date(gameTime);
-    await setDoc(gameRef, {
+    batch.set(gameRef, {
       gameNumber: g + 1,
       date: gameDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       opponent: opponents[g],
@@ -115,7 +121,11 @@ export async function createDemoTeam(userId) {
 
   // Add team to user's teamIds
   const userRef = doc(db, 'users', userId);
-  await updateDoc(userRef, { teamIds: arrayUnion(teamId) });
+  batch.update(userRef, { teamIds: arrayUnion(teamId) });
+
+  // A WriteBatch can only be committed once, so retrying happens at the call
+  // site by invoking createDemoTeam again (which builds a fresh batch).
+  await batch.commit();
 
   return teamId;
 }

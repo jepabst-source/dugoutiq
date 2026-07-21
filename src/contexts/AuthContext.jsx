@@ -40,39 +40,53 @@ export function AuthProvider({ children }) {
         if (snap.exists()) {
           const data = snap.data();
 
-          // Demo account auto-reset: wipe and recreate fresh every login
+          // Demo account auto-reset: recreate a fresh team on every login.
+          //
+          // Seed FIRST, delete the old teams only once the seed succeeds. The
+          // reverse order left the account permanently empty whenever the seed
+          // failed partway (flaky connection), and an App Review tester who
+          // reopened the app would land on a blank roster with no way back.
           if (firebaseUser.email === DEMO_ACCOUNT_EMAIL && !demoResetDone.current) {
             demoResetDone.current = true;
             setCreatingDemo(true);
-            // Delete all existing teams
             const existingTeamIds = data.teamIds || [];
-            for (const tid of existingTeamIds) {
+            let demoId = null;
+            for (let attempt = 0; attempt < 2 && !demoId; attempt++) {
               try {
-                const playerSnap = await getDocs(collection(db, 'teams', tid, 'players'));
-                await Promise.all(playerSnap.docs.map(d => deleteDoc(d.ref)));
-                const abSnap = await getDocs(collection(db, 'teams', tid, 'atBats'));
-                await Promise.all(abSnap.docs.map(d => deleteDoc(d.ref)));
-                const gameSnap = await getDocs(collection(db, 'teams', tid, 'games'));
-                await Promise.all(gameSnap.docs.map(d => deleteDoc(d.ref)));
-                await deleteDoc(doc(db, 'teams', tid));
-              } catch {}
+                demoId = await createDemoTeam(firebaseUser.uid);
+              } catch (err) {
+                console.error(`Demo seed attempt ${attempt + 1} failed:`, err);
+              }
             }
-            // Reset user doc
-            await setDoc(userRef, { ...data, teamIds: [] });
-            // Create fresh Demo Dolphins
-            try {
-              const demoId = await createDemoTeam(firebaseUser.uid);
+
+            if (demoId) {
+              // Safe to clear the previous teams now that the new one exists.
+              for (const tid of existingTeamIds) {
+                try {
+                  const playerSnap = await getDocs(collection(db, 'teams', tid, 'players'));
+                  await Promise.all(playerSnap.docs.map(d => deleteDoc(d.ref)));
+                  const abSnap = await getDocs(collection(db, 'teams', tid, 'atBats'));
+                  await Promise.all(abSnap.docs.map(d => deleteDoc(d.ref)));
+                  const gameSnap = await getDocs(collection(db, 'teams', tid, 'games'));
+                  await Promise.all(gameSnap.docs.map(d => deleteDoc(d.ref)));
+                  await deleteDoc(doc(db, 'teams', tid));
+                } catch {}
+              }
+              await updateDoc(userRef, { teamIds: [demoId] });
               setActiveTeamId(demoId);
               const updatedSnap = await getDoc(userRef);
               if (updatedSnap.exists()) setUserDoc(updatedSnap.data());
               setAllTeams([{ id: demoId, name: 'Demo Dolphins', sport: 'softball', seasonLabel: 'Spring', seasonYear: new Date().getFullYear() }]);
-            } catch (err) {
-              console.error('Demo reset error:', err);
+              setCreatingDemo(false);
+              setUser(firebaseUser);
+              setLoading(false);
+              return; // skip normal team loading
             }
+
+            // Seed failed twice — leave the existing teams alone and fall
+            // through to normal loading so the reviewer still sees a populated
+            // app rather than an empty one.
             setCreatingDemo(false);
-            setUser(firebaseUser);
-            setLoading(false);
-            return; // skip normal team loading
           }
 
           setUserDoc(data);
