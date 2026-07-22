@@ -13,4 +13,9 @@ ext {
     androidxJunitVersion = '1.3.0'
     androidxEspressoCoreVersion = '3.7.0'
     cordovaAndroidVersion = '14.0.1'
+    // @capacitor-firebase/authentication: opt in to the Google sign-in libs so
+    // they're bundled at runtime (implementation, not compileOnly). Without
+    // this the plugin's default leaves Credential Manager + googleid out of the
+    // release APK and native Google sign-in fails on device.
+    rgcfaIncludeGoogle = true
 }
