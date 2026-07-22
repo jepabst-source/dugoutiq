@@ -3,7 +3,7 @@ import {
   onAuthStateChanged, signInWithPopup, signOut, signInWithCredential,
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
   sendEmailVerification, sendPasswordResetEmail, updateProfile,
-  OAuthProvider,
+  OAuthProvider, GoogleAuthProvider,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, serverTimestamp } from 'firebase/firestore';
 import { auth, db, googleProvider, appleProvider } from '../lib/firebase';
@@ -206,7 +206,32 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const loginWithGoogle = () => signInWithPopup(auth, googleProvider);
+  const loginWithGoogle = async () => {
+    // On native Android use the Capacitor Firebase Authentication plugin (the
+    // system Google account picker via Credential Manager) and bridge its
+    // idToken to the JS SDK with signInWithCredential — mirroring loginWithApple.
+    //
+    // Why not the popup here: signInWithPopup degrades to a redirect inside the
+    // Android WebView, and the WebView partitions/clears the sessionStorage the
+    // redirect relies on, so it fails intermittently with "missing initial
+    // state" (works only on retry once storage is warm). The native picker has
+    // no such round-trip. skipNativeAuth:true (capacitor.config) keeps the JS
+    // SDK as the single source of truth, so onAuthStateChanged still drives the
+    // app exactly as before.
+    //
+    // iOS is intentionally NOT wired here: the Google button is hidden on iOS,
+    // and the plugin's iOS side calls FirebaseApp.configure() at launch, which
+    // would need a GoogleService-Info.plist. Kept out of the iOS build entirely.
+    if (getPlatform() === 'android') {
+      const { FirebaseAuthentication } = await import('@capacitor-firebase/authentication');
+      const result = await FirebaseAuthentication.signInWithGoogle();
+      const idToken = result.credential?.idToken;
+      if (!idToken) throw new Error('Google Sign In failed: no identity token');
+      const credential = GoogleAuthProvider.credential(idToken);
+      return signInWithCredential(auth, credential);
+    }
+    return signInWithPopup(auth, googleProvider);
+  };
 
   const loginWithApple = async () => {
     // On native iOS use the Capacitor plugin (system Sign In with Apple sheet)

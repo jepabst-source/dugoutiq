@@ -18,6 +18,10 @@
     "StatusBar": {
       "style": "DARK",
       "backgroundColor": "#ffffff"
+    },
+    "FirebaseAuthentication": {
+      "skipNativeAuth": true,
+      "providers": ["google.com"]
     }
   },
   "ios": {

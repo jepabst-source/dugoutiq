@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "670201192937",
+    "project_id": "dugoutiq-ade15",
+    "storage_bucket": "dugoutiq-ade15.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:670201192937:android:07909a346550828acd6b78",
+        "android_client_info": {
+          "package_name": "com.dugoutiq.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "670201192937-mka2ioi94l4sue72uu4gf8vuongleke3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dugoutiq.app",
+            "certificate_hash": "6ee7335595a01ff274803c262d67ba2c8404191e"
+          }
+        },
+        {
+          "client_id": "670201192937-rkna8ejb6lgfp0fd5m8icdf7juglmr4n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dugoutiq.app",
+            "certificate_hash": "a0a962c4e0b84501c39cb5612e6ebd68b98a59c9"
+          }
+        },
+        {
+          "client_id": "670201192937-vf6drq0j72voei10i5hq8gn54rgh8njt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dugoutiq.app",
+            "certificate_hash": "cd270e838e884aad53aaa428d57426491f8c9352"
+          }
+        },
+        {
+          "client_id": "670201192937-hp5ket3adf0c642sulh689c1oiiatifk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJL_SyEqDS4km8VTOFAxRcx3nviargbXM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "670201192937-hp5ket3adf0c642sulh689c1oiiatifk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
