@@ -33,7 +33,11 @@
 
 body {
   font-family: var(--font-body);
-  background-color: var(--color-field);
+  /* White so the iOS safe-area strip (padding-top below) matches the white login
+     screen and app header, instead of showing a gray bar above the content.
+     Full-screen pages set their own background; the app content area sets its
+     own gray in AppShell. */
+  background-color: #ffffff;
   color: var(--color-chalk);
   min-height: 100vh;
   min-height: 100dvh;

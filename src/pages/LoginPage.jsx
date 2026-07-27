@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { isIOS } from '../services/platform';
 
 export default function LoginPage() {
   const { loginWithGoogle, loginWithApple, signUpWithEmail, loginWithEmail, resetPassword } = useAuth();
@@ -85,12 +84,10 @@ export default function LoginPage() {
           Continue with Apple
         </button>
 
-        {/* Google button — hidden on iOS only. signInWithPopup can't complete
-            inside the iOS WKWebView (Apple rejected build 9 over the error it
-            threw), so iOS relies on Apple Sign In + email/password. Android's
-            WebView handles the popup, so it keeps the button. Revisit once a
-            native Google plugin is wired up and both platforms can show both. */}
-        {!isIOS() && (
+        {/* Google button — shown on all platforms. Native (iOS + Android) routes
+            through the Firebase Authentication plugin's native picker; web uses
+            signInWithPopup. (Previously hidden on iOS because the popup can't
+            complete in WKWebView; the native plugin fixed that.) */}
         <button
           onClick={handleGoogle}
           className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl
@@ -105,7 +102,6 @@ export default function LoginPage() {
           </svg>
           Continue with Google
         </button>
-        )}
 
         {/* Divider */}
         <div className="flex items-center gap-3 my-5">

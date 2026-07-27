@@ -7,7 +7,6 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, serverTimestamp } from 'firebase/firestore';
 import { auth, db, googleProvider, appleProvider } from '../lib/firebase';
-import { getPlatform } from '../services/platform';
 import { initPushNotifications, cleanupPushNotifications } from '../services/notifications';
 import { initPurchases } from '../services/payments';
 import { enableBiometricLogin, disableBiometricLogin } from '../services/biometric';
@@ -207,22 +206,19 @@ export function AuthProvider({ children }) {
   };
 
   const loginWithGoogle = async () => {
-    // On native Android use the Capacitor Firebase Authentication plugin (the
-    // system Google account picker via Credential Manager) and bridge its
-    // idToken to the JS SDK with signInWithCredential — mirroring loginWithApple.
+    // On native (iOS + Android) use the Firebase Authentication plugin — the
+    // system Google account picker (Credential Manager on Android, the Google
+    // Sign-In SDK on iOS) — and bridge its idToken to the JS SDK with
+    // signInWithCredential, mirroring loginWithApple.
     //
-    // Why not the popup here: signInWithPopup degrades to a redirect inside the
-    // Android WebView, and the WebView partitions/clears the sessionStorage the
-    // redirect relies on, so it fails intermittently with "missing initial
-    // state" (works only on retry once storage is warm). The native picker has
-    // no such round-trip. skipNativeAuth:true (capacitor.config) keeps the JS
-    // SDK as the single source of truth, so onAuthStateChanged still drives the
-    // app exactly as before.
-    //
-    // iOS is intentionally NOT wired here: the Google button is hidden on iOS,
-    // and the plugin's iOS side calls FirebaseApp.configure() at launch, which
-    // would need a GoogleService-Info.plist. Kept out of the iOS build entirely.
-    if (getPlatform() === 'android') {
+    // Why not the popup on native: signInWithPopup degrades to a redirect inside
+    // the WebView, which partitions/clears the sessionStorage the redirect relies
+    // on, so it fails intermittently with "missing initial state". The native
+    // picker has no such round-trip. skipNativeAuth:true (capacitor.config) keeps
+    // the JS SDK as the single source of truth, so onAuthStateChanged still
+    // drives the app. iOS also needs the REVERSED_CLIENT_ID URL scheme in
+    // Info.plist for the Google callback (added).
+    if (isNative()) {
       const { FirebaseAuthentication } = await import('@capacitor-firebase/authentication');
       const result = await FirebaseAuthentication.signInWithGoogle();
       const idToken = result.credential?.idToken;

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTeam } from '../contexts/TeamContext';
 import { usePlan } from '../hooks/usePlan';
+import { isNative } from '../services/platform';
 import { useToast } from '../components/shared/Toast';
 import RosterTab from '../components/roster/RosterTab';
 import BattingTab from '../components/batting/BattingTab';
@@ -38,7 +39,10 @@ export default function AppShell() {
 
   // Capture the beforeinstallprompt event (Android/Chrome)
   useEffect(() => {
-    if (isStandalone) return;
+    // Never show the "add to home screen" prompt inside the native app — it's
+    // already installed, and the Safari instructions make no sense there (and
+    // look like a web wrapper to an App Review tester).
+    if (isStandalone || isNative()) return;
     const handler = (e) => {
       e.preventDefault();
       setInstallPrompt(e);
@@ -76,7 +80,7 @@ export default function AppShell() {
   const needsVerification = user?.providerData?.[0]?.providerId === 'password' && !user?.emailVerified;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--color-field)' }}>
       {/* Create Team Modal */}
       {showCreateTeam && (
         <CreateTeamModal onClose={() => setShowCreateTeam(false)} />

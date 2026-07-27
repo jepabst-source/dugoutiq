@@ -4,6 +4,16 @@
 <dict>
     <key>CAPACITOR_DEBUG</key>
 	<string>$(CAPACITOR_DEBUG)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<!-- Google Sign-In callback (REVERSED_CLIENT_ID from GoogleService-Info.plist) -->
+				<string>com.googleusercontent.apps.670201192937-g8d0a35q90h4mn4e568v5bd28k5p91ne</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
