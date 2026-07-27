@@ -106,8 +106,12 @@ export default function AppShell() {
         </div>
       )}
 
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-border shadow-sm">
+      {/* Header — the navy wrapper paints the status-bar safe area (padding-top),
+          so the system clock/battery sit on brand navy and the white header
+          below never slides under the status bar on scroll. */}
+      <header className="sticky top-0 z-50 shadow-sm"
+              style={{ paddingTop: 'env(safe-area-inset-top)', background: 'var(--color-lime)' }}>
+       <div className="bg-white border-b border-border">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           {/* Logo + Team Switcher */}
           <div className="flex items-center gap-3">
@@ -190,6 +194,7 @@ export default function AppShell() {
             ))}
           </div>
         </div>
+       </div>
       </header>
 
       {/* Content */}

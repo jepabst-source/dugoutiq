@@ -47,10 +47,14 @@ body {
   overflow-x: hidden;
 }
 
-/* PWA standalone mode — account for notch/safe areas */
+/* PWA standalone mode — account for notch/safe areas.
+   NOTE: no padding-top here on purpose — the app header owns the top safe area
+   (it paints the status-bar strip navy and pads its content below the notch),
+   so a body padding-top would double-offset it and let the sticky header slide
+   under the status bar on scroll. Full-screen pages (login etc.) are centered
+   and set their own background, so they don't need it. */
 @supports (padding: env(safe-area-inset-top)) {
   body {
-    padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
