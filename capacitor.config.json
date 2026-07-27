@@ -21,7 +21,7 @@
     },
     "FirebaseAuthentication": {
       "skipNativeAuth": true,
-      "providers": ["google.com"]
+      "providers": ["apple.com", "google.com"]
     }
   },
   "ios": {
@@ -32,5 +32,16 @@
   "android": {
     "allowMixedContent": false,
     "backgroundColor": "#ffffff"
+  },
+  "experimental": {
+    "ios": {
+      "spm": {
+        "packageOptions": {
+          "@capacitor-firebase/authentication": {
+            "symlink": true
+          }
+        }
+      }
+    }
   }
 }

@@ -33,14 +33,6 @@ workflows:
     scripts:
       - name: Install npm dependencies
         script: npm ci
-      - name: Patch apple-sign-in SPM manifest for Capacitor 8
-        # Plugin 7.1.0 is JS-compatible with Cap 8 (peer >=7.0.0) but its
-        # Package.swift pins capacitor-swift-pm to 7.x, which can't co-resolve
-        # with the app's exact 8.3.0. No Cap-8 plugin release exists yet —
-        # remove this step when one does.
-        script: |
-          sed -i '' 's|from: "7.0.0"|from: "8.0.0"|' node_modules/@capacitor-community/apple-sign-in/Package.swift
-          grep 'capacitor-swift-pm' node_modules/@capacitor-community/apple-sign-in/Package.swift
       - name: Build web assets (Vite)
         script: npm run build
       - name: Capacitor sync iOS (copies web build, resolves SPM packages)

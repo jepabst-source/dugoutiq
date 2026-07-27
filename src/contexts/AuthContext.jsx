@@ -234,26 +234,27 @@ export function AuthProvider({ children }) {
   };
 
   const loginWithApple = async () => {
-    // On native iOS use the Capacitor plugin (system Sign In with Apple sheet)
-    // and bridge the identityToken to Firebase. On web/Android, use Firebase popup.
-    if (getPlatform() === 'ios') {
-      const { SignInWithApple } = await import('@capacitor-community/apple-sign-in');
-      // clientId must match the Service ID configured in Apple Developer + Firebase
-      const result = await SignInWithApple.authorize({
-        clientId: 'com.studiopabst.dugoutiq.signin',
-        redirectURI: 'https://dugoutiq-ade15.firebaseapp.com/__/auth/handler',
-        scopes: 'email name',
-        nonce: Math.random().toString(36).slice(2),
-      });
-      const { identityToken, givenName, familyName } = result.response || {};
-      if (!identityToken) throw new Error('Apple Sign In failed: no identity token');
+    // On native use the Firebase Authentication plugin — the documented
+    // cross-platform path. iOS presents the system Sign in with Apple sheet;
+    // the plugin returns an idToken + rawNonce that we bridge to the JS SDK via
+    // signInWithCredential. skipNativeAuth keeps the JS SDK authoritative, so
+    // onAuthStateChanged still drives the app. (This replaces the old
+    // @capacitor-community/apple-sign-in path, whose Service-ID/redirect config
+    // was web-oriented and failed on the native sheet — and it needs the
+    // com.apple.developer.applesignin entitlement, now added.)
+    if (isNative()) {
+      const { FirebaseAuthentication } = await import('@capacitor-firebase/authentication');
+      const result = await FirebaseAuthentication.signInWithApple({ skipNativeAuth: true });
+      const idToken = result.credential?.idToken;
+      if (!idToken) throw new Error('Apple Sign In failed: no identity token');
       const provider = new OAuthProvider('apple.com');
-      const credential = provider.credential({ idToken: identityToken });
+      // rawNonce is required — Firebase verifies its SHA-256 hash against the token.
+      const credential = provider.credential({ idToken, rawNonce: result.credential?.nonce });
       const cred = await signInWithCredential(auth, credential);
-      // Apple returns name only on first sign-in — capture it then.
-      const fullName = [givenName, familyName].filter(Boolean).join(' ').trim();
-      if (fullName && !cred.user.displayName) {
-        try { await updateProfile(cred.user, { displayName: fullName }); } catch {}
+      // Apple returns the name only on first sign-in — capture it then.
+      const displayName = result.user?.displayName;
+      if (displayName && !cred.user.displayName) {
+        try { await updateProfile(cred.user, { displayName }); } catch {}
       }
       return cred;
     }
