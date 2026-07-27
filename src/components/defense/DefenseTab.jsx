@@ -336,59 +336,66 @@ export default function DefenseTab({ onNavigate }) {
   return (
     <div>
       {showUpgrade && <UpgradeModal onClose={() => setShowUpgrade(false)} lockReason={plan.lockReason} />}
-      {/* Header */}
-      <div className="flex items-center justify-between mb-2">
-        <div>
-          <h2 className="text-xl font-bold text-lime">Fielding Lineup</h2>
-          <p className="text-xs text-chalk-muted mt-0.5">
-            Auto-generates a {standardInnings}-inning rotation + final inning pocket card
-          </p>
-        </div>
-        <div className="flex gap-2">
+      {/* Header — title, then equal-width action buttons in a row, then the
+          description on its own line below (keeps everything readable on a
+          narrow phone with no horizontal scroll). */}
+      <div className="mb-3">
+        <h2 className="text-xl font-bold text-lime mb-2">Fielding Lineup</h2>
+        <div className="flex gap-2 max-w-md">
           {savedGames?.length > 0 && (
-            <div className="relative">
-              <button onClick={() => setShowLoadMenu(!showLoadMenu)}
-                className="px-4 py-2 rounded-lg bg-border text-chalk font-bold text-sm
-                           hover:bg-border-light active:scale-[0.97] transition-all">
-                📂 Load
-              </button>
-              {showLoadMenu && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setShowLoadMenu(false)} />
-                  <div className="absolute right-0 top-full mt-1 w-64 bg-panel border border-border rounded-xl shadow-xl z-50 overflow-hidden max-h-72 overflow-y-auto">
-                    {savedGames.map(g => (
-                      <button key={g.id} onClick={() => handleLoadGame(g)}
-                        className="w-full text-left px-4 py-2.5 hover:bg-panel-hover transition-colors border-b border-border last:border-b-0">
-                        <div className="text-sm font-semibold text-chalk">
-                          Game {g.gameNumber}{g.opponent ? ` vs ${g.opponent}` : ''}
-                        </div>
-                        <div className="text-[10px] text-chalk-muted">
-                          {g.date} · {g.innings} innings
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
+            <button onClick={() => setShowLoadMenu(true)}
+              className="flex-1 px-3 py-2 rounded-lg bg-border text-chalk font-bold text-sm
+                         hover:bg-border-light active:scale-[0.97] transition-all whitespace-nowrap">
+              📂 Load
+            </button>
           )}
           <button onClick={handleGenerate}
-            className="px-4 py-2 rounded-lg bg-border text-chalk font-bold text-sm
-                       hover:bg-border-light active:scale-[0.97] transition-all">
+            className="flex-1 px-3 py-2 rounded-lg bg-border text-chalk font-bold text-sm
+                       hover:bg-border-light active:scale-[0.97] transition-all whitespace-nowrap">
             🔀 {generated ? 'Regenerate' : 'Generate'}
           </button>
           {generated && (
             <button onClick={handleCommitGame} disabled={committing || committed}
-              className={`px-4 py-2 rounded-lg font-bold text-sm active:scale-[0.97] transition-all
+              className={`flex-1 px-3 py-2 rounded-lg font-bold text-sm active:scale-[0.97] transition-all whitespace-nowrap
                 ${committed
                   ? 'bg-lime/20 text-lime border border-lime/30'
                   : 'bg-lime text-field hover:bg-lime-bright'
                 } disabled:opacity-60`}>
-              {committed ? '✓ Committed!' : committing ? 'Saving...' : '✅ Commit Game'}
+              {committed ? '✓ Committed!' : committing ? 'Saving…' : '✅ Commit'}
             </button>
           )}
         </div>
+        <p className="text-xs text-chalk-muted mt-2">
+          Auto-generates a {standardInnings}-inning rotation + final inning pocket card
+        </p>
       </div>
+
+      {/* Load-game picker — centered modal so long game names are never clipped
+          off the side of the screen. */}
+      {showLoadMenu && savedGames?.length > 0 && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 px-4"
+             onClick={() => setShowLoadMenu(false)}>
+          <div className="bg-panel border border-border rounded-2xl shadow-2xl w-full max-w-sm max-h-[70vh] overflow-y-auto"
+               onClick={e => e.stopPropagation()}>
+            <div className="px-4 py-3 border-b border-border flex items-center justify-between sticky top-0 bg-panel">
+              <span className="font-bold text-chalk">Load a saved game</span>
+              <button onClick={() => setShowLoadMenu(false)}
+                className="text-chalk-muted hover:text-chalk text-lg leading-none">✕</button>
+            </div>
+            {savedGames.map(g => (
+              <button key={g.id} onClick={() => handleLoadGame(g)}
+                className="w-full text-left px-4 py-3 hover:bg-panel-hover transition-colors border-b border-border last:border-b-0">
+                <div className="text-sm font-semibold text-chalk">
+                  Game {g.gameNumber}{g.opponent ? ` vs ${g.opponent}` : ''}
+                </div>
+                <div className="text-[10px] text-chalk-muted">
+                  {g.date} · {g.innings} innings
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Attendance */}
       <div className="bg-panel border border-border rounded-xl shadow-sm p-4 mb-4">
@@ -722,12 +729,15 @@ function PositionRow({ pos, playerId, players, onSwap, type, isBeingDragged }) {
       <div className={`flex items-center flex-1 min-w-0 rounded-md transition-all
         ${isOver ? 'ring-2 ring-lime/40 bg-lime/10' : ''}
         ${isBeingDragged ? 'opacity-25' : ''}`}>
-        {/* Drag handle */}
+        {/* Drag handle — hidden on touch devices (native app + mobile web),
+            where HTML/dnd drag is unreliable; the player <select> below is the
+            swap method there. Shown for desktop mouse users. */}
         <div
           ref={setDragRef}
           {...listeners}
           {...attributes}
-          className={`flex items-center justify-center w-5 h-6 shrink-0 select-none text-[14px]
+          className={`items-center justify-center w-5 h-6 shrink-0 select-none text-[14px]
+            hidden [@media(pointer:fine)]:flex
             ${playerId ? 'text-chalk-muted/50 cursor-grab hover:text-chalk-muted active:cursor-grabbing' : 'text-transparent'}`}
           aria-label="Drag to swap"
         >
