@@ -525,9 +525,9 @@ export default function SettingsTab() {
             onChange={() => toggleRule('fourOutfielders')}
           />
 
-          {/* All-Star Bench Ratio */}
+          {/* Bench Your All-Stars Less */}
           <div className="bg-field/50 border border-border rounded-lg p-3">
-            <div className="text-sm text-chalk font-semibold mb-1">All-Star Bench Ratio</div>
+            <div className="text-sm text-chalk font-semibold mb-1">Bench Your All-Stars Less</div>
             <p className="text-[10px] text-chalk-muted mb-3">
               How much less often 4-5★ players bench compared to 1-3★ players. Higher = studs bench less.
             </p>
