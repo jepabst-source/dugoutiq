@@ -61,7 +61,13 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4"
-         style={{ background: '#ffffff' }}>
+         style={{
+           background: '#ffffff',
+           // Keep the logo clear of the iPhone status bar / dock (and give a
+           // little breathing room on Android). Respects the notch safe area.
+           paddingTop: 'calc(env(safe-area-inset-top) + 20px)',
+           paddingBottom: 'calc(env(safe-area-inset-bottom) + 20px)',
+         }}>
       <div className="w-full max-w-md text-center">
         {/* Logo */}
         <div className="mb-6">
