@@ -13,7 +13,7 @@ android {
         applicationId "com.dugoutiq.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 15
+        versionCode 16
         versionName "1.2.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
@@ -34,8 +34,13 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // R8 code shrinking + obfuscation + resource shrinking (Play "app
+            // optimization" requirement). Capacitor/Firebase/RevenueCat ship
+            // their own consumer keep-rules; app-specific keeps are in
+            // proguard-rules.pro. MUST be device-tested before production.
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             if (keystorePropertiesFile.exists()) {
                 signingConfig signingConfigs.release
             }
