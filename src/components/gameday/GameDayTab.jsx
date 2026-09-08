@@ -3,6 +3,7 @@ import { useTeam, PTS, OUTCOME_LABELS, IS_K } from '../../contexts/TeamContext';
 import { usePlan } from '../../hooks/usePlan';
 import UpgradeModal from '../shared/UpgradeModal';
 import InfoTip from '../shared/InfoTip';
+import { shareBaseUrl } from '../../services/platform';
 
 
 export default function GameDayTab() {
@@ -92,7 +93,7 @@ export default function GameDayTab() {
               setGeneratingScorer(true);
               const code = await generateScorerLink(gameNum);
               if (code) {
-                const base = window.location.origin + window.location.pathname.replace(/\/$/, '');
+                const base = shareBaseUrl();
                 setScorerLink(`${base}/score/${code}`);
               }
               setGeneratingScorer(false);

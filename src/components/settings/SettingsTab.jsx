@@ -8,6 +8,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { usePlan } from '../../hooks/usePlan';
 import UpgradeModal from '../shared/UpgradeModal';
+import { shareBaseUrl } from '../../services/platform';
 
 export default function SettingsTab() {
   const { team, updateTeam, updateSettings, generateInviteCode, removeAssistant, deleteTeam, getActivePlayers, battingOrder: savedOrder } = useTeam();
@@ -291,7 +292,7 @@ export default function SettingsTab() {
               setGeneratingInvite(true);
               const code = await generateInviteCode();
               if (code) {
-                const base = window.location.origin + window.location.pathname.replace(/\/$/, '');
+                const base = shareBaseUrl();
                 setInviteLink(`${base}/join/${code}`);
               }
               setGeneratingInvite(false);
@@ -365,12 +366,12 @@ export default function SettingsTab() {
             <p className="text-[10px] text-chalk-muted uppercase tracking-wider mb-1">Portal Link</p>
             <div className="flex items-center gap-2">
               <input type="text" readOnly
-                value={`${window.location.origin}/portal/${team.id}`}
+                value={`${shareBaseUrl()}/portal/${team.id}`}
                 className="flex-1 px-3 py-2 rounded-lg bg-panel border border-border text-chalk text-xs focus:outline-none"
                 onClick={e => e.target.select()} />
               <button
                 onClick={() => {
-                  navigator.clipboard.writeText(`${window.location.origin}/portal/${team.id}`);
+                  navigator.clipboard.writeText(`${shareBaseUrl()}/portal/${team.id}`);
                   showSaved('Link copied!');
                 }}
                 className="px-3 py-2 rounded-lg bg-lime text-field font-bold text-xs hover:bg-lime-bright transition-all whitespace-nowrap">
