@@ -321,10 +321,16 @@ export function TeamProvider({ children }) {
     return [...active].map(p => {
       const stats = getPlayerStats(p.id);
       const rolling = getRollingAvg(p.id);
-      return { ...p, ...stats, avg: rolling.avg, avgAbs: rolling.absCount };
+      return { ...p, ...stats, avg: rolling.avg, avgAbs: rolling.absCount, rollingObp: rolling.obp, rollingPts: rolling.pts };
     }).sort((a, b) => {
-      if (b.avg !== a.avg) return b.avg - a.avg;
-      if (b.pts !== a.pts) return b.pts - a.pts;
+      // Primary: on-base % over the coach's rolling window (default last 5 ABs);
+      // players with no at-bats in the window sink to the bottom.
+      // Tie-break: points scored in that same window (bigger production bats
+      // higher). Final tie-break: defensive rating.
+      const aObp = a.rollingObp == null ? -1 : a.rollingObp;
+      const bObp = b.rollingObp == null ? -1 : b.rollingObp;
+      if (bObp !== aObp) return bObp - aObp;
+      if (b.rollingPts !== a.rollingPts) return b.rollingPts - a.rollingPts;
       return b.defRating - a.defRating;
     });
   }, [getActivePlayers, getPlayerStats, getRollingAvg]);
