@@ -363,18 +363,32 @@ export function TeamProvider({ children }) {
   // Build position history from all saved games.
   const getPositionHistory = useCallback(() => {
     const hist = {};
+    const tally = (assignment) => {
+      for (const [pos, playerId] of Object.entries(assignment || {})) {
+        if (!playerId) continue;
+        if (!hist[playerId]) hist[playerId] = {};
+        hist[playerId][pos] = (hist[playerId][pos] || 0) + 1;
+      }
+    };
     for (const game of savedGames) {
       const lineups = game.lineups || {};
-      for (const [, assignment] of Object.entries(lineups)) {
-        for (const [pos, playerId] of Object.entries(assignment)) {
-          if (!playerId) continue;
-          if (!hist[playerId]) hist[playerId] = {};
-          hist[playerId][pos] = (hist[playerId][pos] || 0) + 1;
-        }
-      }
+      for (const [, assignment] of Object.entries(lineups)) tally(assignment);
+      // Fold in the final-inning pocket card the coach actually played (set
+      // post-game in the History game log). 'lfg' = Competitive, 'oor' =
+      // Developmental, 'none'/unset = didn't play it / not recorded → skip.
+      if (game.pocketCardUsed === 'lfg') tally(game.lfg);
+      else if (game.pocketCardUsed === 'oor') tally(game.oor);
     }
     return hist;
   }, [savedGames]);
+
+  // Record which final-inning pocket card was actually played, so its
+  // positions + bench sits feed the fairness engine. value: 'lfg' |
+  // 'oor' | 'none'.
+  const setPocketCardUsed = useCallback(async (gameId, value) => {
+    if (!activeTeamId || !gameId) return;
+    await updateDoc(doc(db, 'teams', activeTeamId, 'games', gameId), { pocketCardUsed: value });
+  }, [activeTeamId]);
 
   // ── INVITE SYSTEM ──
 
@@ -485,6 +499,7 @@ export function TeamProvider({ children }) {
       commitGame,
       deleteGame,
       getPositionHistory,
+      setPocketCardUsed,
       generateInviteCode,
       joinTeamWithCode,
       removeAssistant,

@@ -3,7 +3,7 @@ import { useTeam, PTS, OUTCOME_SHORT, IS_K } from '../../contexts/TeamContext';
 import { POSITIONS, getPositions } from '../../utils/rotationEngine';
 
 export default function HistoryTab() {
-  const { team, players, atBats, savedGames, getPlayerStats, getRollingAvg, getPositionHistory, deleteGame, deleteAtBat, clearAllAtBats } = useTeam();
+  const { team, players, atBats, savedGames, getPlayerStats, getRollingAvg, getPositionHistory, deleteGame, deleteAtBat, clearAllAtBats, setPocketCardUsed } = useTeam();
   const [clearing, setClearing] = useState(false);
   const positions = getPositions(team?.settings);
   const POS_ORDER = [...positions.infield, ...positions.outfield, 'Bench'];
@@ -138,6 +138,36 @@ export default function HistoryTab() {
                     </div>
                   ))}
                 </div>
+                {/* Post-game: record which final-inning pocket card was played,
+                    so its positions + bench sits feed the fairness engine. */}
+                {(game.lfg || game.oor) && (
+                  <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[9px] font-bold text-chalk-muted uppercase tracking-wider mr-0.5">Final inning played:</span>
+                    {[
+                      { key: 'lfg', label: 'Competitive' },
+                      { key: 'oor', label: 'Developmental' },
+                      { key: 'none', label: "Didn't play" },
+                    ].map(opt => {
+                      const active = game.pocketCardUsed === opt.key;
+                      return (
+                        <button key={opt.key}
+                          onClick={() => setPocketCardUsed(game.id, opt.key)}
+                          className={`px-2 py-0.5 text-[10px] font-semibold rounded border transition-colors ${
+                            active
+                              ? 'bg-lime text-field border-lime'
+                              : 'text-chalk-muted border-border hover:bg-field-light'
+                          }`}>
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                    {game.pocketCardUsed == null && (
+                      <span className="text-[9px] font-bold text-gold-bright bg-gold/15 border border-gold/30 rounded px-1.5 py-0.5">
+                        ⚠ not recorded
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>
