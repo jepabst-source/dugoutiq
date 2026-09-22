@@ -649,7 +649,7 @@ function InningCard({ inning, assignment, isDevInning, mode, players, benchCount
           <div className="px-3 py-2">
             <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-1">Infield</div>
             {POSITIONS.infield.map(pos => (
-              <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="infield" isBeingDragged={activeId === pos} />
+              <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} assignment={assignment} onSwap={onSwap} type="infield" isBeingDragged={activeId === pos} />
             ))}
           </div>
 
@@ -657,14 +657,14 @@ function InningCard({ inning, assignment, isDevInning, mode, players, benchCount
           <div className="px-3 py-2">
             <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-1">Outfield</div>
             {outfield.map(pos => (
-              <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="outfield" isBeingDragged={activeId === pos} />
+              <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} assignment={assignment} onSwap={onSwap} type="outfield" isBeingDragged={activeId === pos} />
             ))}
 
             {benchPositions.length > 0 && (
               <>
                 <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mt-2 mb-1">Bench</div>
                 {benchPositions.map(pos => (
-                  <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="bench" isBeingDragged={activeId === pos} />
+                  <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} assignment={assignment} onSwap={onSwap} type="bench" isBeingDragged={activeId === pos} />
                 ))}
               </>
             )}
@@ -699,10 +699,20 @@ const SHORT_POS = {
   'Right Center': 'R Center',
 };
 
-function PositionRow({ pos, playerId, players, onSwap, type, isBeingDragged }) {
+function PositionRow({ pos, playerId, players, assignment = {}, onSwap, type, isBeingDragged }) {
   const player = players.find(p => p.id === playerId);
   const isCatcher = pos === 'Catcher';
   const displayPos = pos.startsWith('Bench') ? 'Bench' : (SHORT_POS[pos] || pos);
+
+  // Where each player currently sits THIS inning (playerId -> position key),
+  // so the dropdown can show who's free vs. who's already placed. Lets the
+  // coach fill an empty slot without hunting the whole roster one by one.
+  const placedAt = {};
+  for (const [k, id] of Object.entries(assignment)) { if (id) placedAt[id] = k; }
+  const shortOf = (p) => (p.startsWith('Bench') ? 'Bench' : (SHORT_POS[p] || p));
+  const catcherMark = (p) => (isCatcher ? (p.canCatch ? ' 🎯' : ' ⚠') : '');
+  const available = players.filter(p => !placedAt[p.id]);                          // not placed anywhere
+  const elsewhere = players.filter(p => placedAt[p.id] && placedAt[p.id] !== pos); // placed at another spot
 
   const { attributes, listeners, setNodeRef: setDragRef, isDragging } = useDraggable({
     id: pos,
@@ -751,11 +761,26 @@ function PositionRow({ pos, playerId, players, onSwap, type, isBeingDragged }) {
                      focus:border-lime focus:outline-none min-w-0 !min-h-7"
         >
           <option value="">— —</option>
-          {players.map(p => (
-            <option key={p.id} value={p.id}>
-              {p.name}{isCatcher ? (p.canCatch ? ' 🎯' : ' ⚠') : ''}
-            </option>
-          ))}
+          {/* Current occupant of this slot (kept selectable at top). */}
+          {player && (
+            <option value={player.id}>{player.name}{catcherMark(player)}</option>
+          )}
+          {/* Unplaced players — who you can drop into an empty slot. */}
+          {available.length > 0 && (
+            <optgroup label="Available">
+              {available.map(p => (
+                <option key={p.id} value={p.id}>{p.name}{catcherMark(p)}</option>
+              ))}
+            </optgroup>
+          )}
+          {/* Already on the field/bench — picking one moves them here. */}
+          {elsewhere.length > 0 && (
+            <optgroup label="Placed elsewhere">
+              {elsewhere.map(p => (
+                <option key={p.id} value={p.id}>{p.name}{catcherMark(p)} — {shortOf(placedAt[p.id])}</option>
+              ))}
+            </optgroup>
+          )}
         </select>
       </div>
     </div>
@@ -812,19 +837,19 @@ function PocketCard({ label, sublabel, assignment, players, benchCount, outfield
           <div className="px-3 py-2">
             <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-1">Infield</div>
             {POSITIONS.infield.map(pos => (
-              <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="infield" isBeingDragged={activeId === pos} />
+              <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} assignment={assignment} onSwap={onSwap} type="infield" isBeingDragged={activeId === pos} />
             ))}
           </div>
           <div className="px-3 py-2">
             <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mb-1">Outfield</div>
             {outfield.map(pos => (
-              <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="outfield" isBeingDragged={activeId === pos} />
+              <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} assignment={assignment} onSwap={onSwap} type="outfield" isBeingDragged={activeId === pos} />
             ))}
             {benchPositions.length > 0 && (
               <>
                 <div className="text-[10px] font-bold text-chalk-muted uppercase tracking-widest mt-2 mb-1">Bench</div>
                 {benchPositions.map(pos => (
-                  <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} onSwap={onSwap} type="bench" isBeingDragged={activeId === pos} />
+                  <PositionRow key={pos} pos={pos} playerId={assignment[pos]} players={players} assignment={assignment} onSwap={onSwap} type="bench" isBeingDragged={activeId === pos} />
                 ))}
               </>
             )}
