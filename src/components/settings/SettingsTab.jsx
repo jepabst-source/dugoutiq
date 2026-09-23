@@ -526,6 +526,13 @@ export default function SettingsTab() {
             onChange={() => toggleRule('fourOutfielders')}
           />
 
+          <RuleToggle
+            label="Final-inning pocket card"
+            description="Generate two last-inning lineups (Competitive & Developmental) to choose between at game time. Turn off to make the last inning a normal rotation inning."
+            enabled={settings.pocketCardEnabled !== false}
+            onChange={() => updateSettings({ pocketCardEnabled: settings.pocketCardEnabled === false })}
+          />
+
           {/* Bench Your All-Stars Less */}
           <div className="bg-field/50 border border-border rounded-lg p-3">
             <div className="text-sm text-chalk font-semibold mb-1">Bench Your All-Stars Less</div>

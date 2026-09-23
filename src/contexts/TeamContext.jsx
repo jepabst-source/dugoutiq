@@ -14,6 +14,7 @@ const DEFAULT_SETTINGS = {
   devInningsEnabled: true,
   devInningCycle: 3,
   noBackToBackBench: true,
+  pocketCardEnabled: true,  // Final inning offers two pocket cards (Competitive/Developmental) to pick at game time. Off = last inning is a normal generated inning.
   infieldCapEnabled: false,
   infieldCapValue: 2,
   positionMinRatings: {

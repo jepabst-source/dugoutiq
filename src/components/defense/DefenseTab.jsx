@@ -47,7 +47,10 @@ export default function DefenseTab({ onNavigate }) {
 
   const activePlayers = getActivePlayers();
   const activeCount = players.filter(p => attendance.has(p.id)).length;
-  const standardInnings = totalInnings - 1;
+  // When the pocket card is off, the last inning is a normal generated inning
+  // (so standardInnings spans all innings and no lfg/oor cards are shown).
+  const pocketCardEnabled = settings.pocketCardEnabled !== false;
+  const standardInnings = pocketCardEnabled ? totalInnings - 1 : totalInnings;
   const benchCount = Math.max(0, activePlayers.length - 9);
   const positionHistory = getPositionHistory();
 
@@ -278,8 +281,8 @@ export default function DefenseTab({ onNavigate }) {
         innings: totalInnings,
         opponent,
         lineups: cleanLineups,
-        lfg,
-        oor,
+        lfg: pocketCardEnabled ? lfg : null,
+        oor: pocketCardEnabled ? oor : null,
         battingOrder: orderIds,
         score: { ours: [], theirs: [] },
       });
@@ -347,7 +350,7 @@ export default function DefenseTab({ onNavigate }) {
           )}
         </div>
         <p className="text-xs text-chalk-muted mt-2">
-          Auto-generates a {standardInnings}-inning rotation + final inning pocket card
+          Auto-generates a {standardInnings}-inning rotation{pocketCardEnabled ? ' + final inning pocket card' : ''}
         </p>
       </div>
 
@@ -494,7 +497,8 @@ export default function DefenseTab({ onNavigate }) {
             );
           })}
 
-          {/* Final Inning Pocket Cards */}
+          {/* Final Inning Pocket Cards — hidden when the pocket card is turned off */}
+          {pocketCardEnabled && (
           <div className="border-t border-border pt-5 mt-6">
             <div className="text-xs font-bold text-chalk-muted uppercase tracking-widest mb-4">
               INNING {totalInnings} — POCKET CARD (Last Inning)
@@ -524,6 +528,7 @@ export default function DefenseTab({ onNavigate }) {
               />
             </div>
           </div>
+          )}
         </div>
       )}
 
