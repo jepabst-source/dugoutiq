@@ -4,9 +4,22 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // ── USERS ──
-    // Users can only read/write their own document
+    // Users can only read/write their own document.
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create, delete: if request.auth != null && request.auth.uid == userId;
+      // IAP bug guard: reject any update that sets `appleProductId` to the app
+      // bundle id. On iOS, StoreKit replays an app-receipt pseudo-transaction
+      // (product id = the bundle id) on launch, and the client marked that as a
+      // Pro purchase — upgrading every iOS user for free. Real purchases carry
+      // the IAP product id (dugoutiq_pro_lifetime); Stripe fulfillment runs
+      // through the Admin SDK, which bypasses these rules. We block exactly the
+      // bug's fingerprint — a resulting doc that is BOTH plan==pro AND
+      // appleProductId==bundle id — so ordinary profile updates and
+      // legitimately-Pro users (Stripe/Google/real IAP) are unaffected.
+      allow update: if request.auth != null && request.auth.uid == userId
+        && !(request.resource.data.get('plan', '') == 'pro'
+             && request.resource.data.get('appleProductId', '') == 'com.studiopabst.dugoutiq');
     }
 
     // ── TEAMS ──
