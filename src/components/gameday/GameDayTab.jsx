@@ -102,16 +102,16 @@ export default function GameDayTab() {
             className="px-4 py-2.5 rounded-lg bg-gold/15 text-gold-bright font-bold text-sm
                        border border-gold/40 hover:bg-gold/25 active:scale-[0.97]
                        transition-all disabled:opacity-50">
-            {generatingScorer ? '...' : '📤 Invite Log Assistant'}
+            {generatingScorer ? '...' : '📤 Invite Guest to Track Stats'}
           </button>
-          <InfoTip text="Generate a link to share with a parent or helper in the stands. They can log at-bats from their phone — no account needed. The link expires after 12 hours." />
+          <InfoTip text="Creates a link to text a parent or helper in the stands. They can record each player's hits and outs from their own phone — no app or account needed. The link expires after 12 hours." />
         </div>
       </div>
 
       {/* Scorer link */}
       {scorerLink && (
         <div className="bg-field border border-sky/30 rounded-xl p-3 mb-4">
-          <p className="text-[10px] text-chalk-muted uppercase tracking-wider mb-1">Log assistant link (expires in 12 hours):</p>
+          <p className="text-[10px] text-chalk-muted uppercase tracking-wider mb-1">Guest stat-tracking link (expires in 12 hours):</p>
           <div className="flex items-center gap-2">
             <input type="text" readOnly value={scorerLink}
               className="flex-1 px-3 py-2 rounded-lg bg-panel border border-border text-chalk text-xs focus:outline-none"
