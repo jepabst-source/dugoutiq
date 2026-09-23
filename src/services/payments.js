@@ -67,9 +67,18 @@ export async function initPurchases() {
 
   store.when()
     .approved(async (transaction) => {
+      // CRITICAL: only our real lifetime IAP may grant Pro. On iOS, StoreKit
+      // replays an "application" pseudo-transaction on launch whose product id
+      // is the app BUNDLE id (not PRODUCT_ID); without this guard every iOS
+      // user was silently upgraded to Pro on first launch. Finish (clear) any
+      // other approved transaction but never fulfill on it.
+      const productId = transaction.products?.[0]?.id || null;
+      if (productId !== PRODUCT_ID) {
+        try { await transaction.finish(); } catch { /* ignore */ }
+        return;
+      }
       try {
         const token = transaction.nativePurchase?.purchaseToken || transaction.purchaseId || null;
-        const productId = transaction.products?.[0]?.id || PRODUCT_ID;
         await markProInFirestore(token, productId);
         await transaction.finish();
         pendingPurchaseResolver?.({ success: true });
