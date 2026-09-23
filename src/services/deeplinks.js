@@ -70,7 +70,10 @@ export async function initDeepLinks(onDeepLink) {
 function parseDeepLink(url) {
   try {
     const u = new URL(url);
-    const path = u.pathname;
+    // Links shared for previews use the root form ?route=/score/CODE (so the
+    // crawler gets a 200 + OG card); also accept the plain /score/CODE path.
+    const route = u.searchParams.get('route') || '';
+    const path = u.pathname + route;
 
     const scorerMatch = path.match(/\/score\/([a-zA-Z0-9]+)/);
     if (scorerMatch) {

@@ -293,7 +293,9 @@ export default function SettingsTab() {
               const code = await generateInviteCode();
               if (code) {
                 const base = shareBaseUrl();
-                setInviteLink(`${base}/join/${code}`);
+                // Root ?route= form so shared links show a link preview card
+                // (the /join/ path 404s on GitHub Pages → no preview).
+                setInviteLink(`${base}/?route=/join/${code}`);
               }
               setGeneratingInvite(false);
             }}
@@ -366,12 +368,12 @@ export default function SettingsTab() {
             <p className="text-[10px] text-chalk-muted uppercase tracking-wider mb-1">Portal Link</p>
             <div className="flex items-center gap-2">
               <input type="text" readOnly
-                value={`${shareBaseUrl()}/portal/${team.id}`}
+                value={`${shareBaseUrl()}/?route=/portal/${team.id}`}
                 className="flex-1 px-3 py-2 rounded-lg bg-panel border border-border text-chalk text-xs focus:outline-none"
                 onClick={e => e.target.select()} />
               <button
                 onClick={() => {
-                  navigator.clipboard.writeText(`${shareBaseUrl()}/portal/${team.id}`);
+                  navigator.clipboard.writeText(`${shareBaseUrl()}/?route=/portal/${team.id}`);
                   showSaved('Link copied!');
                 }}
                 className="px-3 py-2 rounded-lg bg-lime text-field font-bold text-xs hover:bg-lime-bright transition-all whitespace-nowrap">
