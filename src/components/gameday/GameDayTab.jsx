@@ -4,6 +4,7 @@ import { usePlan } from '../../hooks/usePlan';
 import UpgradeModal from '../shared/UpgradeModal';
 import InfoTip from '../shared/InfoTip';
 import { shareBaseUrl } from '../../services/platform';
+import { shareLink } from '../../services/sharing';
 
 
 export default function GameDayTab() {
@@ -117,12 +118,23 @@ export default function GameDayTab() {
               className="flex-1 px-3 py-2 rounded-lg bg-panel border border-border text-chalk text-xs focus:outline-none"
               onClick={e => e.target.select()} />
             <button
-              onClick={() => { navigator.clipboard.writeText(scorerLink); }}
-              className="px-3 py-2 rounded-lg bg-sky text-field font-bold text-xs hover:bg-sky/80 transition-all whitespace-nowrap">
-              📋 Copy
+              onClick={() => shareLink({
+                title: 'Dugout IQ — Track Game Stats',
+                text: "Help track stats for today's game — tap players and log hits/outs from your phone. No app or login needed:",
+                url: scorerLink,
+              })}
+              className="px-3 py-2 rounded-lg bg-sky text-field font-bold text-xs hover:bg-sky/80 active:scale-[0.97] transition-all whitespace-nowrap">
+              📤 Share
             </button>
           </div>
-          <p className="text-[10px] text-chalk-muted mt-1">Text this to anyone — no login needed. They tap players and log at-bats from the stands.</p>
+          <div className="flex items-center justify-between mt-1 gap-2">
+            <p className="text-[10px] text-chalk-muted">Text this to anyone — no login needed. They tap players and log at-bats from the stands.</p>
+            <button
+              onClick={() => { navigator.clipboard.writeText(scorerLink); }}
+              className="text-[10px] font-semibold text-sky hover:underline shrink-0 whitespace-nowrap">
+              Copy link
+            </button>
+          </div>
         </div>
       )}
 
