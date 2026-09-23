@@ -75,6 +75,12 @@ function parseDeepLink(url) {
     const route = u.searchParams.get('route') || '';
     const path = u.pathname + route;
 
+    // track.html?c=CODE — the static shim used for shareable scorer links.
+    const c = u.searchParams.get('c');
+    if (/track\.html$/.test(u.pathname) && c) {
+      return { path: '/score/' + c, code: c, type: 'scorer' };
+    }
+
     const scorerMatch = path.match(/\/score\/([a-zA-Z0-9]+)/);
     if (scorerMatch) {
       return { path, code: scorerMatch[1], type: 'scorer' };

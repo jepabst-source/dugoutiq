@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dugout IQ — Track the Stats</title>
+  <meta name="description" content="Tap players and log hits & outs from your phone — no app or login needed." />
+  <!-- Open Graph — gives the shared guest link its own preview card. This is a
+       real static file, so GitHub Pages serves it with a 200 (unlike the SPA
+       /score/ path, which 404s and shows no preview). -->
+  <meta property="og:title" content="Track the Stats — Dugout IQ" />
+  <meta property="og:description" content="Tap players and log hits & outs from your phone — no app or login needed." />
+  <meta property="og:image" content="https://lineupman.com/og-score.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:url" content="https://lineupman.com/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Track the Stats — Dugout IQ" />
+  <meta name="twitter:description" content="Tap players and log hits & outs from your phone — no app or login needed." />
+  <meta name="twitter:image" content="https://lineupman.com/og-score.jpg" />
+  <script>
+    // Real visitors bounce straight into the scorer page, code preserved.
+    var c = new URLSearchParams(window.location.search).get('c');
+    window.location.replace(c ? ('/?route=/score/' + encodeURIComponent(c)) : '/');
+  </script>
+</head>
+<body></body>
+</html>

@@ -95,9 +95,10 @@ export default function GameDayTab() {
               const code = await generateScorerLink(gameNum);
               if (code) {
                 const base = shareBaseUrl();
-                // Root ?route= form so texted links show a link preview (the
-                // /score/ path returns a 404 on GitHub Pages → no preview).
-                setScorerLink(`${base}/?route=/score/${code}`);
+                // Point at the static track.html shim: it returns a 200 with a
+                // "Track the Stats" preview card, then bounces into the scorer.
+                // (The /score/ path 404s on GitHub Pages → no preview.)
+                setScorerLink(`${base}/track.html?c=${code}`);
               }
               setGeneratingScorer(false);
             }}
