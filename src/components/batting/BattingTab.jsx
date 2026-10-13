@@ -67,6 +67,13 @@ export default function BattingTab() {
       const rolling = getRollingAvg(p.id);
       return { ...p, ...stats, avg: rolling.avg, avgAbs: rolling.absCount, rollingObp: rolling.obp };
     }).sort((a, b) => {
+      if (sortMode === 'prod') {
+        // Productivity (rolling): on-base + points per at-bat over the window.
+        const aP = a.avgAbs > 0 ? (a.rollingObp ?? 0) + a.avg : -1;
+        const bP = b.avgAbs > 0 ? (b.rollingObp ?? 0) + b.avg : -1;
+        if (bP !== aP) return bP - aP;
+        return b.defRating - a.defRating;
+      }
       if (sortMode === 'obp') {
         const aObp = a.rollingObp ?? -1;
         const bObp = b.rollingObp ?? -1;
@@ -179,6 +186,11 @@ export default function BattingTab() {
               className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all
                 ${sortMode === 'obp' ? 'bg-field-light text-sky' : 'text-chalk-muted hover:text-chalk'}`}>
               OBP
+            </button>
+            <button onClick={() => setSortMode('prod')}
+              className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all
+                ${sortMode === 'prod' ? 'bg-field-light text-lime-bright' : 'text-chalk-muted hover:text-chalk'}`}>
+              Prod
             </button>
           </div>
         </div>
@@ -330,6 +342,11 @@ function SortableBattingSlot({ player, index }) {
         <div className="text-[10px] text-chalk-muted">{absNote}</div>
         {player.avgAbs > 0 && (
           <div className="text-[10px] text-lime">{avgDisplay} avg</div>
+        )}
+        {player.avgAbs > 0 && (
+          <div className="text-[10px] font-bold text-lime-bright">
+            {((rolling.obp ?? 0) + player.avg).toFixed(2)} prod
+          </div>
         )}
       </div>
     </div>
