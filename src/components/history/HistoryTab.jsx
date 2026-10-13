@@ -3,6 +3,33 @@ import { useTeam, PTS, OUTCOME_SHORT, IS_K } from '../../contexts/TeamContext';
 import { POSITIONS, getPositions } from '../../utils/rotationEngine';
 import { isNative } from '../../services/platform';
 
+// What counts as reaching base for OBP (mirrors TeamContext's IS_ON_BASE).
+const IS_ON_BASE = { hit: true, single: true, double: true, triple: true, hr: true, walk: true, hbp: true };
+
+// Prod over a slice of at-bats = OBP + points/AB, exactly as the season column
+// computes it, just on a window. Null when the slice is empty.
+function prodOf(abs) {
+  if (!abs.length) return null;
+  const pts = abs.reduce((s, a) => s + (PTS[a.outcome] ?? 0), 0);
+  const onBase = abs.filter(a => IS_ON_BASE[a.outcome]).length;
+  const obpAbs = abs.filter(a => a.outcome !== 'sac').length; // sac flies don't count
+  const obp = obpAbs ? onBase / obpAbs : 0;
+  return obp + pts / abs.length;
+}
+
+// Trailing rolling Prod at each at-bat, so the sparkline shows the shape of the
+// season instead of a jagged per-AB spike.
+function rollingProd(abs, w) {
+  return abs.map((_, i) => prodOf(abs.slice(Math.max(0, i - w + 1), i + 1)));
+}
+
+// A player needs a full prior+recent window (20 ABs) for a trend read.
+const TREND_MIN_ABS = 20;
+// Prod moves smaller than this read as "steady" rather than a real trend.
+const TREND_BAND = 0.12;
+const trendClass = (d) => d == null ? 'text-sky' : d > TREND_BAND ? 'text-lime' : d < -TREND_BAND ? 'text-red' : 'text-chalk-muted';
+const trendArrow = (d) => d == null ? '' : d > TREND_BAND ? '▲' : d < -TREND_BAND ? '▼' : '▬';
+
 export default function HistoryTab() {
   const { team, players, atBats, savedGames, getPlayerStats, getRollingAvg, getPositionHistory, deleteGame, deleteAtBat, clearAllAtBats, setPocketCardUsed } = useTeam();
   const [clearing, setClearing] = useState(false);
@@ -22,6 +49,31 @@ export default function HistoryTab() {
   const showCol = (key) => isNative() ? true : !hiddenCols.has(key);
   const positions = getPositions(team?.settings);
   const POS_ORDER = [...positions.infield, ...positions.outfield, 'Bench'];
+  const rollWindow = team?.settings?.rollingWindow || 5;
+
+  // Season trend — per player, the rolling-Prod shape across the season plus a
+  // "last 10 ABs vs prior 10" delta so a hot streak or a slump stands out.
+  const trendStats = useMemo(() => {
+    return players.map(p => {
+      const abs = atBats
+        .filter(a => a.playerId === p.id)
+        .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0)); // oldest → newest
+      const recent = abs.slice(-10);
+      const prior = abs.slice(-20, -10);
+      const trend = abs.length >= TREND_MIN_ABS ? prodOf(recent) - prodOf(prior) : null;
+      return {
+        id: p.id, name: p.name, abCount: abs.length,
+        series: rollingProd(abs, rollWindow), trend, seasonProd: prodOf(abs),
+      };
+    })
+    .filter(p => p.abCount > 0)
+    .sort((a, b) => {
+      // Climbers first; players without a full 20-AB read sink to the bottom.
+      if ((a.trend == null) !== (b.trend == null)) return a.trend == null ? 1 : -1;
+      if (a.trend != null) return b.trend - a.trend;
+      return (b.seasonProd ?? 0) - (a.seasonProd ?? 0);
+    });
+  }, [players, atBats, rollWindow]);
 
   // Player stats summary
   const playerStats = useMemo(() => {
@@ -266,6 +318,51 @@ export default function HistoryTab() {
         </div>
       </div>
 
+      {/* Season Trend — who's heating up / cooling off */}
+      {trendStats.length > 0 && (
+        <div className="bg-panel border border-border rounded-xl shadow-sm overflow-hidden mb-6">
+          <div className="px-4 py-2.5 bg-field-light border-b border-border flex items-center justify-between">
+            <span className="text-xs font-bold text-lime uppercase tracking-wider">Season Trend</span>
+            <span className="text-[10px] text-chalk-muted">last 10 ABs vs prior 10</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left px-3 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">Player</th>
+                  <th className="text-center px-2 py-2 text-[10px] font-bold text-lime uppercase tracking-wider"
+                    title="Productivity = Season OBP + points per at-bat.">Prod</th>
+                  <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider whitespace-nowrap">Season · rolling Prod</th>
+                  <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">Trend</th>
+                </tr>
+              </thead>
+              <tbody>
+                {trendStats.map(p => (
+                  <tr key={p.id} className="border-b border-border/30 hover:bg-panel-hover transition-colors">
+                    <td className="px-3 py-2 font-semibold text-chalk whitespace-nowrap">{p.name}</td>
+                    <td className="text-center px-2 py-2 font-bold text-lime-bright">
+                      {p.seasonProd != null ? p.seasonProd.toFixed(2) : '—'}
+                    </td>
+                    <td className={`px-2 py-2 ${trendClass(p.trend)}`}>
+                      <div className="flex justify-center"><Sparkline series={p.series} /></div>
+                    </td>
+                    <td className={`text-center px-2 py-2 font-bold whitespace-nowrap ${trendClass(p.trend)}`}>
+                      {p.trend == null
+                        ? <span className="text-chalk-muted font-normal text-[10px]">needs 20 AB</span>
+                        : <span>{trendArrow(p.trend)} {p.trend >= 0 ? '+' : ''}{p.trend.toFixed(2)}</span>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="px-4 py-2 border-t border-border/60 bg-field/40 text-[10px] text-chalk-muted leading-relaxed">
+            Shaded band = last 10 ABs. Line is a {rollWindow}-AB rolling average of Prod.
+            <span className="text-lime"> ▲ heating up</span> · <span className="text-red">▼ cooling off</span> · ▬ steady.
+          </div>
+        </div>
+      )}
+
       {/* Game-by-Game At-Bat Log */}
       <div className="bg-panel border border-border rounded-xl shadow-sm overflow-hidden">
         <div className="px-4 py-2.5 bg-field-light border-b border-border flex items-center justify-between">
@@ -300,6 +397,37 @@ export default function HistoryTab() {
         )}
       </div>
     </div>
+  );
+}
+
+// Small inline sparkline of a player's rolling Prod across the season. Colors
+// come from the parent cell via currentColor, so it tracks the trend hue and
+// both light/dark themes. The last 10 ABs are shaded to mark the trend window.
+function Sparkline({ series, w = 116, h = 26 }) {
+  if (!series || series.length < 2) {
+    return <span className="text-chalk-muted text-[11px]">—</span>;
+  }
+  const pad = 3;
+  const min = Math.min(...series);
+  const max = Math.max(...series);
+  const rng = (max - min) || 1;
+  const x = i => pad + i * (w - pad * 2) / (series.length - 1);
+  const y = v => h - pad - (v - min) / rng * (h - pad * 2);
+  const pts = series.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`);
+  const line = 'M' + pts.join(' L');
+  const area = `M${x(0).toFixed(1)},${h - pad} L` + pts.join(' L') + ` L${x(series.length - 1).toFixed(1)},${h - pad} Z`;
+  const lastX = x(series.length - 1).toFixed(1);
+  const lastY = y(series[series.length - 1]).toFixed(1);
+  const bandStart = series.length > 10 ? x(series.length - 10) : null;
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} aria-hidden="true">
+      {bandStart != null && (
+        <rect x={bandStart.toFixed(1)} y="0" width={(w - pad - bandStart).toFixed(1)} height={h} fill="currentColor" opacity="0.08" />
+      )}
+      <path d={area} fill="currentColor" opacity="0.15" />
+      <path d={line} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round" />
+      <circle cx={lastX} cy={lastY} r="2.4" fill="currentColor" />
+    </svg>
   );
 }
 
