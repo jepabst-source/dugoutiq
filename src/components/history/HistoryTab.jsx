@@ -1,10 +1,25 @@
 import { useState, useMemo } from 'react';
 import { useTeam, PTS, OUTCOME_SHORT, IS_K } from '../../contexts/TeamContext';
 import { POSITIONS, getPositions } from '../../utils/rotationEngine';
+import { isNative } from '../../services/platform';
 
 export default function HistoryTab() {
   const { team, players, atBats, savedGames, getPlayerStats, getRollingAvg, getPositionHistory, deleteGame, deleteAtBat, clearAllAtBats, setPocketCardUsed } = useTeam();
   const [clearing, setClearing] = useState(false);
+
+  // Column visibility for the Season Batting Stats table — web-only coach
+  // convenience, remembered per browser. Native always shows every column.
+  const [hiddenCols, setHiddenCols] = useState(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('dugoutiq_history_hidden_cols') || '[]')); }
+    catch { return new Set(); }
+  });
+  const toggleCol = (key) => setHiddenCols(prev => {
+    const next = new Set(prev);
+    next.has(key) ? next.delete(key) : next.add(key);
+    try { localStorage.setItem('dugoutiq_history_hidden_cols', JSON.stringify([...next])); } catch {}
+    return next;
+  });
+  const showCol = (key) => isNative() ? true : !hiddenCols.has(key);
   const positions = getPositions(team?.settings);
   const POS_ORDER = [...positions.infield, ...positions.outfield, 'Bench'];
 
@@ -186,17 +201,31 @@ export default function HistoryTab() {
         <div className="px-4 py-2.5 bg-field-light border-b border-border">
           <span className="text-xs font-bold text-lime uppercase tracking-wider">Season Batting Stats</span>
         </div>
+        {/* Column toggles — web only (coach convenience, saved per browser). */}
+        {!isNative() && (
+          <div className="flex flex-wrap items-center gap-1.5 px-4 py-2 border-b border-border/60 bg-field/40">
+            <span className="text-[10px] font-bold text-chalk-muted uppercase tracking-wider mr-1">Columns:</span>
+            {[['form', 'Form'], ['abs', 'ABs'], ['pts', 'Pts'], ['obp', 'OBP'], ['prod', 'Prod'], ['games', 'Games']].map(([key, label]) => (
+              <button key={key} onClick={() => toggleCol(key)}
+                className={`px-2 py-0.5 text-[10px] font-semibold rounded border transition-colors ${
+                  showCol(key) ? 'bg-lime/15 text-lime border-lime/40' : 'text-chalk-muted border-border hover:bg-field-light'
+                }`}>
+                {showCol(key) ? '✓ ' : ''}{label}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border">
                 <th className="text-left px-3 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">Player</th>
-                <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">Form</th>
-                <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">ABs</th>
-                <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">Pts</th>
-                <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">Season OBP</th>
-                <th className="text-center px-2 py-2 text-[10px] font-bold text-lime uppercase tracking-wider" title="Productivity = Season OBP + points per at-bat. Rewards getting on base AND producing, so kids who swing rank above passive walkers.">Prod</th>
-                <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">Games</th>
+                {showCol('form') && <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">Form</th>}
+                {showCol('abs') && <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">ABs</th>}
+                {showCol('pts') && <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">Pts</th>}
+                {showCol('obp') && <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">Season OBP</th>}
+                {showCol('prod') && <th className="text-center px-2 py-2 text-[10px] font-bold text-lime uppercase tracking-wider" title="Productivity = Season OBP + points per at-bat. Rewards getting on base AND producing, so kids who swing rank above passive walkers.">Prod</th>}
+                {showCol('games') && <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">Games</th>}
               </tr>
             </thead>
             <tbody>
@@ -205,18 +234,24 @@ export default function HistoryTab() {
                   <td className="px-3 py-2 font-semibold text-chalk">
                     {p.name}
                   </td>
-                  <td className="text-center px-2 py-2 font-bold text-lime">
-                    {p.avgAbs > 0 ? p.avg.toFixed(2) : '—'}
-                  </td>
-                  <td className="text-center px-2 py-2 text-chalk-dim">{p.totalAbs}</td>
-                  <td className="text-center px-2 py-2 text-gold font-semibold">{p.pts}</td>
-                  <td className="text-center px-2 py-2 text-sky">
-                    {p.obp !== null ? p.obp.toFixed(3).replace(/^0/, '') : '—'}
-                  </td>
-                  <td className="text-center px-2 py-2 font-bold text-lime-bright">
-                    {p.productivity !== null ? p.productivity.toFixed(2) : '—'}
-                  </td>
-                  <td className="text-center px-2 py-2 text-chalk-dim">{p.gamesPlayed}</td>
+                  {showCol('form') && (
+                    <td className="text-center px-2 py-2 font-bold text-lime">
+                      {p.avgAbs > 0 ? p.avg.toFixed(2) : '—'}
+                    </td>
+                  )}
+                  {showCol('abs') && <td className="text-center px-2 py-2 text-chalk-dim">{p.totalAbs}</td>}
+                  {showCol('pts') && <td className="text-center px-2 py-2 text-gold font-semibold">{p.pts}</td>}
+                  {showCol('obp') && (
+                    <td className="text-center px-2 py-2 text-sky">
+                      {p.obp !== null ? p.obp.toFixed(3).replace(/^0/, '') : '—'}
+                    </td>
+                  )}
+                  {showCol('prod') && (
+                    <td className="text-center px-2 py-2 font-bold text-lime-bright">
+                      {p.productivity !== null ? p.productivity.toFixed(2) : '—'}
+                    </td>
+                  )}
+                  {showCol('games') && <td className="text-center px-2 py-2 text-chalk-dim">{p.gamesPlayed}</td>}
                 </tr>
               ))}
               {playerStats.length === 0 && (
