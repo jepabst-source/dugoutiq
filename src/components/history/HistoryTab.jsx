@@ -13,7 +13,14 @@ export default function HistoryTab() {
     return players.map(p => {
       const stats = getPlayerStats(p.id);
       const rolling = getRollingAvg(p.id);
-      return { ...p, ...stats, avg: rolling.avg, avgAbs: rolling.absCount };
+      // Productivity = season OBP + season points-per-at-bat. Blends getting on
+      // base with our point system so kids who swing & produce rank above
+      // passive walkers. Uses existing points (all hits = 2), so it works the
+      // same whether or not a team tracks doubles/triples/HRs.
+      const productivity = stats.totalAbs > 0
+        ? (stats.obp ?? 0) + stats.pts / stats.totalAbs
+        : null;
+      return { ...p, ...stats, avg: rolling.avg, avgAbs: rolling.absCount, productivity };
     }).sort((a, b) => b.defRating - a.defRating);
   }, [players, getPlayerStats, getRollingAvg]);
 
@@ -188,11 +195,12 @@ export default function HistoryTab() {
                 <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">ABs</th>
                 <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">Pts</th>
                 <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">Season OBP</th>
+                <th className="text-center px-2 py-2 text-[10px] font-bold text-lime uppercase tracking-wider" title="Productivity = Season OBP + points per at-bat. Rewards getting on base AND producing, so kids who swing rank above passive walkers.">Prod</th>
                 <th className="text-center px-2 py-2 text-[10px] font-bold text-chalk-muted uppercase tracking-wider">Games</th>
               </tr>
             </thead>
             <tbody>
-              {[...playerStats].sort((a, b) => (b.obp ?? -1) - (a.obp ?? -1)).map(p => (
+              {[...playerStats].sort((a, b) => (b.productivity ?? -1) - (a.productivity ?? -1)).map(p => (
                 <tr key={p.id} className="border-b border-border/30 hover:bg-panel-hover transition-colors">
                   <td className="px-3 py-2 font-semibold text-chalk">
                     {p.name}
@@ -205,12 +213,15 @@ export default function HistoryTab() {
                   <td className="text-center px-2 py-2 text-sky">
                     {p.obp !== null ? p.obp.toFixed(3).replace(/^0/, '') : '—'}
                   </td>
+                  <td className="text-center px-2 py-2 font-bold text-lime-bright">
+                    {p.productivity !== null ? p.productivity.toFixed(2) : '—'}
+                  </td>
                   <td className="text-center px-2 py-2 text-chalk-dim">{p.gamesPlayed}</td>
                 </tr>
               ))}
               {playerStats.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-3 py-8 text-center text-chalk-muted">
+                  <td colSpan={7} className="px-3 py-8 text-center text-chalk-muted">
                     No batting data yet — log at-bats in Game Day or the Batting tab
                   </td>
                 </tr>
