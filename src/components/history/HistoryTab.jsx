@@ -28,7 +28,7 @@ function rollingProd(abs, w) {
 const TREND_MIN_ABS = 6;
 // Prod moves smaller than this read as "steady" rather than a real trend.
 const TREND_BAND = 0.12;
-const trendClass = (d) => d == null ? 'text-sky' : d > TREND_BAND ? 'text-lime' : d < -TREND_BAND ? 'text-red' : 'text-chalk-muted';
+const trendClass = (d) => d == null ? 'text-chalk-dim' : d > TREND_BAND ? 'text-lime' : d < -TREND_BAND ? 'text-sky' : 'text-chalk-muted';
 const trendArrow = (d) => d == null ? '' : d > TREND_BAND ? '▲' : d < -TREND_BAND ? '▼' : '▬';
 
 export default function HistoryTab() {
@@ -362,7 +362,7 @@ export default function HistoryTab() {
           </div>
           <div className="px-4 py-2 border-t border-border/60 bg-field/40 text-[10px] text-chalk-muted leading-relaxed">
             Shaded band = second half of the season. Line is a {rollWindow}-AB rolling average of Prod.
-            <span className="text-lime"> ▲ heating up</span> · <span className="text-red">▼ cooling off</span> · ▬ steady.
+            <span className="text-lime"> ▲ heating up</span> · <span className="text-sky">▼ cooling off</span> · ▬ steady.
           </div>
         </div>
       )}
