@@ -23,8 +23,9 @@ function rollingProd(abs, w) {
   return abs.map((_, i) => prodOf(abs.slice(Math.max(0, i - w + 1), i + 1)));
 }
 
-// A player needs a full prior+recent window (20 ABs) for a trend read.
-const TREND_MIN_ABS = 20;
+// Trend splits the season in half (first half vs second half), so it needs at
+// least this many ABs for a 3-vs-3 read.
+const TREND_MIN_ABS = 6;
 // Prod moves smaller than this read as "steady" rather than a real trend.
 const TREND_BAND = 0.12;
 const trendClass = (d) => d == null ? 'text-sky' : d > TREND_BAND ? 'text-lime' : d < -TREND_BAND ? 'text-red' : 'text-chalk-muted';
@@ -58,9 +59,12 @@ export default function HistoryTab() {
       const abs = atBats
         .filter(a => a.playerId === p.id)
         .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0)); // oldest → newest
-      const recent = abs.slice(-10);
-      const prior = abs.slice(-20, -10);
-      const trend = abs.length >= TREND_MIN_ABS ? prodOf(recent) - prodOf(prior) : null;
+      // Split the season in half: first half vs second half (for an odd count
+      // the single middle AB sits out of both, keeping the halves even).
+      const half = Math.floor(abs.length / 2);
+      const firstHalf = abs.slice(0, half);
+      const secondHalf = abs.slice(-half);
+      const trend = abs.length >= TREND_MIN_ABS ? prodOf(secondHalf) - prodOf(firstHalf) : null;
       return {
         id: p.id, name: p.name, abCount: abs.length,
         series: rollingProd(abs, rollWindow), trend, seasonProd: prodOf(abs),
@@ -323,7 +327,7 @@ export default function HistoryTab() {
         <div className="bg-panel border border-border rounded-xl shadow-sm overflow-hidden mb-6">
           <div className="px-4 py-2.5 bg-field-light border-b border-border flex items-center justify-between">
             <span className="text-xs font-bold text-lime uppercase tracking-wider">Season Trend</span>
-            <span className="text-[10px] text-chalk-muted">last 10 ABs vs prior 10</span>
+            <span className="text-[10px] text-chalk-muted">2nd half vs 1st half</span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -348,7 +352,7 @@ export default function HistoryTab() {
                     </td>
                     <td className={`text-center px-2 py-2 font-bold whitespace-nowrap ${trendClass(p.trend)}`}>
                       {p.trend == null
-                        ? <span className="text-chalk-muted font-normal text-[10px]">needs 20 AB</span>
+                        ? <span className="text-chalk-muted font-normal text-[10px]">needs 6 AB</span>
                         : <span>{trendArrow(p.trend)} {p.trend >= 0 ? '+' : ''}{p.trend.toFixed(2)}</span>}
                     </td>
                   </tr>
@@ -357,7 +361,7 @@ export default function HistoryTab() {
             </table>
           </div>
           <div className="px-4 py-2 border-t border-border/60 bg-field/40 text-[10px] text-chalk-muted leading-relaxed">
-            Shaded band = last 10 ABs. Line is a {rollWindow}-AB rolling average of Prod.
+            Shaded band = second half of the season. Line is a {rollWindow}-AB rolling average of Prod.
             <span className="text-lime"> ▲ heating up</span> · <span className="text-red">▼ cooling off</span> · ▬ steady.
           </div>
         </div>
@@ -402,7 +406,8 @@ export default function HistoryTab() {
 
 // Small inline sparkline of a player's rolling Prod across the season. Colors
 // come from the parent cell via currentColor, so it tracks the trend hue and
-// both light/dark themes. The last 10 ABs are shaded to mark the trend window.
+// both light/dark themes. The second half of the season is shaded to mark the
+// window the Trend number scores.
 function Sparkline({ series, w = 116, h = 26 }) {
   if (!series || series.length < 2) {
     return <span className="text-chalk-muted text-[11px]">—</span>;
@@ -418,7 +423,9 @@ function Sparkline({ series, w = 116, h = 26 }) {
   const area = `M${x(0).toFixed(1)},${h - pad} L` + pts.join(' L') + ` L${x(series.length - 1).toFixed(1)},${h - pad} Z`;
   const lastX = x(series.length - 1).toFixed(1);
   const lastY = y(series[series.length - 1]).toFixed(1);
-  const bandStart = series.length > 10 ? x(series.length - 10) : null;
+  // Shade the second half of the season (matches the first-half vs second-half
+  // split the Trend column scores).
+  const bandStart = series.length >= 4 ? x(Math.ceil(series.length / 2)) : null;
   return (
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} aria-hidden="true">
       {bandStart != null && (
