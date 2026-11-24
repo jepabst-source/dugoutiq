@@ -76,7 +76,7 @@ export default function PrintTab() {
               <div className="text-sm text-gray-500">
                 Game {gameNum}{opponent ? ` vs ${opponent}` : ''} · {gameDate}
               </div>
-              <div className="text-[10px] text-gray-400 mt-0.5">www.lineupman.com</div>
+              <div className="text-[10px] text-gray-400 mt-0.5">dugoutiq.web.app</div>
             </div>
           </div>
 

@@ -51,13 +51,13 @@ KEYWORDS (100 chars max):
 lineup,softball,baseball,coach,rotation,batting order,dugout,roster,youth,fair play
 
 PRIVACY POLICY URL:
-https://lineupman.com/privacy.html
+https://dugoutiq.web.app/privacy.html
 
 SUPPORT URL:
-https://lineupman.com/about.html
+https://dugoutiq.web.app/about.html
 
 MARKETING URL:
-https://lineupman.com/about.html
+https://dugoutiq.web.app/about.html
 
 
 ────────────────────────────────────────

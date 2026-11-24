@@ -7,8 +7,9 @@
     "rules": "firestore.rules"
   },
   "hosting": {
+    "site": "dugoutiq",
     "public": "dist",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**", "CNAME"],
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "cleanUrls": true,
     "rewrites": [
       { "source": "/join/**", "destination": "/index.html" },

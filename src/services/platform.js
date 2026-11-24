@@ -47,7 +47,7 @@ export const getPlatform = () => {
 // point here. On the native app the WebView origin is capacitor://localhost,
 // so building a link from window.location would produce an unopenable
 // capacitor://localhost/... URL — use this instead.
-export const PUBLIC_WEB_ORIGIN = 'https://lineupman.com';
+export const PUBLIC_WEB_ORIGIN = 'https://dugoutiq.web.app';
 
 // Base URL for a shareable link. Native → the public domain; web → the live
 // origin (works for both localhost dev and production).

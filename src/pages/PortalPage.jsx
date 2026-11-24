@@ -203,7 +203,7 @@ export default function PortalPage({ teamId }) {
           </form>
 
           <p className="mt-6 text-[10px] text-gray-400">
-            Powered by <strong>Dugout IQ</strong> · lineupman.com
+            Powered by <strong>Dugout IQ</strong> · dugoutiq.web.app
           </p>
         </div>
       </div>
@@ -329,7 +329,7 @@ export default function PortalPage({ teamId }) {
 
       {/* Footer */}
       <div className="text-center py-6 text-[10px] text-gray-300">
-        Read-only · Stats update live · Powered by <strong>Dugout IQ</strong> · lineupman.com
+        Read-only · Stats update live · Powered by <strong>Dugout IQ</strong> · dugoutiq.web.app
       </div>
     </div>
   );
