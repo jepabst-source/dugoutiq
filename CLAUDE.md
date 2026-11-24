@@ -1,6 +1,6 @@
 # DugoutIQ
 
-React + Vite + Tailwind v4 app for managing a softball team (lineups, batting stats, defense rotations, game day scoring). Firebase backend. Web hosted on Firebase Hosting at https://dugoutiq.web.app — after pushing to `main`, deploy with `npm run build && firebase deploy --only hosting`.
+React + Vite + Tailwind v4 app for managing a softball team (lineups, batting stats, defense rotations, game day scoring). Firebase backend. Deployed via push to `main`.
 
 ## Commands
 - `npm run dev` — local dev server
