@@ -194,7 +194,7 @@ export default function ScorerPage({ scorerCode }) {
       </div>
 
       <div className="text-center py-4 text-[10px] text-gray-300">
-        Powered by <strong>Dugout IQ</strong> · dugoutiq.web.app
+        Powered by <strong>Dugout IQ</strong> · lineupman.com
       </div>
     </div>
   );

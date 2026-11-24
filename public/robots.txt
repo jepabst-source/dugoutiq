@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://dugoutiq.web.app/sitemap.xml
+Sitemap: https://lineupman.com/sitemap.xml

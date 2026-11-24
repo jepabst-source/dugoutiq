@@ -1,7 +1,7 @@
-# Dugout IQ — dugoutiq.web.app
+# Dugout IQ — lineupman.com
 
 ## What is Dugout IQ?
-Dugout IQ is a free web-based lineup management application for youth baseball and softball coaches. It is available at https://dugoutiq.web.app with no app download required.
+Dugout IQ is a free web-based lineup management application for youth baseball and softball coaches. It is available at https://lineupman.com with no app download required.
 
 ## What problem does it solve?
 Youth coaches need to build fair defensive rotations, track batting performance, and manage game-day logistics. Most coaches use spreadsheets, paper, or nothing at all. Existing apps like GameChanger focus on scoring and stats, while TeamSnap focuses on team communication. Neither solves the lineup planning and fair play problem. Dugout IQ is the only tool built specifically for this purpose.
@@ -34,10 +34,10 @@ TeamSnap is a team communication and scheduling platform (RSVPs, messaging, paym
 Built by Josh Pabst, a youth softball coach in Indianapolis, Indiana.
 
 ## URLs
-- App: https://dugoutiq.web.app
-- About: https://dugoutiq.web.app/about.html
-- Compare: https://dugoutiq.web.app/compare.html
-- Privacy: https://dugoutiq.web.app/privacy.html
+- App: https://lineupman.com
+- About: https://lineupman.com/about.html
+- Compare: https://lineupman.com/compare.html
+- Privacy: https://lineupman.com/privacy.html
 - Support: support@lineupman.com
 
 ## Technical Details

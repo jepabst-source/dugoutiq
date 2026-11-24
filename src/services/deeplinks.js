@@ -1,6 +1,6 @@
 // Deep link handler for Dugout IQ native app
 //
-// When the native app is opened via a URL (e.g., dugoutiq.web.app/score/ABC123),
+// When the native app is opened via a URL (e.g., lineupman.com/score/ABC123),
 // Capacitor's App plugin captures it and we route it to the right page.
 //
 // Supported deep link patterns:
@@ -64,7 +64,7 @@ export async function initDeepLinks(onDeepLink) {
 
 /**
  * Parse a deep link URL into a route object.
- * @param {string} url - full URL like https://dugoutiq.web.app/score/ABC123
+ * @param {string} url - full URL like https://lineupman.com/score/ABC123
  * @returns {{ path: string, code: string, type: string } | null}
  */
 function parseDeepLink(url) {

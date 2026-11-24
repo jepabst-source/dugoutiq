@@ -1,6 +1,6 @@
 # ⚾ Dugout IQ — Smart Lineup Manager for Youth Baseball & Softball
 
-**[dugoutiq.web.app](https://dugoutiq.web.app)** — Free to use. No download required.
+**[lineupman.com](https://lineupman.com)** — Free to use. No download required.
 
 Dugout IQ is a lineup management app built specifically for youth baseball and softball coaches. It handles the stuff you used to scribble on napkins — batting orders, defensive rotations, and position tracking — so you can focus on your players.
 
@@ -66,7 +66,7 @@ Rate players 1-5 stars for defense. Optionally break it down into Glove and Arm 
 - **Frontend:** React 18 + Vite + Tailwind CSS v4
 - **Backend:** Firebase (Auth + Firestore + Cloud Functions)
 - **Payments:** Stripe (web) + RevenueCat (native, coming soon)
-- **Hosting:** Firebase Hosting ([dugoutiq.web.app](https://dugoutiq.web.app))
+- **Hosting:** GitHub Pages with custom domain ([lineupman.com](https://lineupman.com))
 - **PWA:** Installable on any device, works offline
 
 ## Pricing
@@ -76,10 +76,10 @@ Rate players 1-5 stars for defense. Optionally break it down into Glove and Arm 
 
 ## Links
 
-- 🌐 **App:** [dugoutiq.web.app](https://dugoutiq.web.app)
-- 📖 **About:** [dugoutiq.web.app/about.html](https://dugoutiq.web.app/about.html)
-- ⚖️ **Compare:** [dugoutiq.web.app/compare.html](https://dugoutiq.web.app/compare.html)
-- 🔒 **Privacy:** [dugoutiq.web.app/privacy.html](https://dugoutiq.web.app/privacy.html)
+- 🌐 **App:** [lineupman.com](https://lineupman.com)
+- 📖 **About:** [lineupman.com/about.html](https://lineupman.com/about.html)
+- ⚖️ **Compare:** [lineupman.com/compare.html](https://lineupman.com/compare.html)
+- 🔒 **Privacy:** [lineupman.com/privacy.html](https://lineupman.com/privacy.html)
 - 📧 **Support:** [support@lineupman.com](mailto:support@lineupman.com)
 
 ## Who It's For
